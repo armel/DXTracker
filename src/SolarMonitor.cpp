@@ -155,22 +155,26 @@ void loop()
   int16_t parenthesisBegin = 0;
   int16_t parenthesisLast = 0;
 
-  uint8_t i, j;
+  uint16_t i, j;
   
   M5.Lcd.fillRect(0, 0, 320, 44, M5.Lcd.color565(TFT_BACK.r, TFT_BACK.g, TFT_BACK.b));
   M5.Lcd.drawFastHLine(  0, 0, 320, TFT_WHITE);
   M5.Lcd.drawFastHLine(  0, 44, 320, TFT_WHITE);
+  M5.Lcd.drawFastHLine(  0, 100, 320, TFT_WHITE);
 
+  // Title
   M5.Lcd.setTextColor(TFT_WHITE, M5.Lcd.color565(TFT_BACK.r, TFT_BACK.g, TFT_BACK.b));
   M5.Lcd.setFreeFont(&dot15pt7b);
-  //M5.Lcd.setFreeFont(&rounded_led_board10pt7b);
+  M5.Lcd.setTextDatum(CC_DATUM);
+  M5.Lcd.setTextPadding(320);
+  solarTitle[alternance].toUpperCase();
+  M5.Lcd.drawString(solarTitle[alternance], 160, 16);
+
+  M5.Lcd.setFreeFont(0);
   M5.Lcd.setTextDatum(CC_DATUM);
   M5.Lcd.setTextPadding(320);
 
-  M5.Lcd.drawString(solarTitle[alternance], 160, 20);
-
-  M5.Lcd.drawFastHLine(  0, 100, 320, TFT_WHITE);
-
+  // Update date and time
   tmpString = xmlData;
   tmpString.replace("<updated>", "(");
   tmpString.replace("</updated>", ")");
@@ -183,10 +187,9 @@ void loop()
 
   tmpString.trim();
 
-  message = tmpString;
+  M5.Lcd.drawString(tmpString, 160, 36);
 
-  scroll(10);
-
+  // Current value
   tmpString = xmlData;
   tmpString.replace("<" + solarKey[alternance] + ">", "(");
   tmpString.replace("</" + solarKey[alternance] + ">", ")");
@@ -206,12 +209,27 @@ void loop()
 
   M5.Lcd.drawString(tmpString, 160, 60);
 
+  // Current propagation
+  tmpString = xmlData;
+  tmpString.replace("location=\"europe_6m\">", "(");
+  tmpString.replace("</phenomenon>", ")");
+  parenthesisBegin = tmpString.indexOf("(");
+  parenthesisLast = tmpString.indexOf(")", parenthesisBegin);
+  if (parenthesisBegin > 0)
+  {
+    tmpString = tmpString.substring(parenthesisBegin + 1, parenthesisLast);
+  }
+
+  tmpString.trim();
+
+  message = "E-Skip / 50 Mhz / " + tmpString;
+
   alternance++;
   if(alternance == 12) {
     alternance = 0;
   }
 
-  for(i = 0; i <= 250; i += 1)
+  for(i = 0; i <= 500; i += 1)
   {
     scroll(10);
   }

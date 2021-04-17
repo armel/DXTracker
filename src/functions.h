@@ -220,7 +220,7 @@ void hamqsl(void *pvParameters)
 {
   HTTPClient http;
   unsigned int limitShort = 1 * 60 * 1000; // Retry all minute
-  unsigned int limitLong = 60 * 60 * 1000; // Retry all hours
+  unsigned int limitLong = 15 * 60 * 1000; // Retry all hours
 
   for (;;)
   {
