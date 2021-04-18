@@ -131,6 +131,35 @@ void getAcceleration()
   }
 }
 
+void title(String title)
+{
+  // Title
+  M5.Lcd.setTextColor(TFT_WHITE, M5.Lcd.color565(TFT_BACK.r, TFT_BACK.g, TFT_BACK.b));
+  M5.Lcd.setFreeFont(&dot15pt7b);
+  M5.Lcd.setTextDatum(CC_DATUM);
+  M5.Lcd.setTextPadding(320);
+  M5.Lcd.drawString(title, 160, 16);
+
+  M5.Lcd.setFreeFont(0);
+  M5.Lcd.setTextDatum(CC_DATUM);
+  M5.Lcd.setTextPadding(320);
+
+  // Update date and time
+  tmpString = xmlData;
+  tmpString.replace("<updated>", "(");
+  tmpString.replace("</updated>", ")");
+  parenthesisBegin = tmpString.indexOf("(");
+  parenthesisLast = tmpString.indexOf(")");
+  if (parenthesisBegin > 0)
+  {
+    tmpString = tmpString.substring(parenthesisBegin + 1, parenthesisLast);
+  }
+
+  tmpString.trim();
+
+  M5.Lcd.drawString(tmpString, 160, 36);
+}
+
 void greyline(void *pvParameters)
 {
   File f;

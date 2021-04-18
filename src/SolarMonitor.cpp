@@ -151,11 +151,18 @@ void loop()
 {  
   String solarTitle[] = {"SFI", "Sunspots", "A-Index", "K-Index", "X-Ray", "Helium Line", "Proton Flux", "Electron Flux", "Aurora", "Solar Wind", "Magnetic Field", "Signal Noise"};
   String solarKey[] = {"solarflux", "sunspots", "aindex", "kindex", "xray", "heliumline", "protonflux", "electonflux", "aurora", "solarwind", "magneticfield", "signalnoise"};
+  String propagKey[] = {
+    "80m-40m\" time=\"day\">", 
+    "30m-20m\" time=\"day\">", 
+    "17m-15m\" time=\"day\">", 
+    "12m-10m\" time=\"day\">", 
+    "80m-40m\" time=\"night\">",
+    "30m-20m\" time=\"night\">",
+    "17m-15m\" time=\"night\">",
+    "12m-10m\" time=\"night\">"    
+    };
   
-  int16_t parenthesisBegin = 0;
-  int16_t parenthesisLast = 0;
-
-  uint16_t i, j;
+  uint16_t i;
   
   M5.Lcd.fillRect(0, 0, 320, 44, M5.Lcd.color565(TFT_BACK.r, TFT_BACK.g, TFT_BACK.b));
   M5.Lcd.drawFastHLine(  0, 0, 320, TFT_WHITE);
@@ -163,31 +170,8 @@ void loop()
   M5.Lcd.drawFastHLine(  0, 100, 320, TFT_WHITE);
 
   // Title
-  M5.Lcd.setTextColor(TFT_WHITE, M5.Lcd.color565(TFT_BACK.r, TFT_BACK.g, TFT_BACK.b));
-  M5.Lcd.setFreeFont(&dot15pt7b);
-  M5.Lcd.setTextDatum(CC_DATUM);
-  M5.Lcd.setTextPadding(320);
   solarTitle[alternance].toUpperCase();
-  M5.Lcd.drawString(solarTitle[alternance], 160, 16);
-
-  M5.Lcd.setFreeFont(0);
-  M5.Lcd.setTextDatum(CC_DATUM);
-  M5.Lcd.setTextPadding(320);
-
-  // Update date and time
-  tmpString = xmlData;
-  tmpString.replace("<updated>", "(");
-  tmpString.replace("</updated>", ")");
-  parenthesisBegin = tmpString.indexOf("(");
-  parenthesisLast = tmpString.indexOf(")");
-  if (parenthesisBegin > 0)
-  {
-    tmpString = tmpString.substring(parenthesisBegin + 1, parenthesisLast);
-  }
-
-  tmpString.trim();
-
-  M5.Lcd.drawString(tmpString, 160, 36);
+  title(solarTitle[alternance]);
 
   // Current value
   tmpString = xmlData;
@@ -209,7 +193,7 @@ void loop()
 
   M5.Lcd.drawString(tmpString, 160, 60);
 
-  // Current propagation
+  // Current propagation 50 MHz
   tmpString = xmlData;
   tmpString.replace("location=\"europe_6m\">", "(");
   tmpString.replace("</phenomenon>", ")");
@@ -232,5 +216,92 @@ void loop()
   for(i = 0; i <= 500; i += 1)
   {
     scroll(10);
+  }
+
+  if(alternance == 5 || alternance == 11)
+  {
+    for(i = 0; i < 56; i += 1)
+    {
+      M5.Lcd.drawFastHLine(  0, 44 + i, 320, M5.Lcd.color565(TFT_BACK.r, TFT_BACK.g, TFT_BACK.b));
+      M5.Lcd.drawFastHLine(  0, 44 + i + 1, 320, TFT_WHITE);
+      if (i < 28)
+      {
+        scroll(10);
+      }
+      else
+      {
+        delay(10);
+      }
+    }
+
+    title("BANDS CONDITIONS");
+
+    // Current propagation
+    M5.Lcd.setFreeFont(&DroidSansMono6pt7b);
+    M5.Lcd.setTextPadding(160);
+    M5.Lcd.setTextDatum(CL_DATUM);
+
+    // Day
+    for(i = 0; i <= 3; i += 1)
+    {
+      tmpString = xmlData;
+      tmpString.replace(propagKey[i], "(");
+      tmpString.replace("</band>", ")");
+      parenthesisBegin = tmpString.indexOf("(");
+      parenthesisLast = tmpString.indexOf(")", parenthesisBegin);
+      if (parenthesisBegin > 0)
+      {
+        tmpString = tmpString.substring(parenthesisBegin + 1, parenthesisLast);
+      }
+      tmpString.trim();
+      tmpString.toUpperCase();
+
+      M5.Lcd.drawString(propagKey[i].substring(0, 7) + " DAY " + tmpString, 20, 48 + (14 * i));
+    }
+
+    M5.Lcd.setTextDatum(CR_DATUM);
+
+    // Night
+    for(i = 4; i <= 7; i += 1)
+    {
+      tmpString = xmlData;
+      tmpString.replace(propagKey[i], "(");
+      tmpString.replace("</band>", ")");
+      parenthesisBegin = tmpString.indexOf("(");
+      parenthesisLast = tmpString.indexOf(")", parenthesisBegin);
+      if (parenthesisBegin > 0)
+      {
+        tmpString = tmpString.substring(parenthesisBegin + 1, parenthesisLast);
+      }
+      tmpString.trim();
+      tmpString.toUpperCase();
+
+      M5.Lcd.drawString(propagKey[i].substring(0, 7) + " NIGHT " + tmpString, 300, 48 + (14 * (i - 4)));
+    }
+
+    for(i = 0; i <= 500; i += 1)
+    {
+      delay(10);
+    }
+
+    for(i = 0; i < 56; i += 1)
+    {
+      M5.Lcd.drawFastHLine(  0, 99 - i, 320, TFT_BLACK);
+      M5.Lcd.drawFastHLine(  0, 99 - i - 1, 320, TFT_WHITE);
+      if (i > 28)
+      {
+        scroll(10);
+      }
+      else
+      {
+        delay(10);
+      }
+    }
+  }
+  else {
+    for(i = 0; i <= 500; i += 1)
+    {
+      scroll(10);
+    }
   }
 }

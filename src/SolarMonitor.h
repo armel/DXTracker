@@ -32,9 +32,8 @@
 #include "FS.h"
 #include "SPIFFS.h"
 
-
 // Version
-#define VERSION "0.0.1"
+#define VERSION "0.0.2"
 
 // Wifi
 WiFiClient clientHamSQL;
@@ -134,3 +133,6 @@ int screensaverLimit = 5 * 60 * 1000;  // 5 minutes
 int screensaverMode = 0;
 
 boolean decoded;
+
+int16_t parenthesisBegin = 0;
+int16_t parenthesisLast = 0;
