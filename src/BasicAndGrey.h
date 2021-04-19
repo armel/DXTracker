@@ -29,22 +29,3 @@ void getButton()
     btnB = M5.BtnB.read();
     btnC = M5.BtnC.read();
 }
-
-// Speaker
-void speaker()
-{
-    M5.Speaker.setVolume(1);
-    M5.Speaker.update();
-}
-
-// Manage Tone
-void totTone()
-{
-    M5.Speaker.tone(2000);
-}
-
-// Manage Mute
-void totMute()
-{
-    M5.Speaker.mute();
-}

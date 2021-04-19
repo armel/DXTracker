@@ -33,7 +33,7 @@
 #include "SPIFFS.h"
 
 // Version
-#define VERSION "0.0.2"
+#define VERSION "0.0.3"
 
 // Wifi
 WiFiClient clientHamSQL;
@@ -54,34 +54,6 @@ colorType TFT_BACK = {48, 48, 48};
 colorType TFT_GRAY = {128, 128, 128};
 colorType TFT_FRONT = {51, 153, 255};
 colorType TFT_HEADER = {0, 76, 153};
-
-const char *color[] = {"ROUGE", "ORANGE", "VERT", "TURQUOISE", "BLEU", "ROSE", "VIOLET", "GRIS"};
-
-int colorCurrent = 0;
-
-const colorType TFT_FRONT_ROUGE = {255, 102, 102};
-const colorType TFT_HEADER_ROUGE = {153, 0, 0};
-
-const colorType TFT_FRONT_ORANGE = {255, 178, 102};
-const colorType TFT_HEADER_ORANGE = {255, 128, 0};
-
-const colorType TFT_FRONT_VERT = {51, 204, 102};
-const colorType TFT_HEADER_VERT = {0, 102, 51};
-
-const colorType TFT_FRONT_TURQUOISE = {51, 204, 204};
-const colorType TFT_HEADER_TURQUOISE = {0, 102, 102};
-
-const colorType TFT_FRONT_BLEU = {51, 153, 255};
-const colorType TFT_HEADER_BLEU = {0, 76, 153};
-
-const colorType TFT_FRONT_ROSE = {255, 102, 178};
-const colorType TFT_HEADER_ROSE = {204, 0, 102};
-
-const colorType TFT_FRONT_VIOLET = {165, 105, 189};
-const colorType TFT_HEADER_VIOLET = {91, 44, 111};
-
-const colorType TFT_FRONT_GRIS = {192, 192, 192};
-const colorType TFT_HEADER_GRIS = {96, 96, 96};
 
 // Icon
 #define ICON_FONT &icon_works_webfont14pt7b
@@ -108,31 +80,46 @@ String endpointGreyline = "https://dx.qsl.net/propagation/greyline.html";
 // Scroll
 TFT_eSprite img = TFT_eSprite(&M5.Lcd); // Create Sprite object "img" with pointer to "tft" object
 String message = "";
-int pos;
+int16_t pos;
 
 // Misceleanous
 const char *menu[] = {"CONFIG", "ALARM", "LUMINOSITE", "QUITTER"};
 
+// Propag data
+String solarData[] = {"SFI", "Sunspots", "A-Index", "K-Index", "X-Ray", "Helium Line", "Proton Flux", "Electron Flux", "Aurora", "Solar Wind", "Magnetic Field", "Signal Noise"};
+String solarKey[] = {"solarflux", "sunspots", "aindex", "kindex", "xray", "heliumline", "protonflux", "electonflux", "aurora", "solarwind", "magneticfield", "signalnoise"};
+String propagKey[] = {
+  "80m-40m\" time=\"day\">", 
+  "30m-20m\" time=\"day\">", 
+  "17m-15m\" time=\"day\">", 
+  "12m-10m\" time=\"day\">", 
+  "80m-40m\" time=\"night\">",
+  "30m-20m\" time=\"night\">",
+  "17m-15m\" time=\"night\">",
+  "12m-10m\" time=\"night\">"    
+  };
+
+// Miscellaneous
 String tmpString;
 String greylineData = "", xmlData = "";
 
-
-int alternance = 0;
-int configCurrent = 0;
-int brightnessCurrent = 32;
-int totCurrent = 0;
-int batteryChargeCurrent = 0;
-int batteryLevelCurrent = 0;
-int menuCurrent = 0;
-int menuMode = 0;
-int menuSelected = -1;
-int menuRefresh = 0;
-
-unsigned long screensaver;
-int screensaverLimit = 5 * 60 * 1000;  // 5 minutes
-int screensaverMode = 0;
-
+bool screenRefresh = 0;
+bool screensaverMode = 0;
 boolean decoded;
+
+int8_t menuCurrent = 0;
+int8_t menuMode = 0;
+int8_t menuSelected = -1;
+
+uint8_t alternance = 0;
+uint8_t configCurrent = 0;
+uint8_t brightnessCurrent = 32;
+uint8_t totCurrent = 0;
+uint8_t batteryChargeCurrent = 0;
+uint8_t batteryLevelCurrent = 0;
+
+uint32_t screensaver;
+uint32_t screensaverLimit = 5 * 60 * 1000;  // 5 minutes
 
 int16_t parenthesisBegin = 0;
 int16_t parenthesisLast = 0;

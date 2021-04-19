@@ -1,76 +1,20 @@
 // Copyright (c) F4HWN Armel. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-// Parse data
-String getValue(String data, char separator, int index)
-{
-  int found = 0;
-  int strIndex[] = {0, -1};
-  int maxIndex = data.length() - 1;
-
-  for (int i = 0; i <= maxIndex && found <= index; i++)
-  {
-    if (data.charAt(i) == separator || i == maxIndex)
-    {
-      found++;
-      strIndex[0] = strIndex[1] + 1;
-      strIndex[1] = (i == maxIndex) ? i + 1 : i;
-    }
-  }
-
-  return found > index ? data.substring(strIndex[0], strIndex[1]) : "";
-}
-
-// Compute interpolation
-int interpolation(int value, int inMin, int inMax, int outMin, int outMax)
-{
-  if ((inMax - inMin) != 0)
-  {
-    return int((value - inMin) * (outMax - outMin) / (inMax - inMin) + outMin);
-  }
-  else
-  {
-    return 0;
-  }
-}
-
-// Reset color
-void resetColor()
-{
-  switch(colorCurrent) {
-    case 0: TFT_FRONT = TFT_FRONT_ROUGE; TFT_HEADER = TFT_HEADER_ROUGE; break;
-    case 1: TFT_FRONT = TFT_FRONT_ORANGE; TFT_HEADER = TFT_HEADER_ORANGE; break;
-    case 2: TFT_FRONT = TFT_FRONT_VERT; TFT_HEADER = TFT_HEADER_VERT; break;
-    case 3: TFT_FRONT = TFT_FRONT_TURQUOISE; TFT_HEADER = TFT_HEADER_TURQUOISE; break;
-    case 4: TFT_FRONT = TFT_FRONT_BLEU; TFT_HEADER = TFT_HEADER_BLEU; break;
-    case 5: TFT_FRONT = TFT_FRONT_ROSE; TFT_HEADER = TFT_HEADER_ROSE; break;
-    case 6: TFT_FRONT = TFT_FRONT_VIOLET; TFT_HEADER = TFT_HEADER_VIOLET; break;
-    case 7: TFT_FRONT = TFT_FRONT_GRIS; TFT_HEADER = TFT_HEADER_GRIS; break;
-  }
-}
-
 // Clear screen
 void clear()
 {
-  // Reset
-  message = "";
-  M5.lcd.clear();
-  resetColor();
-
-  // Header
-  M5.Lcd.fillRect(0, 0, 320, 44, M5.Lcd.color565(TFT_HEADER.r, TFT_HEADER.g, TFT_HEADER.b));
-  M5.Lcd.drawFastHLine(  0,   0, 320, TFT_WHITE);
-  M5.Lcd.drawFastHLine(  0,  44, 320, TFT_WHITE);
-
-  // Grey zone
+  M5.Lcd.fillRect(0, 0, 320, 44, M5.Lcd.color565(TFT_BACK.r, TFT_BACK.g, TFT_BACK.b));
+  M5.Lcd.drawFastHLine(  0, 0, 320, TFT_WHITE);
+  M5.Lcd.drawFastHLine(  0, 44, 320, TFT_WHITE);
   M5.Lcd.drawFastHLine(  0, 100, 320, TFT_WHITE);
 }
 
 // Build scroll
 void buildScroll()
 {
-  int h = 20;
-  int w = M5.Lcd.width();
+  int16_t h = 20;
+  int16_t w = M5.Lcd.width();
 
   // We could just use fillSprite(color) but lets be a bit more creative...
   while (h--)
@@ -93,12 +37,8 @@ void buildScroll()
 }
 
 // Scroll
-void scroll(int pause)
+void scroll(uint8_t pause)
 {
-  if(btnA == 0 && btnB == 0 && btnC == 0) {
-    getButton();
-  }
-
   // Sprite for scroll
   buildScroll();
   img.pushSprite(0, 78);
@@ -110,6 +50,19 @@ void scroll(int pause)
   }
 
   delay(pause);
+}
+
+// Manage temporisation
+void temporisation()
+{
+  for(uint16_t i = 0; i <= 500; i += 1)
+  {
+    if(screenRefresh == 1)
+    {
+      break;
+    }
+    scroll(10);
+  }
 }
 
 // Detect rotation
@@ -131,6 +84,7 @@ void getAcceleration()
   }
 }
 
+// Draw title
 void title(String title)
 {
   // Title
@@ -160,115 +114,134 @@ void title(String title)
   M5.Lcd.drawString(tmpString, 160, 36);
 }
 
-void greyline(void *pvParameters)
+// Draw Propag Data
+void propagData()
 {
-  File f;
-  HTTPClient http;
-  uint16_t len, check, count, httpCode;
+  // Title
+  solarData[alternance].toUpperCase();
 
-  for (;;)
+  // Current value
+  tmpString = xmlData;
+  tmpString.replace("<" + solarKey[alternance] + ">", "(");
+  tmpString.replace("</" + solarKey[alternance] + ">", ")");
+  parenthesisBegin = tmpString.indexOf("(");
+  parenthesisLast = tmpString.indexOf(")");
+  if (parenthesisBegin > 0)
   {
-    if ((WiFi.status() == WL_CONNECTED)) // Check the current connection status
-    {
-      clientGreyline.setInsecure();
-      http.begin(clientGreyline, endpointGreyline);   // Specify the URL
-      http.setTimeout(1000);                          // Set Time Out
-      httpCode = http.GET();                          // Make the request
-      if (httpCode == 200)                            // Check for the returning code
-      {
-        greylineData = http.getString(); // Get data
-
-        greylineData.replace("<img src=\"", ">>>");
-        greylineData.replace("\" alt=\"Grey Line Map\"", "<<<");
-
-        int16_t parenthesisBegin = greylineData.indexOf(">>>");
-        int16_t parenthesisLast = greylineData.indexOf("<<<");
-
-        if (parenthesisBegin > 0)
-        {
-          greylineData = greylineData.substring(parenthesisBegin + 4, parenthesisLast);
-        }
-
-        http.begin(clientGreyline, greylineData);     // Specify the URL
-        httpCode = http.GET();                        // Make the request
-        if (httpCode == 200)                          // Check for the returning code
-        {
-          if (httpCode == 200) {
-            // Open file
-            f = SPIFFS.open("/greyline.jpg", "w+");
-
-            // Get size
-            len = http.getSize();
-            check = len;
-            count = 0;
-
-            // Create buffer for read
-            uint8_t buff[1024] = { 0 };
-
-            // Get TCP stream
-            WiFiClient *stream = &clientGreyline;
-
-            // Read all data from server
-            while (http.connected() && (len > 0 || len == -1)) {
-              int c = stream->readBytes(buff, std::min((size_t)len, sizeof(buff)));          
-              // Write it to file
-              f.write(buff, c);
-              if (len > 0) {
-                len -= c;
-              }
-              count += c;
-            }
-            Serial.println(check);
-            Serial.println(count);
-            Serial.println("-----");   
-            if(count == check)
-            {
-              //SPIFFS.cp("/tmp.jpg", "/greyline.jpg");
-            }     
-            // Close file
-            f.close();
-          }
-        }
-      }
-      http.end(); // Free the resources
-    }
-
-    decoded = JpegDec.decodeFsFile("/greyline.jpg");
-    if (decoded) {
-      M5.Lcd.drawJpgFile(SPIFFS, "/greyline.jpg", 0, 101, 320, 139, 0, 11, JPEG_DIV_2);
-    }
-
-    Serial.println("Ok");
-
-    vTaskDelay(pdMS_TO_TICKS(5 * 60 * 1000));
+    tmpString = tmpString.substring(parenthesisBegin + 1, parenthesisLast);
   }
+
+  tmpString.trim();
+
+  title(solarData[alternance] + " " + tmpString);
+
+  M5.Lcd.setTextColor(TFT_WHITE, TFT_BLACK);
+  M5.Lcd.setFreeFont(&rounded_led_board10pt7b);
+  M5.Lcd.setTextDatum(CC_DATUM);
+  M5.Lcd.setTextPadding(320);
 }
 
-// Get data from HamQSL
-void hamqsl(void *pvParameters)
+// Draw Propag Message
+void propagMessage()
 {
-  HTTPClient http;
-  unsigned int limitShort = 1 * 60 * 1000; // Retry all minute
-  unsigned int limitLong = 15 * 60 * 1000; // Retry all hours
-
-  for (;;)
+  // Current propagation 50 MHz
+  tmpString = xmlData;
+  tmpString.replace("location=\"europe_6m\">", "(");
+  tmpString.replace("</phenomenon>", ")");
+  parenthesisBegin = tmpString.indexOf("(");
+  parenthesisLast = tmpString.indexOf(")", parenthesisBegin);
+  if (parenthesisBegin > 0)
   {
-    if ((WiFi.status() == WL_CONNECTED)) // Check the current connection status
+    tmpString = tmpString.substring(parenthesisBegin + 1, parenthesisLast);
+  }
+
+  tmpString.trim();
+
+  message = "E-Skip / Europe 6m / " + tmpString;
+}
+
+// Draw Propag Condition
+void propagCondition()
+{
+  for(uint8_t i = 0; i < 56; i += 1)
+  {
+    M5.Lcd.drawFastHLine(  0, 44 + i, 320, M5.Lcd.color565(TFT_BACK.r, TFT_BACK.g, TFT_BACK.b));
+    M5.Lcd.drawFastHLine(  0, 44 + i + 1, 320, TFT_WHITE);
+    if (i < 28)
     {
-      http.begin(clientHamSQL, endpointHamQSL);     // Specify the URL
-      http.addHeader("Content-Type", "text/plain");   // Specify content-type header
-      http.setTimeout(1000);                          // Set Time Out
-      int httpCode = http.GET();                      // Make the request
-      if (httpCode == 200)                            // Check for the returning code
-      {
-        xmlData = http.getString(); // Get data
-        http.end(); // Free the resources
-        vTaskDelay(pdMS_TO_TICKS(limitLong));
-      }
-      else {
-        http.end(); // Free the resources
-        vTaskDelay(pdMS_TO_TICKS(limitShort));
-      }
+      scroll(10);
+    }
+    else
+    {
+      delay(10);
+    }
+  }
+
+  title("BANDS CONDITIONS");
+
+  // Current propagation
+  M5.Lcd.setFreeFont(&DroidSansMono6pt7b);
+  M5.Lcd.setTextPadding(160);
+  M5.Lcd.setTextDatum(CL_DATUM);
+
+  // Day
+  for(uint8_t i = 0; i <= 3; i += 1)
+  {
+    tmpString = xmlData;
+    tmpString.replace(propagKey[i], "(");
+    tmpString.replace("</band>", ")");
+    parenthesisBegin = tmpString.indexOf("(");
+    parenthesisLast = tmpString.indexOf(")", parenthesisBegin);
+    if (parenthesisBegin > 0)
+    {
+      tmpString = tmpString.substring(parenthesisBegin + 1, parenthesisLast);
+    }
+    tmpString.trim();
+    tmpString.toUpperCase();
+
+    M5.Lcd.drawString(propagKey[i].substring(0, 7) + " DAY " + tmpString, 20, 48 + (14 * i));
+  }
+
+  M5.Lcd.setTextDatum(CR_DATUM);
+
+  // Night
+  for(uint8_t i = 4; i <= 7; i += 1)
+  {
+    tmpString = xmlData;
+    tmpString.replace(propagKey[i], "(");
+    tmpString.replace("</band>", ")");
+    parenthesisBegin = tmpString.indexOf("(");
+    parenthesisLast = tmpString.indexOf(")", parenthesisBegin);
+    if (parenthesisBegin > 0)
+    {
+      tmpString = tmpString.substring(parenthesisBegin + 1, parenthesisLast);
+    }
+    tmpString.trim();
+    tmpString.toUpperCase();
+
+    M5.Lcd.drawString(propagKey[i].substring(0, 7) + " NIGHT " + tmpString, 300, 48 + (14 * (i - 4)));
+  }
+
+  for(uint16_t i = 0; i <= 500; i += 1)
+  {
+    if(screenRefresh == 1)
+    {
+      break;
+    }
+    delay(10);
+  }
+
+  for(uint8_t i = 0; i < 56; i += 1)
+  {
+    M5.Lcd.drawFastHLine(  0, 99 - i, 320, TFT_BLACK);
+    M5.Lcd.drawFastHLine(  0, 99 - i - 1, 320, TFT_WHITE);
+    if (i > 28)
+    {
+      scroll(10);
+    }
+    else
+    {
+      delay(10);
     }
   }
 }

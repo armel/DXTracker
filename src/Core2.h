@@ -103,21 +103,3 @@ void getButton()
         btnE = 0;
     }
 }
-
-// Speaker
-void speaker()
-{
-    // Core2 is not ready
-}
-
-// Manage Tone
-void totTone()
-{
-    // Core2 is not ready
-}
-
-// Manage Mute
-void totMute()
-{
-    // Core2 is not ready
-}
