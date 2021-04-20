@@ -57,6 +57,7 @@ void hamdata(void *pvParameters)
           if (httpCode == 200)                          // Check for the returning code
           {
             if (httpCode == 200) {
+              greylineRefresh = 1;
               // Open file
               f = SPIFFS.open("/greyline.jpg", "w+");
 
@@ -85,11 +86,7 @@ void hamdata(void *pvParameters)
         http.end(); // Free the resources
       }
 
-      // Draw greyline
-      decoded = JpegDec.decodeFsFile("/greyline.jpg");
-      if (decoded) {
-        M5.Lcd.drawJpgFile(SPIFFS, "/greyline.jpg", 0, 101, 320, 139, 0, 11, JPEG_DIV_2);
-      }
+      vTaskDelay(pdMS_TO_TICKS(1000));
 
       if ((WiFi.status() == WL_CONNECTED)) // Check the current connection status
       {

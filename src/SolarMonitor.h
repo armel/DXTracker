@@ -33,7 +33,7 @@
 #include "SPIFFS.h"
 
 // Version
-#define VERSION "0.0.4"
+#define VERSION "0.0.5"
 
 // Wifi
 WiFiClient clientHamSQL;
@@ -109,9 +109,10 @@ String cluster[10], call[10], frequency[10], band[10], country[10];
 String tmpString;
 String greylineData = "", HamQSLData = "", HamQTHData = "";
 
-bool screenRefresh = 0;
-bool screensaverMode = 0;
+boolean screenRefresh = 0;
+boolean screensaverMode = 0;
 boolean decoded;
+boolean greylineRefresh = 0;
 
 int8_t menuCurrent = 0;
 int8_t menuMode = 0;

@@ -289,6 +289,20 @@ void clusterMessage()
   }
 }
 
+// Draw Greyline
+void greyline()
+{
+  if(greylineRefresh == 1)
+  {
+    // Draw greyline
+    decoded = JpegDec.decodeFsFile("/greyline.jpg");
+    if (decoded) {
+      M5.Lcd.drawJpgFile(SPIFFS, "/greyline.jpg", 0, 101, 320, 139, 0, 11, JPEG_DIV_2);
+    }
+    greylineRefresh = 0;
+  }
+}
+
 // Draw Propag Condition
 void propagCondition()
 {

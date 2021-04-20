@@ -129,22 +129,13 @@ void setup()
   M5.IMU.Init();
 
   // Let's go after temporisation
-  delay(2000);
+  delay(3000);
 
   for (uint8_t i = 0; i <= 120; i++)
   {
     M5.Lcd.drawFastHLine(0, i, 320, TFT_BLACK);
     M5.Lcd.drawFastHLine(0, 240 - i, 320, TFT_BLACK);
     delay(5);
-  }
-
-  delay(2000);
-
-  // Draw first
-  decoded = JpegDec.decodeFsFile("/greyline.jpg");
-
-  if (decoded) {
-    M5.Lcd.drawJpgFile(SPIFFS, "/greyline.jpg", 0, 101, 320, 139, 0, 11, JPEG_DIV_2);
   }
 }
 
@@ -157,7 +148,8 @@ void loop()
   // Propag data and message
   propagMessage();
   clusterMessage();
-
+  greyline();
+  
   if(alternance == 11 || btnB)
   {
     propagCondition();
