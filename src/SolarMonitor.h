@@ -33,11 +33,11 @@
 #include "SPIFFS.h"
 
 // Version
-#define VERSION "0.0.3"
+#define VERSION "0.0.4"
 
 // Wifi
 WiFiClient clientHamSQL;
-WiFiClientSecure clientISS, clientGreyline;
+WiFiClientSecure clientISS, clientGreyline, clientHamQTH;
 
 // Preferences
 Preferences preferences;
@@ -74,13 +74,18 @@ colorType TFT_HEADER = {0, 76, 153};
 
 // HTTP endpoint
 String endpointHamQSL = "http://www.hamqsl.com/solarxml.php";
-String endpointISS = "https://api.wheretheiss.at/v1/satellites/25544";
 String endpointGreyline = "https://dx.qsl.net/propagation/greyline.html";
+String endpointHamQTH = "https://www.hamqth.com/dxc_csv.php?limit=10";
 
 // Scroll
-TFT_eSprite img = TFT_eSprite(&M5.Lcd); // Create Sprite object "img" with pointer to "tft" object
-String message = "";
-int16_t pos;
+TFT_eSprite imgH = TFT_eSprite(&M5.Lcd); // Create Sprite object "img" with pointer to "tft" object
+String messageH = "";
+int16_t posH;
+
+TFT_eSprite imgV = TFT_eSprite(&M5.Lcd); // Create Sprite object "img" with pointer to "tft" object
+String messageV = "";
+int16_t posV;
+
 
 // Misceleanous
 const char *menu[] = {"CONFIG", "ALARM", "LUMINOSITE", "QUITTER"};
@@ -98,10 +103,11 @@ String propagKey[] = {
   "17m-15m\" time=\"night\">",
   "12m-10m\" time=\"night\">"    
   };
+String cluster[10], call[10], frequency[10], band[10], country[10];
 
 // Miscellaneous
 String tmpString;
-String greylineData = "", xmlData = "";
+String greylineData = "", HamQSLData = "", HamQTHData = "";
 
 bool screenRefresh = 0;
 bool screensaverMode = 0;

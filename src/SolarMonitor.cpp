@@ -100,14 +100,17 @@ void setup()
   M5.Lcd.drawString(String(WiFi.localIP().toString().c_str()), 160, 70);
 
   // Scroll
-  pos = M5.Lcd.width();
-  img.createSprite(M5.Lcd.width(), 20);
+  posV = M5.Lcd.width();
+  imgV.createSprite(M5.Lcd.width(), 20);
+
+  posH = M5.Lcd.width();
+  imgH.createSprite(M5.Lcd.width(), 20);
 
   // Multitasking task for retreive rrf, spotnik and propag data
   xTaskCreatePinnedToCore(
       hamdata,      // Function to implement the task
       "hamdata",    // Name of the task
-      8192,         // Stack size in words
+      16384,        // Stack size in words
       NULL,         // Task input parameter
       1,            // Priority of the task
       NULL,         // Task handle
@@ -153,8 +156,9 @@ void loop()
 
   // Propag data and message
   propagMessage();
+  clusterMessage();
 
-  if(alternance == 5 || alternance == 11 || btnB)
+  if(alternance == 11 || btnB)
   {
     propagCondition();
   }
@@ -163,6 +167,7 @@ void loop()
     propagData();
     temporisation();
   }
+
   // Manage refresh and alternance
   if(screenRefresh != 1)
   {
