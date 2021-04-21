@@ -150,7 +150,7 @@ void loop()
   clusterMessage();
   greyline();
   
-  if(alternance == 11 || btnB)
+  if(btnB)
   {
     propagCondition();
   }

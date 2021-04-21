@@ -36,7 +36,7 @@
 #define VERSION "0.0.5"
 
 // Wifi
-WiFiClient clientHamSQL;
+WiFiClient clientHamQSL;
 WiFiClientSecure clientISS, clientGreyline, clientHamQTH;
 
 // Preferences
@@ -75,7 +75,7 @@ colorType TFT_HEADER = {0, 76, 153};
 // HTTP endpoint
 String endpointHamQSL = "http://www.hamqsl.com/solarxml.php";
 String endpointGreyline = "https://dx.qsl.net/propagation/greyline.html";
-String endpointHamQTH = "https://www.hamqth.com/dxc_csv.php?limit=10";
+String endpointHamQTH = "https://www.hamqth.com/dxc_csv.php?limit=50";
 
 // Scroll
 TFT_eSprite imgH = TFT_eSprite(&M5.Lcd); // Create Sprite object "img" with pointer to "tft" object
@@ -103,7 +103,8 @@ String propagKey[] = {
   "17m-15m\" time=\"night\">",
   "12m-10m\" time=\"night\">"    
   };
-String cluster[10], call[10], frequency[10], band[10], country[10];
+
+String cluster[50], call[50], frequency[50], band[50], country[50];
 
 // Miscellaneous
 String tmpString;
@@ -130,3 +131,14 @@ uint32_t screensaverLimit = 5 * 60 * 1000;  // 5 minutes
 
 int16_t parenthesisBegin = 0;
 int16_t parenthesisLast = 0;
+
+uint32_t frequencyExclude[] = {
+  1840, 1842, 3573, 5357,	
+  7056, 7071, 7074, 7078,
+  10130, 10132, 10133, 10136, 
+  14071, 14074, 14078, 14090,
+  18100, 18104, 21074, 21078,
+  21091, 24915, 28074, 28078,
+  50310, 50313, 50328, 50323,
+  70100, 144174, 222065, 432065
+};

@@ -16,7 +16,7 @@ void hamdata(void *pvParameters)
 
     if ((WiFi.status() == WL_CONNECTED)) // Check the current connection status
     {
-      Serial.println("HamQTH");
+      //Serial.println("HamQTH");
       clientHamQTH.setInsecure();
       http.begin(clientHamQTH, endpointHamQTH);       // Specify the URL
       http.addHeader("Content-Type", "text/plain");   // Specify content-type header
@@ -32,7 +32,7 @@ void hamdata(void *pvParameters)
     if(counter == 1) {
       if ((WiFi.status() == WL_CONNECTED)) // Check the current connection status
       {
-        Serial.println("Greyline");
+        //Serial.println("Greyline");
         clientGreyline.setInsecure();
         http.begin(clientGreyline, endpointGreyline);   // Specify the URL
         http.setTimeout(1000);                          // Set Time Out
@@ -90,8 +90,8 @@ void hamdata(void *pvParameters)
 
       if ((WiFi.status() == WL_CONNECTED)) // Check the current connection status
       {
-        Serial.println("HamSQL");
-        http.begin(clientHamSQL, endpointHamQSL);       // Specify the URL
+        //Serial.println("HamQSL");
+        http.begin(clientHamQSL, endpointHamQSL);       // Specify the URL
         http.addHeader("Content-Type", "text/plain");   // Specify content-type header
         http.setTimeout(1000);                          // Set Time Out
         httpCode = http.GET();                          // Make the request

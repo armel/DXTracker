@@ -34,7 +34,7 @@ void clear()
 void buildScrollV()
 {
   int16_t h = 20;
-  int16_t w = M5.Lcd.width() * 6;
+  int16_t w = M5.Lcd.width() * 10;
 
   // We could just use fillSprite(color) but lets be a bit more creative...
   while (h--)
@@ -66,7 +66,7 @@ void scrollV(uint8_t pause)
   posV -= 1;
   if (posV == 0)
   {
-    posV = M5.Lcd.width() * 6;
+    posV = M5.Lcd.width() * 10;
   }
 
   delay(pause);
@@ -187,6 +187,7 @@ void propagData()
   tmpString = HamQSLData;
   tmpString.replace("<" + solarKey[alternance] + ">", "(");
   tmpString.replace("</" + solarKey[alternance] + ">", ")");
+
   parenthesisBegin = tmpString.indexOf("(");
   parenthesisLast = tmpString.indexOf(")");
   if (parenthesisBegin > 0)
@@ -261,32 +262,47 @@ void propagMessage()
 // Draw Cluster Message
 void clusterMessage()
 {
-  messageV = "";
+  boolean exclude = 0;
+  uint8_t counter = 0;
+  uint32_t tmp = 0;
 
+  size_t n = sizeof(frequencyExclude)/sizeof(frequencyExclude[0]);
+
+  messageV = "";
   HamQTHData.replace("\n", "|");
 
-  for (uint8_t i = 0; i < 8; i++)
+  for (uint8_t i = 0; i < 50; i++)
   {
     cluster[i] = getValue(HamQTHData, '|', i);
-    call[i] = getValue(cluster[i], '^', 0);
-    band[i] = getValue(cluster[i], '^', 8);
     frequency[i] = getValue(cluster[i], '^', 1);
-    country[i] = getValue(cluster[i], '^', 9);
+    tmp = frequency[i].toInt();
+    
+    exclude = 0;
 
-    messageV += call[i] + " " + band[i] + " " + frequency[i] + " " + country[i];
-    if(i != 7)
+    for (uint8_t j = 0; j < n; j++)
     {
-      messageV += " -- ";
+      if(abs(tmp - frequencyExclude[j]) <= 2)
+      {
+        exclude = 1;
+        break;
+      }
     }
 
-    /*
-    Serial.println(call[i]);
-    Serial.println(band[i]);
-    Serial.println(frequency[i]);
-    Serial.println(country[i]);
-    Serial.println("------------");
-    */
-  }
+    if(exclude == 0)
+    {    
+      call[i] = getValue(cluster[i], '^', 0);
+      band[i] = getValue(cluster[i], '^', 8);
+      country[i] = getValue(cluster[i], '^', 9);
+
+      messageV += call[i] + " " + band[i] + " " + frequency[i] + " " + country[i] + " -- ";
+      counter += 1;
+    }
+
+    if(counter == 10) 
+    {
+      break;
+    }
+  }  
 }
 
 // Draw Greyline
