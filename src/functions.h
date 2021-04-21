@@ -34,7 +34,7 @@ void clear()
 void buildScrollV()
 {
   int16_t h = 20;
-  int16_t w = M5.Lcd.width() * 10;
+  int16_t w = M5.Lcd.width() * 8;
 
   // We could just use fillSprite(color) but lets be a bit more creative...
   while (h--)
@@ -66,7 +66,7 @@ void scrollV(uint8_t pause)
   posV -= 1;
   if (posV == 0)
   {
-    posV = M5.Lcd.width() * 10;
+    posV = M5.Lcd.width() * 8;
   }
 
   delay(pause);
@@ -302,7 +302,8 @@ void clusterMessage()
     {
       break;
     }
-  }  
+  }
+  messageV = messageV.substring(0, messageV.length() - 4); 
 }
 
 // Draw Greyline

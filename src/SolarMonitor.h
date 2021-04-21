@@ -33,7 +33,7 @@
 #include "SPIFFS.h"
 
 // Version
-#define VERSION "0.0.5"
+#define VERSION "0.0.6"
 
 // Wifi
 WiFiClient clientHamQSL;
