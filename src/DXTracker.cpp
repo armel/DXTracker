@@ -173,35 +173,33 @@ void setup()
 // Main loop
 void loop()
 {
-  if(greylineData != "" && hamQSLData != "" && hamQTHData != "") 
+  // Let's clean
+  clear();
+
+  // Propag data and message
+  propagMessage();
+  clusterMessage();
+  greyline();
+  
+  if(btnB)
   {
-    // Let's clean
-    clear();
+    propagCondition();
+  }
+  else
+  {
+    propagData();
+    temporisation();
+    getAcceleration();
+  }
 
-    // Propag data and message
-    propagMessage();
-    clusterMessage();
-    greyline();
-    
-    if(btnB)
-    {
-      propagCondition();
-    }
-    else
-    {
-      propagData();
-      temporisation();
-    }
-
-    // Manage refresh and alternance
-    if(screenRefresh != 1)
-    {
-      alternance++;
-      alternance = (alternance > 11) ? 0 : alternance;
-    }
-    else
-    {
-      screenRefresh = 0;
-    }
+  // Manage refresh and alternance
+  if(screenRefresh != 1)
+  {
+    alternance++;
+    alternance = (alternance > 11) ? 0 : alternance;
+  }
+  else
+  {
+    screenRefresh = 0;
   }
 }

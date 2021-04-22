@@ -6,26 +6,26 @@ int btnA, btnB, btnC = 0;
 // Power init
 void power()
 {
-    M5.Power.begin();
+  M5.Power.begin();
 }
 
 // Get Battery level
 int8_t getBatteryLevel(bool type)
 {
-    return M5.Power.getBatteryLevel();
+  return M5.Power.getBatteryLevel();
 }
 
 // Control if charging
 bool isCharging()
 {
-    return M5.Power.isCharging();
+  return M5.Power.isCharging();
 }
 
 // Get button
 void getButton()
 {
-    M5.update();
-    btnA = M5.BtnA.read();
-    btnB = M5.BtnB.read();
-    btnC = M5.BtnC.read();
+  M5.update();
+  btnA = M5.BtnA.read();
+  btnB = M5.BtnB.read();
+  btnC = M5.BtnC.read();
 }

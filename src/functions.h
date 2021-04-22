@@ -112,39 +112,6 @@ void scrollB(uint8_t pause)
   delay(pause);
 }
 
-// Manage temporisation
-void temporisation()
-{
-  for(uint16_t i = 0; i <= 500; i += 1)
-  {
-    if(screenRefresh == 1)
-    {
-      break;
-    }
-    scrollA(5);
-    scrollB(5);
-  }
-}
-
-// Detect rotation
-void getAcceleration()
-{
-  float accX = 0.0F;
-  float accY = 0.0F;
-  float accZ = 0.0F;
-
-  if(BOARD == GREY || BOARD == CORE2) {
-    M5.IMU.getAccelData(&accX,&accY,&accZ);
-
-    if(int(accY * 1000) < -500 && M5.Lcd.getRotation() != 3) {
-      M5.Lcd.setRotation(3);
-    }
-    else if(int(accY * 1000) > 500 && M5.Lcd.getRotation() != 1) {
-      M5.Lcd.setRotation(1);
-    }
-  }
-}
-
 // Draw title
 void title(String title)
 {
@@ -405,5 +372,44 @@ void propagCondition()
     {
       delay(10);
     }
+  }
+}
+
+// Detect rotation
+void getAcceleration()
+{
+  float accX = 0.0F;
+  float accY = 0.0F;
+  float accZ = 0.0F;
+
+  if(BOARD == GREY || BOARD == CORE2) {
+    M5.IMU.getAccelData(&accX,&accY,&accZ);
+
+    if(int(accY * 1000) < -500 && M5.Lcd.getRotation() != 3) {
+      M5.Lcd.setRotation(3);
+      M5.Lcd.clear();
+      clear();
+      greylineRefresh = 1;
+    }
+    else if(int(accY * 1000) > 500 && M5.Lcd.getRotation() != 1) {
+      M5.Lcd.setRotation(1);
+      M5.Lcd.clear();
+      clear();
+      greylineRefresh = 1;
+    }
+  }
+}
+
+// Manage temporisation
+void temporisation()
+{
+  for(uint16_t i = 0; i <= 100; i += 1)
+  {
+    if(screenRefresh == 1)
+    {
+      break;
+    }
+    scrollA(5);
+    scrollB(5);
   }
 }
