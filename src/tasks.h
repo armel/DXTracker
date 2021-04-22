@@ -155,9 +155,7 @@ void button(void *pvParameters)
         btnB = 0;
         btnC = 0;
       }
-
-      // Mode menu inactive
-      if (menuMode == 0)
+      else
       {
         change = alternance;
         if(btnA)

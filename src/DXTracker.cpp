@@ -1,7 +1,7 @@
 // Copyright (c) F4HWN Armel. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#include "SolarMonitor.h"
+#include "DXTracker.h"
 #include "functions.h"
 #include "tasks.h"
 
@@ -33,11 +33,8 @@ void setup()
     preferences.putUInt("config", configCurrent);
   }
 
-  brightnessCurrent = preferences.getUInt("brightness", 128);
-  totCurrent = preferences.getUInt("tot", 0);
-
   // LCD
-  M5.Lcd.setBrightness(brightnessCurrent);
+  M5.Lcd.setBrightness(64);
   M5.Lcd.fillScreen(M5.Lcd.color565(TFT_BACK.r, TFT_BACK.g, TFT_BACK.b));
 
   // SPIFFS
@@ -52,15 +49,14 @@ void setup()
   M5.Lcd.setFreeFont(&rounded_led_board10pt7b);
   M5.Lcd.setTextColor(TFT_WHITE, M5.Lcd.color565(TFT_BACK.r, TFT_BACK.g, TFT_BACK.b));
   M5.Lcd.setTextDatum(CC_DATUM);
-  M5.Lcd.drawString("Solar Monitor", 160, 20);
+  M5.Lcd.drawString("DXTracker", 160, 20);
   M5.Lcd.setFreeFont(0);
   M5.Lcd.drawString("Version " + String(VERSION) + " par F4HWN", 160, 50);
 
   // QRCode
-  M5.Lcd.qrcode("https://github.com/armel/SolarMonitor", 90, 80, 140, 6);
+  M5.Lcd.qrcode("https://github.com/armel/DXTracker", 90, 80, 140, 6);
 
   // We start by connecting to the WiFi network
-
   M5.Lcd.setTextPadding(320);
 
   while(true)

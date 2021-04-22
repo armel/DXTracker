@@ -87,7 +87,7 @@ void buildScrollH()
   imgH.setTextFont(2);          // Font 2 selected
   //img.setFreeFont(&tahoma6pt7b);
   
-  imgH.setTextColor(M5.Lcd.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b)); // White text, no background colour
+  imgH.setTextColor(M5.Lcd.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b)); // Gray text, no background colour
   imgH.setTextWrap(false);      // Turn of wrap so we can print past end of sprite
 
   // Need to print twice so text appears to wrap around at left and right edges

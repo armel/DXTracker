@@ -42,7 +42,7 @@ WiFiClientSecure clientISS, clientGreyline, clientHamQTH;
 // Preferences
 Preferences preferences;
 
-// Color (https://www.rapidtables.com/web/color/RGB_Color.html)
+// Color
 typedef struct __attribute__((__packed__))
 {
   uint8_t r;
@@ -52,25 +52,6 @@ typedef struct __attribute__((__packed__))
 
 colorType TFT_BACK = {48, 48, 48};
 colorType TFT_GRAY = {128, 128, 128};
-colorType TFT_FRONT = {51, 153, 255};
-colorType TFT_HEADER = {0, 76, 153};
-
-// Icon
-#define ICON_FONT &icon_works_webfont14pt7b
-#define ICON_STAT 40
-#define ICON_CLOCK 105
-#define ICON_CALL 77
-#define ICON_TOT 105
-#define ICON_SETTING 106
-#define ICON_LEFT 119
-#define ICON_RIGHT 87
-#define ICON_ISS 51
-#define ICON_BAT100 118
-#define ICON_BAT075 117
-#define ICON_BAT050 116
-#define ICON_BAT025 115
-#define ICON_BAT000 34
-#define ICON_CHARGING 37
 
 // HTTP endpoint
 String endpointHamQSL = "http://www.hamqsl.com/solarxml.php";
@@ -86,13 +67,19 @@ TFT_eSprite imgV = TFT_eSprite(&M5.Lcd); // Create Sprite object "img" with poin
 String messageV = "";
 int16_t posV;
 
-
-// Misceleanous
-const char *menu[] = {"CONFIG", "ALARM", "LUMINOSITE", "QUITTER"};
-
 // Propag data
-String solarData[] = {"SFI", "Sunspots", "A-Index", "K-Index", "X-Ray", "Helium Line", "Proton Flux", "Electron Flux", "Aurora", "Solar Wind", "Magnetic Field", "Signal Noise"};
-String solarKey[] = {"solarflux", "sunspots", "aindex", "kindex", "xray", "heliumline", "protonflux", "electonflux", "aurora", "solarwind", "magneticfield", "signalnoise"};
+String solarData[] = {
+  "SFI", "Sunspots", "A-Index", "K-Index", 
+  "X-Ray", "Helium Line", "Proton Flux", "Electron Flux", 
+  "Aurora", "Solar Wind", "Magnetic Field", "Signal Noise"
+};
+
+String solarKey[] = {
+  "solarflux", "sunspots", "aindex", "kindex", 
+  "xray", "heliumline", "protonflux", "electonflux", 
+  "aurora", "solarwind", "magneticfield", "signalnoise"
+};
+
 String propagKey[] = {
   "80m-40m\" time=\"day\">", 
   "30m-20m\" time=\"day\">", 
@@ -102,7 +89,7 @@ String propagKey[] = {
   "30m-20m\" time=\"night\">",
   "17m-15m\" time=\"night\">",
   "12m-10m\" time=\"night\">"    
-  };
+};
 
 String cluster[50], call[50], frequency[50], band[50], country[50];
 
@@ -115,16 +102,8 @@ boolean screensaverMode = 0;
 boolean decoded;
 boolean greylineRefresh = 0;
 
-int8_t menuCurrent = 0;
-int8_t menuMode = 0;
-int8_t menuSelected = -1;
-
 uint8_t alternance = 0;
 uint8_t configCurrent = 0;
-uint8_t brightnessCurrent = 32;
-uint8_t totCurrent = 0;
-uint8_t batteryChargeCurrent = 0;
-uint8_t batteryLevelCurrent = 0;
 
 uint32_t screensaver;
 uint32_t screensaverLimit = 5 * 60 * 1000;  // 5 minutes
