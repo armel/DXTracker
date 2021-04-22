@@ -30,85 +30,83 @@ void clear()
   M5.Lcd.drawFastHLine(  0, 100, 320, TFT_WHITE);
 }
 
-// Build scroll V
-void buildScrollV()
+// Build scroll A
+void buildScrollA()
 {
   int16_t h = 20;
   int16_t w = M5.Lcd.width() * 8;
 
   // We could just use fillSprite(color) but lets be a bit more creative...
   while (h--)
-    imgV.drawFastHLine(0, h, w, TFT_BLACK);
+    imgA.drawFastHLine(0, h, w, TFT_BLACK);
 
   // Now print text on top of the graphics
-  imgV.setTextSize(1);          // Font size scaling is x1
-  imgV.setTextFont(2);          // Font 2 selected
-  //img.setFreeFont(&tahoma6pt7b);
+  imgA.setTextSize(1);          // Font size scaling is x1
+  imgA.setTextFont(2);          // Font 2 selected
   
-  imgV.setTextColor(TFT_WHITE); // White text, no background colour
-  imgV.setTextWrap(false);      // Turn of wrap so we can print past end of sprite
+  imgA.setTextColor(TFT_WHITE); // White text, no background colour
+  imgA.setTextWrap(false);      // Turn of wrap so we can print past end of sprite
 
   // Need to print twice so text appears to wrap around at left and right edges
-  imgV.setCursor(posV, 2); // Print text at pos
-  imgV.print(messageV);
+  imgA.setCursor(posA, 2); // Print text at pos
+  imgA.print(messageA);
 
-  imgV.setCursor(posV - w, 2); // Print text at pos - sprite width
-  imgV.print(messageV);
+  imgA.setCursor(posA - w, 2); // Print text at pos - sprite width
+  imgA.print(messageA);
 }
 
-// Scroll V
-void scrollV(uint8_t pause)
+// Scroll A
+void scrollA(uint8_t pause)
 {
   // Sprite for scroll
-  buildScrollV();
-  imgV.pushSprite(0, 52);
+  buildScrollA();
+  imgA.pushSprite(0, 52);
 
-  posV -= 1;
-  if (posV == 0)
+  posA -= 1;
+  if (posA == 0)
   {
-    posV = M5.Lcd.width() * 8;
+    posA = M5.Lcd.width() * 8;
   }
 
   delay(pause);
 }
 
-// Build scroll H
-void buildScrollH()
+// Build scroll B
+void buildScrollB()
 {
   int16_t h = 20;
   int16_t w = M5.Lcd.width() * 2;
 
   // We could just use fillSprite(color) but lets be a bit more creative...
   while (h--)
-    imgH.drawFastHLine(0, h, w, TFT_BLACK);
+    imgB.drawFastHLine(0, h, w, TFT_BLACK);
 
   // Now print text on top of the graphics
-  imgH.setTextSize(1);          // Font size scaling is x1
-  imgH.setTextFont(2);          // Font 2 selected
-  //img.setFreeFont(&tahoma6pt7b);
+  imgB.setTextSize(1);          // Font size scaling is x1
+  imgB.setTextFont(2);          // Font 2 selected
   
-  imgH.setTextColor(M5.Lcd.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b)); // Gray text, no background colour
-  imgH.setTextWrap(false);      // Turn of wrap so we can print past end of sprite
+  imgB.setTextColor(M5.Lcd.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b)); // Gray text, no background colour
+  imgB.setTextWrap(false);      // Turn of wrap so we can print past end of sprite
 
   // Need to print twice so text appears to wrap around at left and right edges
-  imgH.setCursor(posH, 2); // Print text at pos
-  imgH.print(messageH);
+  imgB.setCursor(posB, 2); // Print text at pos
+  imgB.print(messageB);
 
-  imgH.setCursor(posH - w, 2); // Print text at pos - sprite width
-  imgH.print(messageH);
+  imgB.setCursor(posB - w, 2); // Print text at pos - sprite width
+  imgB.print(messageB);
 }
 
-// Scroll H
-void scrollH(uint8_t pause)
+// Scroll B
+void scrollB(uint8_t pause)
 {
   // Sprite for scroll
-  buildScrollH();
-  imgH.pushSprite(0, 74);
+  buildScrollB();
+  imgB.pushSprite(0, 74);
 
-  posH -= 1;
-  if (posH == 0)
+  posB -= 1;
+  if (posB == 0)
   {
-    posH = M5.Lcd.width() * 2;
+    posB = M5.Lcd.width() * 2;
   }
 
   delay(pause);
@@ -123,8 +121,8 @@ void temporisation()
     {
       break;
     }
-    scrollH(5);
-    scrollV(5);
+    scrollA(5);
+    scrollB(5);
   }
 }
 
@@ -161,18 +159,25 @@ void title(String title)
   M5.Lcd.setTextDatum(CC_DATUM);
   M5.Lcd.setTextPadding(320);
 
-  // Update date and time
-  tmpString = HamQSLData;
-  tmpString.replace("<updated>", "(");
-  tmpString.replace("</updated>", ")");
-  parenthesisBegin = tmpString.indexOf("(");
-  parenthesisLast = tmpString.indexOf(")");
-  if (parenthesisBegin > 0)
+  if(alternance % 2 == 0)
   {
-    tmpString = tmpString.substring(parenthesisBegin + 1, parenthesisLast);
-  }
+    // Update date and time
+    tmpString = hamQSLData;
+    tmpString.replace("<updated>", "(");
+    tmpString.replace("</updated>", ")");
+    parenthesisBegin = tmpString.indexOf("(");
+    parenthesisLast = tmpString.indexOf(")");
+    if (parenthesisBegin > 0)
+    {
+      tmpString = tmpString.substring(parenthesisBegin + 1, parenthesisLast);
+    }
 
-  tmpString.trim();
+    tmpString.trim();
+  }
+  else
+  {
+    tmpString = String(NAME) + " Version " + String(VERSION);
+  }
 
   M5.Lcd.drawString(tmpString, 160, 36);
 }
@@ -184,7 +189,7 @@ void propagData()
   solarData[alternance].toUpperCase();
 
   // Current value
-  tmpString = HamQSLData;
+  tmpString = hamQSLData;
   tmpString.replace("<" + solarKey[alternance] + ">", "(");
   tmpString.replace("</" + solarKey[alternance] + ">", ")");
 
@@ -198,19 +203,14 @@ void propagData()
   tmpString.trim();
 
   title(solarData[alternance] + " " + tmpString);
-
-  M5.Lcd.setTextColor(TFT_WHITE, TFT_BLACK);
-  M5.Lcd.setFreeFont(&rounded_led_board10pt7b);
-  M5.Lcd.setTextDatum(CC_DATUM);
-  M5.Lcd.setTextPadding(320);
 }
 
 // Draw Propag Message
 void propagMessage()
 {
-  messageH = "";
+  messageB = "";
   // Current propagation 50 MHz
-  tmpString = HamQSLData;
+  tmpString = hamQSLData;
   tmpString.replace("location=\"europe\">", "(");
   tmpString.replace("</phenomenon>", ")");
   parenthesisBegin = tmpString.indexOf("(");
@@ -222,12 +222,12 @@ void propagMessage()
 
   tmpString.trim();
 
-  messageH += "E-Skip Europe " + tmpString;
+  messageB += "E-Skip Europe " + tmpString;
 
-  messageH += " -- ";
+  messageB += " -- ";
 
   // Current propagation 50 MHz
-  tmpString = HamQSLData;
+  tmpString = hamQSLData;
   tmpString.replace("location=\"europe_6m\">", "(");
   tmpString.replace("</phenomenon>", ")");
   parenthesisBegin = tmpString.indexOf("(");
@@ -239,12 +239,12 @@ void propagMessage()
 
   tmpString.trim();
 
-  messageH += "E-Skip Europe 6m " + tmpString;
+  messageB += "E-Skip Europe 6m " + tmpString;
 
-  messageH += " -- ";
+  messageB += " -- ";
 
   // Current propagation 70 MHz
-  tmpString = HamQSLData;
+  tmpString = hamQSLData;
   tmpString.replace("location=\"europe_4m\">", "(");
   tmpString.replace("</phenomenon>", ")");
   parenthesisBegin = tmpString.indexOf("(");
@@ -256,7 +256,7 @@ void propagMessage()
 
   tmpString.trim();
 
-  messageH += "E-Skip Europe 4m " + tmpString;
+  messageB += "E-Skip Europe 4m " + tmpString;
 }
 
 // Draw Cluster Message
@@ -268,12 +268,12 @@ void clusterMessage()
 
   size_t n = sizeof(frequencyExclude)/sizeof(frequencyExclude[0]);
 
-  messageV = "";
-  HamQTHData.replace("\n", "|");
+  messageA = "";
+  hamQTHData.replace("\n", "|");
 
   for (uint8_t i = 0; i < 50; i++)
   {
-    cluster[i] = getValue(HamQTHData, '|', i);
+    cluster[i] = getValue(hamQTHData, '|', i);
     frequency[i] = getValue(cluster[i], '^', 1);
     tmp = frequency[i].toInt();
     
@@ -294,7 +294,7 @@ void clusterMessage()
       band[i] = getValue(cluster[i], '^', 8);
       country[i] = getValue(cluster[i], '^', 9);
 
-      messageV += call[i] + " " + band[i] + " " + frequency[i] + " " + country[i] + " -- ";
+      messageA += call[i] + " " + band[i] + " " + frequency[i] + " " + country[i] + " -- ";
       counter += 1;
     }
 
@@ -303,7 +303,7 @@ void clusterMessage()
       break;
     }
   }
-  messageV = messageV.substring(0, messageV.length() - 4); 
+  messageA = messageA.substring(0, messageA.length() - 4); 
 }
 
 // Draw Greyline
@@ -329,8 +329,8 @@ void propagCondition()
     M5.Lcd.drawFastHLine(  0, 44 + i + 1, 320, TFT_WHITE);
     if (i < 8)
     {
-      scrollH(5);
-      scrollV(5);
+      scrollA(5);
+      scrollB(5);
     }
     else
     {
@@ -348,7 +348,7 @@ void propagCondition()
   // Day
   for(uint8_t i = 0; i <= 3; i += 1)
   {
-    tmpString = HamQSLData;
+    tmpString = hamQSLData;
     tmpString.replace(propagKey[i], "(");
     tmpString.replace("</band>", ")");
     parenthesisBegin = tmpString.indexOf("(");
@@ -368,7 +368,7 @@ void propagCondition()
   // Night
   for(uint8_t i = 4; i <= 7; i += 1)
   {
-    tmpString = HamQSLData;
+    tmpString = hamQSLData;
     tmpString.replace(propagKey[i], "(");
     tmpString.replace("</band>", ")");
     parenthesisBegin = tmpString.indexOf("(");
@@ -398,8 +398,8 @@ void propagCondition()
     M5.Lcd.drawFastHLine(  0, 99 - i - 1, 320, TFT_WHITE);
     if (i > 48)
     {
-      scrollH(5);
-      scrollV(5);
+      scrollA(5);
+      scrollB(5);
     }
     else
     {

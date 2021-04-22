@@ -19,7 +19,7 @@ void setup()
   power();
 
   // Preferences
-  preferences.begin("SolarMonitor");
+  preferences.begin(NAME);
 
   size_t n = sizeof(config) / sizeof(config[0]);
   n = (n / 6) - 1;
@@ -49,9 +49,9 @@ void setup()
   M5.Lcd.setFreeFont(&rounded_led_board10pt7b);
   M5.Lcd.setTextColor(TFT_WHITE, M5.Lcd.color565(TFT_BACK.r, TFT_BACK.g, TFT_BACK.b));
   M5.Lcd.setTextDatum(CC_DATUM);
-  M5.Lcd.drawString("DXTracker", 160, 20);
+  M5.Lcd.drawString(String(NAME), 160, 20);
   M5.Lcd.setFreeFont(0);
-  M5.Lcd.drawString("Version " + String(VERSION) + " par F4HWN", 160, 50);
+  M5.Lcd.drawString("Version " + String(VERSION) + " by F4HWN", 160, 50);
 
   // QRCode
   M5.Lcd.qrcode("https://github.com/armel/DXTracker", 90, 80, 140, 6);
@@ -96,11 +96,11 @@ void setup()
   M5.Lcd.drawString(String(WiFi.localIP().toString().c_str()), 160, 70);
 
   // Scroll
-  posV = M5.Lcd.width();
-  imgV.createSprite(M5.Lcd.width(), 20);
+  posA = M5.Lcd.width();
+  imgA.createSprite(M5.Lcd.width(), 20);
 
-  posH = M5.Lcd.width();
-  imgH.createSprite(M5.Lcd.width(), 20);
+  posB = M5.Lcd.width();
+  imgB.createSprite(M5.Lcd.width(), 20);
 
   // Multitasking task for retreive rrf, spotnik and propag data
   xTaskCreatePinnedToCore(
@@ -110,14 +110,14 @@ void setup()
       NULL,         // Task input parameter
       1,            // Priority of the task
       NULL,         // Task handle
-      1);           // Core where the task should run
+      0);           // Core where the task should run
 
   xTaskCreatePinnedToCore(
       button,       // Function to implement the task
       "button",     // Name of the task
       8192,         // Stack size in words
       NULL,         // Task input parameter
-      2,            // Priority of the task
+      1,            // Priority of the task
       NULL,         // Task handle
       1);           // Core where the task should run
 
@@ -125,7 +125,7 @@ void setup()
   M5.IMU.Init();
 
   // Let's go after temporisation
-  delay(3000);
+  delay(1000);
 
   for (uint8_t i = 0; i <= 120; i++)
   {
@@ -133,37 +133,75 @@ void setup()
     M5.Lcd.drawFastHLine(0, 240 - i, 320, TFT_BLACK);
     delay(5);
   }
+
+  // Waiting for data
+  M5.Lcd.setTextColor(TFT_WHITE, TFT_BLACK);
+  M5.Lcd.setTextSize(1);  // Font size scaling is x1
+  M5.Lcd.setTextFont(2);  // Font 2 selected
+  M5.Lcd.setTextDatum(CC_DATUM);
+  M5.Lcd.setTextPadding(320);
+
+  while(greylineData == "" || hamQSLData == "" || hamQTHData == "") 
+  {
+    M5.Lcd.drawString("Loading data", 160, 120);
+    
+    if(hamQTHData != 0)
+    {
+      M5.Lcd.drawString("Cluster Ok", 160, 160);
+    }
+    if(greylineData != 0)
+    {
+      M5.Lcd.drawString("Greyline Ok", 160, 180);
+    }
+    if(hamQSLData != 0)
+    {
+      M5.Lcd.drawString("Solar Ok", 160, 200);
+    }
+    delay(250);
+    M5.Lcd.drawString(" ", 160, 120);
+    delay(250);
+  }
+
+  M5.Lcd.drawString("Loading data", 160, 120);
+  M5.Lcd.drawString("Cluster Ok", 160, 160);
+  M5.Lcd.drawString("Greyline Ok", 160, 180);
+  M5.Lcd.drawString("Solar Ok", 160, 200);
+
+  delay(500);
 }
 
 // Main loop
 void loop()
-{  
-  // Let's clean
-  clear();
+{
+  if(greylineData != "" && hamQSLData != "" && hamQTHData != "") 
+  {
+    // Let's clean
+    clear();
 
-  // Propag data and message
-  propagMessage();
-  clusterMessage();
-  greyline();
-  
-  if(btnB)
-  {
-    propagCondition();
-  }
-  else
-  {
-    propagData();
-    temporisation();
-  }
+    // Propag data and message
+    propagMessage();
+    clusterMessage();
+    greyline();
+    
+    if(btnB)
+    {
+      propagCondition();
+    }
+    else
+    {
+      propagData();
+      temporisation();
+    }
 
-  // Manage refresh and alternance
-  if(screenRefresh != 1)
-  {
-    alternance++;
-    alternance = (alternance > 11) ? 0 : alternance;
-  }
-  else
-  {
-    screenRefresh = 0;
+    // Manage refresh and alternance
+    if(screenRefresh != 1)
+    {
+      alternance++;
+      alternance = (alternance > 11) ? 0 : alternance;
+    }
+    else
+    {
+      screenRefresh = 0;
+    }
   }
 }

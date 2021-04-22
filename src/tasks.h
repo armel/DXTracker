@@ -12,8 +12,6 @@ void hamdata(void *pvParameters)
 
   for (;;)
   {
-    Serial.println(counter);
-
     if ((WiFi.status() == WL_CONNECTED)) // Check the current connection status
     {
       //Serial.println("HamQTH");
@@ -24,7 +22,7 @@ void hamdata(void *pvParameters)
       httpCode = http.GET();                          // Make the request
       if (httpCode == 200)                            // Check for the returning code
       {
-        HamQTHData = http.getString(); // Get data  
+        hamQTHData = http.getString(); // Get data
       }
       http.end(); // Free the resources
     }
@@ -97,7 +95,7 @@ void hamdata(void *pvParameters)
         httpCode = http.GET();                          // Make the request
         if (httpCode == 200)                            // Check for the returning code
         {
-          HamQSLData = http.getString(); // Get data
+          hamQSLData = http.getString(); // Get data
         }
         http.end(); // Free the resources
       }

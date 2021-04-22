@@ -32,12 +32,13 @@
 #include "FS.h"
 #include "SPIFFS.h"
 
-// Version
-#define VERSION "0.0.6"
+// Name and Version
+#define NAME "DXTracker"
+#define VERSION "0.0.7"
 
 // Wifi
 WiFiClient clientHamQSL;
-WiFiClientSecure clientISS, clientGreyline, clientHamQTH;
+WiFiClientSecure clientGreyline, clientHamQTH;
 
 // Preferences
 Preferences preferences;
@@ -59,13 +60,13 @@ String endpointGreyline = "https://dx.qsl.net/propagation/greyline.html";
 String endpointHamQTH = "https://www.hamqth.com/dxc_csv.php?limit=50";
 
 // Scroll
-TFT_eSprite imgH = TFT_eSprite(&M5.Lcd); // Create Sprite object "img" with pointer to "tft" object
-String messageH = "";
-int16_t posH;
+TFT_eSprite imgA = TFT_eSprite(&M5.Lcd); // Create Sprite object "img" with pointer to "tft" object
+String messageA = "";
+int16_t posA;
 
-TFT_eSprite imgV = TFT_eSprite(&M5.Lcd); // Create Sprite object "img" with pointer to "tft" object
-String messageV = "";
-int16_t posV;
+TFT_eSprite imgB = TFT_eSprite(&M5.Lcd); // Create Sprite object "img" with pointer to "tft" object
+String messageB = "";
+int16_t posB;
 
 // Propag data
 String solarData[] = {
@@ -95,7 +96,7 @@ String cluster[50], call[50], frequency[50], band[50], country[50];
 
 // Miscellaneous
 String tmpString;
-String greylineData = "", HamQSLData = "", HamQTHData = "";
+String greylineData = "", hamQSLData = "", hamQTHData = "";
 
 boolean screenRefresh = 0;
 boolean screensaverMode = 0;
