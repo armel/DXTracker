@@ -34,7 +34,7 @@ void setup()
   }
 
   // LCD
-  M5.Lcd.setBrightness(64);
+  M5.Lcd.setBrightness(128);
   M5.Lcd.fillScreen(M5.Lcd.color565(TFT_BACK.r, TFT_BACK.g, TFT_BACK.b));
 
   // SPIFFS
