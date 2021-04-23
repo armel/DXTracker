@@ -9,9 +9,15 @@ void hamdata(void *pvParameters)
   uint32_t limit = 1 * 30 * 1000; // Retry 30 secondes
   uint16_t len, httpCode;
   static uint8_t counter = 1;
+  static uint8_t counterWakeUp = 1;
 
   for (;;)
   {
+    if(counterWakeUp == 1)
+    {
+      screensaver = millis(); // Screensaver update !!!
+    }
+
     if ((WiFi.status() == WL_CONNECTED)) // Check the current connection status
     {
       //Serial.println("HamQTH");
@@ -102,6 +108,7 @@ void hamdata(void *pvParameters)
     }
     
     counter = (counter++ < 10) ? counter : 1;
+    counterWakeUp = (counterWakeUp++ < 120) ? counterWakeUp : 1;
 
     // Pause
     vTaskDelay(pdMS_TO_TICKS(limit));

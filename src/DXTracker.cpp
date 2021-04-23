@@ -34,8 +34,9 @@ void setup()
   }
 
   // LCD
-  M5.Lcd.setBrightness(128);
+  M5.Lcd.setBrightness(brightnessCurrent);
   M5.Lcd.fillScreen(M5.Lcd.color565(TFT_BACK.r, TFT_BACK.g, TFT_BACK.b));
+  screensaver = millis(); // Screensaver update !!!
 
   // SPIFFS
   SPIFFS.begin(true);
@@ -202,4 +203,31 @@ void loop()
   {
     screenRefresh = 0;
   }
+
+  // Manage screensaver
+  if (screensaverMode == 0 && millis() - screensaver > screensaverLimit)
+  {
+    for (uint8_t i = brightnessCurrent; i >= 1; i--)
+    {
+      M5.Lcd.setBrightness(i);
+      scrollA(0);
+      scrollB(0);
+      delay(10);
+    }
+    screensaverMode = 1;
+    M5.Lcd.sleep();
+  }
+  else if (screensaverMode == 1 && millis() - screensaver < screensaverLimit)
+  {
+    M5.Lcd.wakeup();
+    screensaverMode = 0;
+    for (uint8_t i = 1; i <= brightnessCurrent; i++)
+    {
+      M5.Lcd.setBrightness(i);
+      scrollA(0);
+      scrollB(0);
+      delay(10);
+    }
+  }
+
 }

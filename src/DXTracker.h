@@ -34,7 +34,7 @@
 
 // Name and Version
 #define NAME "DXTracker"
-#define VERSION "0.0.7"
+#define VERSION "0.0.8"
 
 // Wifi
 WiFiClient clientHamQSL;
@@ -105,9 +105,10 @@ boolean greylineRefresh = 0;
 
 uint8_t alternance = 0;
 uint8_t configCurrent = 0;
+uint8_t brightnessCurrent = 128;
 
 uint32_t screensaver;
-uint32_t screensaverLimit = 5 * 60 * 1000;  // 5 minutes
+uint32_t screensaverLimit = 30 * 60 * 1000;  // 30 minutes
 
 int16_t parenthesisBegin = 0;
 int16_t parenthesisLast = 0;

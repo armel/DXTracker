@@ -34,25 +34,23 @@ void clear()
 void buildScrollA()
 {
   int16_t h = 20;
-  int16_t w = M5.Lcd.width() * 8;
+  int16_t w = M5.Lcd.width() * 9;
 
   // We could just use fillSprite(color) but lets be a bit more creative...
   while (h--)
     imgA.drawFastHLine(0, h, w, TFT_BLACK);
 
   // Now print text on top of the graphics
-  imgA.setTextSize(1);          // Font size scaling is x1
-  imgA.setTextFont(2);          // Font 2 selected
-  
+  imgA.setFreeFont(&FreeSans9pt7b); 
   imgA.setTextColor(TFT_WHITE); // White text, no background colour
   imgA.setTextWrap(false);      // Turn of wrap so we can print past end of sprite
 
-  // Need to print twice so text appears to wrap around at left and right edges
-  imgA.setCursor(posA, 2); // Print text at pos
-  imgA.print(messageA);
+  //Serial.println(imgA.textWidth(messageA));
+  //Serial.println(imgA.textWidth(messageA));
 
-  imgA.setCursor(posA - w, 2); // Print text at pos - sprite width
-  imgA.print(messageA);
+  // Need to print twice so text appears to wrap around at left and right edges
+  imgA.drawString(messageA, posA, 2);
+  imgA.drawString(messageA, posA - w, 2);
 }
 
 // Scroll A
@@ -65,7 +63,7 @@ void scrollA(uint8_t pause)
   posA -= 1;
   if (posA == 0)
   {
-    posA = M5.Lcd.width() * 8;
+    posA = M5.Lcd.width() * 9;
   }
 
   delay(pause);
@@ -84,16 +82,12 @@ void buildScrollB()
   // Now print text on top of the graphics
   imgB.setTextSize(1);          // Font size scaling is x1
   imgB.setTextFont(2);          // Font 2 selected
-  
   imgB.setTextColor(M5.Lcd.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b)); // Gray text, no background colour
   imgB.setTextWrap(false);      // Turn of wrap so we can print past end of sprite
 
   // Need to print twice so text appears to wrap around at left and right edges
-  imgB.setCursor(posB, 2); // Print text at pos
-  imgB.print(messageB);
-
-  imgB.setCursor(posB - w, 2); // Print text at pos - sprite width
-  imgB.print(messageB);
+  imgB.drawString(messageB, posB, 2);
+  imgB.drawString(messageB, posB - w, 2);
 }
 
 // Scroll B
@@ -248,7 +242,7 @@ void clusterMessage()
 
     for (uint8_t j = 0; j < n; j++)
     {
-      if(abs(tmp - frequencyExclude[j]) <= 2)
+      if(abs(tmp - frequencyExclude[j]) <= 2 || tmp > 470000)
       {
         exclude = 1;
         break;
@@ -403,7 +397,7 @@ void getAcceleration()
 // Manage temporisation
 void temporisation()
 {
-  for(uint16_t i = 0; i <= 100; i += 1)
+  for(uint16_t i = 0; i <= 200; i += 1)
   {
     if(screenRefresh == 1)
     {
