@@ -34,7 +34,7 @@
 
 // Name and Version
 #define NAME "DXTracker"
-#define VERSION "0.0.8"
+#define VERSION "0.0.9"
 
 // Wifi
 WiFiClient clientHamQSL;
@@ -79,6 +79,20 @@ String solarKey[] = {
   "solarflux", "sunspots", "aindex", "kindex", 
   "xray", "heliumline", "protonflux", "electonflux", 
   "aurora", "solarwind", "magneticfield", "signalnoise"
+};
+
+String skipData[] = {
+  "E-Skip North America",
+  "E-Skip Europe",
+  "E-Skip Europe 4m",
+  "E-Skip Europe 6m",
+};
+
+String skipKey[] = {
+  "location=\"north_america\">", 
+  "location=\"europe\">", 
+  "location=\"europe_4m\">",  
+  "location=\"europe_6m\">" 
 };
 
 String propagKey[] = {

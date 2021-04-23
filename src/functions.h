@@ -73,7 +73,7 @@ void scrollA(uint8_t pause)
 void buildScrollB()
 {
   int16_t h = 20;
-  int16_t w = M5.Lcd.width() * 2;
+  int16_t w = M5.Lcd.width() * 4;
 
   // We could just use fillSprite(color) but lets be a bit more creative...
   while (h--)
@@ -100,7 +100,7 @@ void scrollB(uint8_t pause)
   posB -= 1;
   if (posB == 0)
   {
-    posB = M5.Lcd.width() * 2;
+    posB = M5.Lcd.width() * 4;
   }
 
   delay(pause);
@@ -169,55 +169,28 @@ void propagData()
 // Draw Propag Message
 void propagMessage()
 {
-  messageB = "";
-  // Current propagation 50 MHz
-  tmpString = hamQSLData;
-  tmpString.replace("location=\"europe\">", "(");
-  tmpString.replace("</phenomenon>", ")");
-  parenthesisBegin = tmpString.indexOf("(");
-  parenthesisLast = tmpString.indexOf(")", parenthesisBegin);
-  if (parenthesisBegin > 0)
+  messageB = "VHF Conditions -- ";
+
+  for (uint8_t i = 0; i < 4; i++)
   {
-    tmpString = tmpString.substring(parenthesisBegin + 1, parenthesisLast);
+    // Current propagation 50 MHz
+    tmpString = hamQSLData;
+    tmpString.replace(skipKey[i], "(");
+    tmpString.replace("</phenomenon>", ")");
+    parenthesisBegin = tmpString.indexOf("(");
+    parenthesisLast = tmpString.indexOf(")", parenthesisBegin);
+    if (parenthesisBegin > 0)
+    {
+      tmpString = tmpString.substring(parenthesisBegin + 1, parenthesisLast);
+    }
+
+    tmpString.trim();
+
+    messageB += skipData[i] + " : " + tmpString;
+    messageB += " -- ";
   }
 
-  tmpString.trim();
-
-  messageB += "E-Skip Europe " + tmpString;
-
-  messageB += " -- ";
-
-  // Current propagation 50 MHz
-  tmpString = hamQSLData;
-  tmpString.replace("location=\"europe_6m\">", "(");
-  tmpString.replace("</phenomenon>", ")");
-  parenthesisBegin = tmpString.indexOf("(");
-  parenthesisLast = tmpString.indexOf(")", parenthesisBegin);
-  if (parenthesisBegin > 0)
-  {
-    tmpString = tmpString.substring(parenthesisBegin + 1, parenthesisLast);
-  }
-
-  tmpString.trim();
-
-  messageB += "E-Skip Europe 6m " + tmpString;
-
-  messageB += " -- ";
-
-  // Current propagation 70 MHz
-  tmpString = hamQSLData;
-  tmpString.replace("location=\"europe_4m\">", "(");
-  tmpString.replace("</phenomenon>", ")");
-  parenthesisBegin = tmpString.indexOf("(");
-  parenthesisLast = tmpString.indexOf(")", parenthesisBegin);
-  if (parenthesisBegin > 0)
-  {
-    tmpString = tmpString.substring(parenthesisBegin + 1, parenthesisLast);
-  }
-
-  tmpString.trim();
-
-  messageB += "E-Skip Europe 4m " + tmpString;
+  messageB = messageB.substring(0, messageB.length() - 4); 
 }
 
 // Draw Cluster Message
