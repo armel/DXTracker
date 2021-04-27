@@ -64,7 +64,9 @@ Par défaut, les fréquences FT8 sont filtrées et ne seront pas affichées par 
 Editer le fichier `src/settings.h` afin de renseigner vos paramétrages, à savoir :
 
 * votre SSID Wifi,
-* votre mot de passe Wifi.
+* votre mot de passe Wifi,
+* votre latitude (format décimale, par exemple 48.8482855),
+* votre longitude (format décimale, par exemple 2.2708201).
 
 > __Remarque__
 > 
@@ -73,8 +75,8 @@ Editer le fichier `src/settings.h` afin de renseigner vos paramétrages, à savo
 
 ```
 const char *config[] = {
-  "Livebox", "mdp_Livebox",
-  "iPhone8", "mdp_iphone" 
+  "Livebox", "mdp_Livebox", "48.8482855", "2.2708201",
+  "iPhone8", "mdp_iphone", "48.8482855", "2.2708201"
 };
 ```
 
