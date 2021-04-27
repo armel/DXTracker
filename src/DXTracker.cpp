@@ -142,7 +142,7 @@ void setup()
   M5.Lcd.setTextDatum(CC_DATUM);
   M5.Lcd.setTextPadding(320);
 
-  while(greylineData == "" || hamQSLData == "" || hamQTHData == "") 
+  while(greylineData == "" || hamQSLData == "" || hamQTHData == "" || satData == "") 
   {
     M5.Lcd.drawString("Loading data", 160, 120);
     
@@ -158,6 +158,10 @@ void setup()
     {
       M5.Lcd.drawString("Solar Ok", 160, 200);
     }
+    if(satData != 0)
+    {
+      M5.Lcd.drawString("Sat Ok", 160, 220);
+    }
     delay(250);
     M5.Lcd.drawString(" ", 160, 120);
     delay(250);
@@ -167,6 +171,7 @@ void setup()
   M5.Lcd.drawString("Cluster Ok", 160, 160);
   M5.Lcd.drawString("Greyline Ok", 160, 180);
   M5.Lcd.drawString("Solar Ok", 160, 200);
+  M5.Lcd.drawString("Sat Ok", 160, 220);
 
   delay(500);
 }
@@ -179,7 +184,7 @@ void loop()
 
   // Propag data and message
   propagMessage();
-  clusterMessage();
+  clusterAndSatMessage();
   greyline();
   
   if(btnB)

@@ -37,7 +37,7 @@
 #define VERSION "0.1.0"
 
 // Wifi
-WiFiClient clientHamQSL;
+WiFiClient clientHamQSL, clientSat;
 WiFiClientSecure clientGreyline, clientHamQTH;
 
 // Preferences
@@ -56,6 +56,7 @@ colorType TFT_GRAY = {128, 128, 128};
 
 // HTTP endpoint
 String endpointHamQSL = "http://www.hamqsl.com/solarxml.php";
+String endpointSat = "http://f4hwn.globalis-dev.com/cgi-bin/DXCluster.py";
 String endpointGreyline = "https://dx.qsl.net/propagation/greyline.html";
 String endpointHamQTH = "https://www.hamqth.com/dxc_csv.php?limit=50";
 
@@ -110,12 +111,13 @@ String cluster[50], call[50], frequency[50], band[50], country[50];
 
 // Miscellaneous
 String tmpString;
-String greylineData = "", hamQSLData = "", hamQTHData = "";
+String greylineData = "", hamQSLData = "", hamQTHData = "", satData = "";
 
 boolean screenRefresh = 0;
 boolean screensaverMode = 0;
 boolean decoded;
 boolean greylineRefresh = 0;
+boolean clusterAndSat = 0;
 
 uint8_t alternance = 0;
 uint8_t configCurrent = 0;

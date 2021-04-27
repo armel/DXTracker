@@ -34,14 +34,15 @@ void clear()
 void buildScrollA()
 {
   int16_t h = 20;
-  int16_t w = M5.Lcd.width() * 9;
+  int16_t w;
 
+  imgA.setFreeFont(&FreeSans9pt7b); 
+  w = imgA.textWidth(messageA) + 80;
   // We could just use fillSprite(color) but lets be a bit more creative...
   while (h--)
     imgA.drawFastHLine(0, h, w, TFT_BLACK);
 
   // Now print text on top of the graphics
-  imgA.setFreeFont(&FreeSans9pt7b); 
   imgA.setTextColor(TFT_WHITE); // White text, no background colour
   imgA.setTextWrap(false);      // Turn of wrap so we can print past end of sprite
 
@@ -63,7 +64,9 @@ void scrollA(uint8_t pause)
   posA -= 1;
   if (posA == 0)
   {
-    posA = M5.Lcd.width() * 9;
+    //posA = M5.Lcd.width() * 10;
+    imgA.setFreeFont(&FreeSans9pt7b); 
+    posA = imgA.textWidth(messageA) + 80;
   }
 
   delay(pause);
@@ -73,15 +76,16 @@ void scrollA(uint8_t pause)
 void buildScrollB()
 {
   int16_t h = 20;
-  int16_t w = M5.Lcd.width() * 4;
+  int16_t w;
 
+  imgB.setTextSize(1);          // Font size scaling is x1
+  imgB.setTextFont(2);          // Font 2 selected
+  w = imgB.textWidth(messageB) + 40;
   // We could just use fillSprite(color) but lets be a bit more creative...
   while (h--)
     imgB.drawFastHLine(0, h, w, TFT_BLACK);
 
   // Now print text on top of the graphics
-  imgB.setTextSize(1);          // Font size scaling is x1
-  imgB.setTextFont(2);          // Font 2 selected
   imgB.setTextColor(M5.Lcd.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b)); // Gray text, no background colour
   imgB.setTextWrap(false);      // Turn of wrap so we can print past end of sprite
 
@@ -100,7 +104,10 @@ void scrollB(uint8_t pause)
   posB -= 1;
   if (posB == 0)
   {
-    posB = M5.Lcd.width() * 4;
+    //posB = M5.Lcd.width() * 4;
+    imgB.setTextSize(1);          // Font size scaling is x1
+    imgB.setTextFont(2);          // Font 2 selected
+    posB = imgB.textWidth(messageB) + 40;
   }
 
   delay(pause);
@@ -194,50 +201,58 @@ void propagMessage()
 }
 
 // Draw Cluster Message
-void clusterMessage()
+void clusterAndSatMessage()
 {
   boolean exclude = 0;
   uint8_t counter = 0;
   uint32_t tmp = 0;
 
-  size_t n = sizeof(frequencyExclude)/sizeof(frequencyExclude[0]);
-
-  messageA = "";
-  hamQTHData.replace("\n", "|");
-
-  for (uint8_t i = 0; i < 50; i++)
+  if(clusterAndSat == 0)
   {
-    cluster[i] = getValue(hamQTHData, '|', i);
-    frequency[i] = getValue(cluster[i], '^', 1);
-    tmp = frequency[i].toInt();
-    
-    exclude = 0;
+    size_t n = sizeof(frequencyExclude)/sizeof(frequencyExclude[0]);
 
-    for (uint8_t j = 0; j < n; j++)
+    messageA = "DX Cluster -- ";
+    hamQTHData.replace("\n", "|");
+
+    for (uint8_t i = 0; i < 50; i++)
     {
-      if(abs(tmp - frequencyExclude[j]) <= 2 || tmp > 470000)
+      cluster[i] = getValue(hamQTHData, '|', i);
+      frequency[i] = getValue(cluster[i], '^', 1);
+      tmp = frequency[i].toInt();
+      
+      exclude = 0;
+
+      for (uint8_t j = 0; j < n; j++)
       {
-        exclude = 1;
+        if(abs(tmp - frequencyExclude[j]) <= 2 || tmp > 470000)
+        {
+          exclude = 1;
+          break;
+        }
+      }
+
+      if(exclude == 0)
+      {    
+        call[i] = getValue(cluster[i], '^', 0);
+        band[i] = getValue(cluster[i], '^', 8);
+        country[i] = getValue(cluster[i], '^', 9);
+
+        messageA += call[i] + " " + band[i] + " " + frequency[i] + " " + country[i] + " -- ";
+        counter += 1;
+      }
+
+      if(counter == 10) 
+      {
         break;
       }
     }
-
-    if(exclude == 0)
-    {    
-      call[i] = getValue(cluster[i], '^', 0);
-      band[i] = getValue(cluster[i], '^', 8);
-      country[i] = getValue(cluster[i], '^', 9);
-
-      messageA += call[i] + " " + band[i] + " " + frequency[i] + " " + country[i] + " -- ";
-      counter += 1;
-    }
-
-    if(counter == 10) 
-    {
-      break;
-    }
+    messageA = messageA.substring(0, messageA.length() - 4); 
   }
-  messageA = messageA.substring(0, messageA.length() - 4); 
+  else 
+  {
+    messageA = "Satellites Passes -- ";
+    messageA += satData;
+  }
 }
 
 // Draw Greyline

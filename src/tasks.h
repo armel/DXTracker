@@ -105,9 +105,26 @@ void hamdata(void *pvParameters)
         }
         http.end(); // Free the resources
       }
+
+      if ((WiFi.status() == WL_CONNECTED)) // Check the current connection status
+      {
+        //Serial.println("Sat");
+        //Serial.println(endpointSat + "?lat=" + config[(configCurrent * 4) + 2] + "&lng=" + config[(configCurrent * 4) + 3] + "&format=text");
+        http.begin(clientSat, endpointSat + "?lat=" + config[(configCurrent * 4) + 2] + "&lng=" + config[(configCurrent * 4) + 3] + "&format=text");       // Specify the URL
+        http.addHeader("Content-Type", "text/plain");   // Specify content-type header
+        http.setTimeout(10000);                          // Set Time Out
+        httpCode = http.GET();                          // Make the request
+        if (httpCode == 200)                            // Check for the returning code
+        {
+          satData = http.getString(); // Get data
+          satData.trim();
+        }
+        http.end(); // Free the resources
+      }
     }
     
     counter = (counter++ < 10) ? counter : 1;
+    clusterAndSat = (counter < 5) ? 1 : 0;
     counterWakeUp = (counterWakeUp++ < 120) ? counterWakeUp : 1;
 
     // Pause
