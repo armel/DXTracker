@@ -22,7 +22,7 @@ void setup()
   preferences.begin(NAME);
 
   size_t n = sizeof(config) / sizeof(config[0]);
-  n = (n / 6) - 1;
+  n = (n / 4) - 1;
 
   //preferences.putUInt("config", 0);
 
@@ -63,8 +63,8 @@ void setup()
   while(true)
   {
     uint8_t attempt = 1;
-    M5.Lcd.drawString(String(config[(configCurrent * 6)]), 160, 60);
-    WiFi.begin(config[(configCurrent * 6)], config[(configCurrent * 6) + 1]);
+    M5.Lcd.drawString(String(config[(configCurrent * 4)]), 160, 60);
+    WiFi.begin(config[(configCurrent * 4)], config[(configCurrent * 4) + 1]);
     while (WiFi.status() != WL_CONNECTED)
     {
       delay(500);
