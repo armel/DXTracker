@@ -21,6 +21,7 @@ void hamdata(void *pvParameters)
     if ((WiFi.status() == WL_CONNECTED)) // Check the current connection status
     {
       //Serial.println("HamQTH");
+      reloadState = "Cluster";
       clientHamQTH.setInsecure();
       http.begin(clientHamQTH, endpointHamQTH);       // Specify the URL
       http.addHeader("Content-Type", "text/plain");   // Specify content-type header
@@ -31,12 +32,14 @@ void hamdata(void *pvParameters)
         hamQTHData = http.getString(); // Get data
       }
       http.end(); // Free the resources
+      reloadState = " ";
     }
 
     if(counter == 1) {
       if ((WiFi.status() == WL_CONNECTED)) // Check the current connection status
       {
         //Serial.println("Greyline");
+        reloadState = "Greyline";
         clientGreyline.setInsecure();
         http.begin(clientGreyline, endpointGreyline);   // Specify the URL
         http.setTimeout(1000);                          // Set Time Out
@@ -88,6 +91,7 @@ void hamdata(void *pvParameters)
           }
         }
         http.end(); // Free the resources
+        reloadState = " ";
       }
 
       vTaskDelay(pdMS_TO_TICKS(1000));
@@ -95,6 +99,7 @@ void hamdata(void *pvParameters)
       if ((WiFi.status() == WL_CONNECTED)) // Check the current connection status
       {
         //Serial.println("HamQSL");
+        reloadState = "Solar";
         http.begin(clientHamQSL, endpointHamQSL);       // Specify the URL
         http.addHeader("Content-Type", "text/plain");   // Specify content-type header
         http.setTimeout(1000);                          // Set Time Out
@@ -104,12 +109,13 @@ void hamdata(void *pvParameters)
           hamQSLData = http.getString(); // Get data
         }
         http.end(); // Free the resources
+        reloadState = " ";
       }
 
       if ((WiFi.status() == WL_CONNECTED)) // Check the current connection status
       {
         //Serial.println("Sat");
-        //Serial.println(endpointSat + "?lat=" + config[(configCurrent * 4) + 2] + "&lng=" + config[(configCurrent * 4) + 3] + "&format=text");
+        reloadState = "Sat";
         http.begin(clientSat, endpointSat + "?lat=" + config[(configCurrent * 4) + 2] + "&lng=" + config[(configCurrent * 4) + 3] + "&format=text");       // Specify the URL
         http.addHeader("Content-Type", "text/plain");   // Specify content-type header
         http.setTimeout(10000);                          // Set Time Out
@@ -120,11 +126,17 @@ void hamdata(void *pvParameters)
           satData.trim();
         }
         http.end(); // Free the resources
+        reloadState = " ";
       }
     }
     
     counter = (counter++ < 10) ? counter : 1;
-    clusterAndSat = (counter < 5) ? 1 : 0;
+    if(counter % 5 == 0)
+    {
+      int change = messageCurrent;
+      change = (change++ < 3) ? change : 0;
+      messageCurrent = change;
+    }
     counterWakeUp = (counterWakeUp++ < 120) ? counterWakeUp : 1;
 
     // Pause
@@ -190,6 +202,7 @@ void button(void *pvParameters)
         }
         else if(btnB)
         {
+          messageCurrent = (messageCurrent++ < 3) ? messageCurrent : 0;
           screenRefresh = 1;
         }
 
@@ -204,5 +217,6 @@ void button(void *pvParameters)
       }
     }
     vTaskDelay(pdMS_TO_TICKS(200));
+    Serial.println(messageCurrent);
   }
 }
