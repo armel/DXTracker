@@ -1,6 +1,6 @@
 # DXTracker
 
-Le projet DXTracker propose plusieurs fonctionnalités permettant de suivre l'activité du Soleil, les conditions d'ouverture et l'activité du trafic sur les bandes Radio Amateurs.
+Le projet DXTracker propose plusieurs fonctionnalités permettant de suivre l'activité du Soleil, les conditions d'ouverture et l'activité du trafic sur les bandes Radio Amateurs, ainsi que les prévisions de passages des satellites Radio Amateurs.
 
 À ce titre, le DXTracker affiche en temps réel, les informations suivantes :
 
@@ -17,9 +17,10 @@ Le projet DXTracker propose plusieurs fonctionnalités permettant de suivre l'ac
 	- Solard Wind,
 	- Magnetic Field,
 	- Signal Noise.
-- Conditions d'ouverture des bandes HF, de jour et de nuit,
 - Conditions d'ouverture de la bande VHF,
+- Conditions d'ouverture des bandes HF, de jour et de nuit,
 - Etat de la Greyline,
+- Prévisions de passages des satellites Radio Amateurs,
 - Cluster DX.
 
 ![DXTracker](https://github.com/armel/DXTracker/blob/main/img/DXTracker.jpeg)
@@ -91,7 +92,7 @@ Par défaut, le DXTracker se met automatiquement en veille au bout de 30 minutes
 
 ## Boutons
 
-Les boutons gauche et droit permettent de passer plus rapidement d'une données solaires à une autre. Le bouton central permet d'afficher l'état d'ouverture des bandes HF.
+Les boutons gauche et droit permettent de passer plus rapidement d'une donnée solaire à une autre. Le bouton central permet d'agir sur l'affichage des informations défilantes.
 
 # That's all
 Bon trafic à tous, 88 & 73 de Armel F4HWN ! 
