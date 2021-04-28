@@ -30,6 +30,20 @@ void clear()
   M5.Lcd.drawFastHLine(  0, 100, 320, TFT_WHITE);
 }
 
+// Manage message cycle
+String binarise()
+{
+  switch(messageCurrent)
+  {
+    case 0: return "00"; break;
+    case 1: return "01"; break;
+    case 2: return "10"; break;
+    case 3: return "11"; break;
+  }
+
+  return "00";
+}
+
 // Build scroll A
 void buildScrollA()
 {
@@ -46,9 +60,6 @@ void buildScrollA()
   imgA.setTextColor(TFT_WHITE); // White text, no background colour
   imgA.setTextWrap(false);      // Turn of wrap so we can print past end of sprite
 
-  //Serial.println(imgA.textWidth(messageA));
-  //Serial.println(imgA.textWidth(messageA));
-
   // Need to print twice so text appears to wrap around at left and right edges
   imgA.drawString(messageA, posA, 2);
   imgA.drawString(messageA, posA - w, 2);
@@ -64,7 +75,6 @@ void scrollA(uint8_t pause)
   posA -= 1;
   if (posA == 0)
   {
-    //posA = M5.Lcd.width() * 10;
     imgA.setFreeFont(&FreeSans9pt7b); 
     posA = imgA.textWidth(messageA) + 80;
   }
@@ -148,6 +158,16 @@ void title(String title)
   }
 
   M5.Lcd.drawString(tmpString, 160, 36);
+
+// On right, view battery level
+  M5.Lcd.setTextDatum(CR_DATUM);
+  M5.Lcd.setTextColor(M5.Lcd.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b), M5.Lcd.color565(TFT_BACK.r, TFT_BACK.g, TFT_BACK.b));
+  M5.Lcd.drawString(reloadState, 2, 36);
+
+  // On left, view battery level
+  M5.Lcd.setTextDatum(CL_DATUM);
+  M5.Lcd.setTextColor(M5.Lcd.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b), M5.Lcd.color565(TFT_BACK.r, TFT_BACK.g, TFT_BACK.b));
+  M5.Lcd.drawString("BAT " + String(getBatteryLevel(1)) + " %", 318, 36);
 }
 
 // Draw Propag Data
@@ -176,28 +196,72 @@ void propagData()
 // Draw Propag Message
 void propagMessage()
 {
-  messageB = "VHF Conditions -- ";
-
-  for (uint8_t i = 0; i < 4; i++)
+  if(binarise().charAt(1) == '0')
   {
-    // Current propagation 50 MHz
-    tmpString = hamQSLData;
-    tmpString.replace(skipKey[i], "(");
-    tmpString.replace("</phenomenon>", ")");
-    parenthesisBegin = tmpString.indexOf("(");
-    parenthesisLast = tmpString.indexOf(")", parenthesisBegin);
-    if (parenthesisBegin > 0)
+    messageB = "VHF Conditions -- ";
+
+    for (uint8_t i = 0; i < 4; i++)
     {
-      tmpString = tmpString.substring(parenthesisBegin + 1, parenthesisLast);
+      // Current propagation 50 MHz
+      tmpString = hamQSLData;
+      tmpString.replace(skipKey[i], "(");
+      tmpString.replace("</phenomenon>", ")");
+      parenthesisBegin = tmpString.indexOf("(");
+      parenthesisLast = tmpString.indexOf(")", parenthesisBegin);
+      if (parenthesisBegin > 0)
+      {
+        tmpString = tmpString.substring(parenthesisBegin + 1, parenthesisLast);
+      }
+
+      tmpString.trim();
+
+      messageB += skipData[i] + " : " + tmpString;
+      messageB += " -- ";
     }
 
-    tmpString.trim();
-
-    messageB += skipData[i] + " : " + tmpString;
-    messageB += " -- ";
+    messageB = messageB.substring(0, messageB.length() - 4);
   }
+  else if(binarise().charAt(1) == '1')
+  {
+    messageB = "HF Conditions -- ";
 
-  messageB = messageB.substring(0, messageB.length() - 4); 
+    // Day
+    for(uint8_t i = 0; i <= 3; i += 1)
+    {
+      tmpString = hamQSLData;
+      tmpString.replace(propagKey[i], "(");
+      tmpString.replace("</band>", ")");
+      parenthesisBegin = tmpString.indexOf("(");
+      parenthesisLast = tmpString.indexOf(")", parenthesisBegin);
+      if (parenthesisBegin > 0)
+      {
+        tmpString = tmpString.substring(parenthesisBegin + 1, parenthesisLast);
+      }
+      tmpString.trim();
+      //tmpString.toUpperCase();
+
+      messageB += propagKey[i].substring(0, 7) + " Day " + tmpString + " -- ";
+    }
+
+    // Night
+    for(uint8_t i = 4; i <= 7; i += 1)
+    {
+      tmpString = hamQSLData;
+      tmpString.replace(propagKey[i], "(");
+      tmpString.replace("</band>", ")");
+      parenthesisBegin = tmpString.indexOf("(");
+      parenthesisLast = tmpString.indexOf(")", parenthesisBegin);
+      if (parenthesisBegin > 0)
+      {
+        tmpString = tmpString.substring(parenthesisBegin + 1, parenthesisLast);
+      }
+      tmpString.trim();
+      //tmpString.toUpperCase();
+
+      messageB += propagKey[i].substring(0, 7) + " Night " + tmpString + " -- ";
+    }
+    messageB = messageB.substring(0, messageB.length() - 4);
+  }
 }
 
 // Draw Cluster Message
@@ -207,11 +271,11 @@ void clusterAndSatMessage()
   uint8_t counter = 0;
   uint32_t tmp = 0;
 
-  if(clusterAndSat == 0)
+  if(binarise().charAt(0) == '0')
   {
     size_t n = sizeof(frequencyExclude)/sizeof(frequencyExclude[0]);
 
-    messageA = "DX Cluster -- ";
+    messageA = "";
     hamQTHData.replace("\n", "|");
 
     for (uint8_t i = 0; i < 50; i++)
@@ -246,12 +310,28 @@ void clusterAndSatMessage()
         break;
       }
     }
-    messageA = messageA.substring(0, messageA.length() - 4); 
+    if(messageA != "")
+    {
+      messageA = "DX Cluster -- " + messageA;
+      messageA = messageA.substring(0, messageA.length() - 4);
+    }
+    else
+    {
+      messageA = "DX Cluster -- Data acquisition on the way, please wait...";
+    }
   }
-  else 
+  else if(binarise().charAt(0) == '1')
   {
-    messageA = "Satellites Passes -- ";
-    messageA += satData;
+    messageA = "";
+    messageA = satData;
+    if(messageA != "")
+    {
+      messageA = "Satellites Passes -- " + messageA;
+    }
+    else
+    {
+      messageA = "Satellites Passes -- Data acquisition on the way, please wait...";
+    }
   }
 }
 
@@ -266,94 +346,6 @@ void greyline()
       M5.Lcd.drawJpgFile(SPIFFS, "/greyline.jpg", 0, 101, 320, 139, 0, 11, JPEG_DIV_2);
     }
     greylineRefresh = 0;
-  }
-}
-
-// Draw Propag Condition
-void propagCondition()
-{
-  for(uint8_t i = 0; i < 56; i += 1)
-  {
-    M5.Lcd.drawFastHLine(  0, 44 + i, 320, M5.Lcd.color565(TFT_BACK.r, TFT_BACK.g, TFT_BACK.b));
-    M5.Lcd.drawFastHLine(  0, 44 + i + 1, 320, TFT_WHITE);
-    if (i < 8)
-    {
-      scrollA(5);
-      scrollB(5);
-    }
-    else
-    {
-      delay(10);
-    }
-  }
-
-  title("BANDS CONDITIONS");
-
-  // Current propagation
-  M5.Lcd.setFreeFont(&DroidSansMono6pt7b);
-  M5.Lcd.setTextPadding(160);
-  M5.Lcd.setTextDatum(CL_DATUM);
-
-  // Day
-  for(uint8_t i = 0; i <= 3; i += 1)
-  {
-    tmpString = hamQSLData;
-    tmpString.replace(propagKey[i], "(");
-    tmpString.replace("</band>", ")");
-    parenthesisBegin = tmpString.indexOf("(");
-    parenthesisLast = tmpString.indexOf(")", parenthesisBegin);
-    if (parenthesisBegin > 0)
-    {
-      tmpString = tmpString.substring(parenthesisBegin + 1, parenthesisLast);
-    }
-    tmpString.trim();
-    tmpString.toUpperCase();
-
-    M5.Lcd.drawString(propagKey[i].substring(0, 7) + " DAY " + tmpString, 20, 48 + (14 * i));
-  }
-
-  M5.Lcd.setTextDatum(CR_DATUM);
-
-  // Night
-  for(uint8_t i = 4; i <= 7; i += 1)
-  {
-    tmpString = hamQSLData;
-    tmpString.replace(propagKey[i], "(");
-    tmpString.replace("</band>", ")");
-    parenthesisBegin = tmpString.indexOf("(");
-    parenthesisLast = tmpString.indexOf(")", parenthesisBegin);
-    if (parenthesisBegin > 0)
-    {
-      tmpString = tmpString.substring(parenthesisBegin + 1, parenthesisLast);
-    }
-    tmpString.trim();
-    tmpString.toUpperCase();
-
-    M5.Lcd.drawString(propagKey[i].substring(0, 7) + " NIGHT " + tmpString, 300, 48 + (14 * (i - 4)));
-  }
-
-  for(uint16_t i = 0; i <= 500; i += 1)
-  {
-    if(screenRefresh == 1)
-    {
-      break;
-    }
-    delay(10);
-  }
-
-  for(uint8_t i = 0; i < 56; i += 1)
-  {
-    M5.Lcd.drawFastHLine(  0, 99 - i, 320, TFT_BLACK);
-    M5.Lcd.drawFastHLine(  0, 99 - i - 1, 320, TFT_WHITE);
-    if (i > 48)
-    {
-      scrollA(5);
-      scrollB(5);
-    }
-    else
-    {
-      delay(10);
-    }
   }
 }
 

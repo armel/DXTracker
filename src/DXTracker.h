@@ -112,16 +112,17 @@ String cluster[50], call[50], frequency[50], band[50], country[50];
 // Miscellaneous
 String tmpString;
 String greylineData = "", hamQSLData = "", hamQTHData = "", satData = "";
+String reloadState = "";
 
 boolean screenRefresh = 0;
 boolean screensaverMode = 0;
 boolean decoded;
 boolean greylineRefresh = 0;
-boolean clusterAndSat = 0;
 
 uint8_t alternance = 0;
 uint8_t configCurrent = 0;
 uint8_t brightnessCurrent = 128;
+uint8_t messageCurrent = 0;
 
 uint32_t screensaver;
 uint32_t screensaverLimit = 30 * 60 * 1000;  // 30 minutes
