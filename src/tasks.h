@@ -21,7 +21,7 @@ void hamdata(void *pvParameters)
     if ((WiFi.status() == WL_CONNECTED)) // Check the current connection status
     {
       //Serial.println("HamQTH");
-      reloadState = "HamQTH";
+      reloadState = "Cluster";
       clientHamQTH.setInsecure();
       http.begin(clientHamQTH, endpointHamQTH);       // Specify the URL
       http.addHeader("Content-Type", "text/plain");   // Specify content-type header
@@ -99,7 +99,7 @@ void hamdata(void *pvParameters)
       if ((WiFi.status() == WL_CONNECTED)) // Check the current connection status
       {
         //Serial.println("HamQSL");
-        reloadState = "HamQSL";
+        reloadState = "Solar";
         http.begin(clientHamQSL, endpointHamQSL);       // Specify the URL
         http.addHeader("Content-Type", "text/plain");   // Specify content-type header
         http.setTimeout(1000);                          // Set Time Out
