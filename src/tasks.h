@@ -122,8 +122,13 @@ void hamdata(void *pvParameters)
         httpCode = http.GET();                          // Make the request
         if (httpCode == 200)                            // Check for the returning code
         {
-          satData = http.getString(); // Get data
-          satData.trim();
+          String tmpString = http.getString(); // Get data
+          tmpString.trim();
+
+          if(tmpString != "")
+          {
+            satData = tmpString;
+          }
         }
         http.end(); // Free the resources
         reloadState = " ";
