@@ -208,6 +208,8 @@ void button(void *pvParameters)
         else if(btnB)
         {
           messageCurrent = (messageCurrent++ < 3) ? messageCurrent : 0;
+          posA = 80;
+          posB = 80;
           screenRefresh = 1;
         }
 
@@ -222,6 +224,5 @@ void button(void *pvParameters)
       }
     }
     vTaskDelay(pdMS_TO_TICKS(200));
-    Serial.println(messageCurrent);
   }
 }

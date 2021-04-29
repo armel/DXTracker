@@ -75,6 +75,7 @@ void scrollA(uint8_t pause)
   posA -= 1;
   if (posA == 0)
   {
+    //posA = M5.Lcd.width();
     imgA.setFreeFont(&FreeSans9pt7b); 
     posA = imgA.textWidth(messageA) + 80;
   }
@@ -90,7 +91,7 @@ void buildScrollB()
 
   imgB.setTextSize(1);          // Font size scaling is x1
   imgB.setTextFont(2);          // Font 2 selected
-  w = imgB.textWidth(messageB) + 40;
+  w = imgB.textWidth(messageB) + 80;
   // We could just use fillSprite(color) but lets be a bit more creative...
   while (h--)
     imgB.drawFastHLine(0, h, w, TFT_BLACK);
@@ -114,10 +115,10 @@ void scrollB(uint8_t pause)
   posB -= 1;
   if (posB == 0)
   {
-    //posB = M5.Lcd.width() * 4;
+    //posB = M5.Lcd.width();
     imgB.setTextSize(1);          // Font size scaling is x1
     imgB.setTextFont(2);          // Font 2 selected
-    posB = imgB.textWidth(messageB) + 40;
+    posB = imgB.textWidth(messageB) + 80;
   }
 
   delay(pause);
