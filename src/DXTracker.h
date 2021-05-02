@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 // Board
-#define BOARD GREY
+#define BOARD BASIC
 
 #define BASIC 1
 #define GREY  2
@@ -34,7 +34,7 @@
 
 // Name and Version
 #define NAME "DXTracker"
-#define VERSION "0.1.3"
+#define VERSION "0.1.4"
 
 // Wifi
 WiFiClient clientHamQSL, clientSat;
@@ -56,7 +56,7 @@ colorType TFT_GRAY = {128, 128, 128};
 
 // HTTP endpoint
 String endpointHamQSL = "http://www.hamqsl.com/solarxml.php";
-String endpointSat = "http://f4hwn.globalis-dev.com/cgi-bin/DXCluster.py";
+String endpointSat = "http://rrf2.f5nlg.ovh:8080/cgi-bin/DXSat.py";
 String endpointGreyline = "https://dx.qsl.net/propagation/greyline.html";
 String endpointHamQTH = "https://www.hamqth.com/dxc_csv.php?limit=50";
 
@@ -114,9 +114,10 @@ String tmpString;
 String greylineData = "", hamQSLData = "", hamQTHData = "", satData = "";
 String reloadState = "";
 
+boolean decoded = 0;
+boolean startup = 0;
 boolean screenRefresh = 0;
 boolean screensaverMode = 0;
-boolean decoded;
 boolean greylineRefresh = 0;
 
 uint8_t alternance = 0;

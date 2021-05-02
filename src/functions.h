@@ -160,15 +160,37 @@ void title(String title)
 
   M5.Lcd.drawString(tmpString, 160, 36);
 
-// On right, view battery level
-  M5.Lcd.setTextDatum(CR_DATUM);
-  M5.Lcd.setTextColor(M5.Lcd.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b), M5.Lcd.color565(TFT_BACK.r, TFT_BACK.g, TFT_BACK.b));
-  M5.Lcd.drawString(reloadState, 2, 36);
+// On right, view reload data
+  tmpString = reloadState;
+  tmpString.trim();
+
+  if(tmpString != "")
+  {
+    /*
+    M5.Lcd.fillRect(2, 38, 13, 5, M5.Lcd.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b));
+    M5.Lcd.fillRect(3, 38, 11, 4, M5.Lcd.color565(TFT_BACK.r, TFT_BACK.g, TFT_BACK.b));
+    M5.Lcd.drawFastVLine(8, 31, 10, M5.Lcd.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b));
+    M5.Lcd.drawLine(8, 40, 5, 37, M5.Lcd.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b));
+    M5.Lcd.drawLine(8, 40, 11, 37, M5.Lcd.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b));
+    */
+
+    M5.Lcd.drawFastHLine(2, 35, 10, M5.Lcd.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b));
+    M5.Lcd.drawLine(12, 35, 8, 31, M5.Lcd.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b));
+    M5.Lcd.drawLine(12, 35, 8, 39, M5.Lcd.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b));
+
+    //M5.Lcd.drawFastHLine(0, 30, 320, M5.Lcd.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b));
+
+    M5.Lcd.setTextColor(M5.Lcd.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b), M5.Lcd.color565(TFT_BACK.r, TFT_BACK.g, TFT_BACK.b));
+    M5.Lcd.setTextPadding(60);
+    M5.Lcd.setTextDatum(ML_DATUM);
+    M5.Lcd.drawString(tmpString, 18, 36);
+  }
 
   // On left, view battery level
-  M5.Lcd.setTextDatum(CL_DATUM);
-  M5.Lcd.setTextColor(M5.Lcd.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b), M5.Lcd.color565(TFT_BACK.r, TFT_BACK.g, TFT_BACK.b));
-  M5.Lcd.drawString("BAT " + String(getBatteryLevel(1)) + " %", 318, 36);
+  uint8_t val = map(getBatteryLevel(1), 0, 100, 0, 16);
+  M5.Lcd.drawRect(294, 30, 20, 12, M5.Lcd.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b));
+  M5.Lcd.drawRect(313, 33, 4, 6, M5.Lcd.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b));
+  M5.Lcd.fillRect(296, 32, val, 8, M5.Lcd.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b));
 }
 
 // Draw Propag Data
@@ -324,7 +346,10 @@ void clusterAndSatMessage()
   else if(binarise().charAt(0) == '1')
   {
     messageA = "";
-    messageA = satData;
+    if(satData.length() > 32)
+    {
+      messageA = satData.substring(15, satData.length() - 3);
+    }
     if(messageA != "")
     {
       messageA = "Satellites Passes -- " + messageA;

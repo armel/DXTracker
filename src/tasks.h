@@ -135,6 +135,8 @@ void hamdata(void *pvParameters)
       }
     }
     
+    //Serial.println("-----");
+
     counter = (counter++ < 10) ? counter : 1;
     if(counter % 5 == 0)
     {
@@ -145,7 +147,15 @@ void hamdata(void *pvParameters)
     counterWakeUp = (counterWakeUp++ < 120) ? counterWakeUp : 1;
 
     // Pause
-    vTaskDelay(pdMS_TO_TICKS(limit));
+    if(startup == 1)
+    {
+      vTaskDelay(pdMS_TO_TICKS(limit));
+    }
+    else
+    {
+      counter = 1;
+      vTaskDelay(pdMS_TO_TICKS(limit / 10));
+    }
   }
 }
 
