@@ -96,14 +96,14 @@ Les boutons gauche et droit permettent de passer plus rapidement d'une donnée s
 
 ## Serveur Web intégré 
 
-Cette fonctionnalité permet de visualiser votre RRFRemote depuis un simple navigateur. Il est même possible de le piloter par ce biais, dans la mesure ou les boutons sont cliquables. Afin d'afficher votre RRFRemote dans votre navigateur, il suffit d'aller sur `http://adresse_ip_de_votre_rrfremote/`. Pour rappel, l'adresse IP que récupère votre RRFRemote s'affiche sur l'écran d'accueil, à l'allumage. Il est également indiquée dans données techniques de l'ESP32 (affichage alterné complémentaire).
+Cette fonctionnalité permet de visualiser votre DXTracker depuis un simple navigateur. Il est même possible de le piloter par ce biais, dans la mesure ou les boutons sont cliquables. Afin d'afficher votre DXTracker dans votre navigateur, il suffit d'aller sur `http://adresse_ip_de_votre_rrfremote/`. Pour rappel, l'adresse IP que récupère votre DXTracker s'affiche sur l'écran d'accueil, à l'allumage.
 
 > Attention : c'est lent ! Et il n'y a pas de rafraîchissement automatique. Il faut cliquer sur le fond de l'image de l'écran pour faire une nouvelle > capture. Et sinon, comme dit, les boutons sont fonctionnels.
 
 Mais pourquoi avoir développé une telle fonctionnalité ? Pour 2 raisons : 
 
 - premièrement, c'était amusant à développer,
-- deuxièmement, ca permet de prendre de belle capture d'écran du RRFRemote, la preuve ;)
+- deuxièmement, ca permet de prendre de belle capture d'écran du DXTracker, la preuve ;)
 
 ![Capture](https://github.com/armel/DXTracker/blob/main/img/screenshot.png)
 
