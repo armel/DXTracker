@@ -34,11 +34,25 @@
 
 // Name and Version
 #define NAME "DXTracker"
-#define VERSION "0.1.4"
+#define VERSION "0.1.5"
 
 // Wifi
 WiFiClient clientHamQSL, clientSat;
 WiFiClientSecure clientGreyline, clientHamQTH;
+WiFiClient httpClient;
+WiFiServer httpServer(80);
+
+// Web site Screen Capture stuff
+#include "WebIndex.h"
+
+#define GET_unknown 0
+#define GET_index_page  1
+#define GET_screenshot  2
+
+// Flags for button presses via Web site Screen Capture
+bool buttonLeftPressed = false;
+bool buttonCenterPressed = false;
+bool buttonRightPressed = false;
 
 // Preferences
 Preferences preferences;
@@ -120,6 +134,7 @@ boolean screenRefresh = 0;
 boolean screensaverMode = 0;
 boolean greylineRefresh = 0;
 
+uint8_t htmlGetRequest;
 uint8_t alternance = 0;
 uint8_t configCurrent = 0;
 uint8_t brightnessCurrent = 128;

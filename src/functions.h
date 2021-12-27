@@ -413,3 +413,237 @@ void temporisation()
     scrollB(5);
   }
 }
+
+// M5Screen2bmp (dump the screen to a file)
+
+bool M5Screen2bmp(fs::FS &fs, const char * path){
+  uint16_t image_height = M5.Lcd.height();
+  uint16_t image_width = M5.Lcd.width();
+  const uint16_t pad = (4 - (3 * image_width) % 4) % 4;
+  uint16_t filesize = 54 + (3 * image_width + pad) * image_height; 
+  unsigned char swap;
+  unsigned char line_data[image_width * 3 + pad];
+  unsigned char header[54] = { 
+    'B','M',  // BMP signature (Windows 3.1x, 95, NT, …)
+    0,0,0,0,  // image file size in bytes
+    0,0,0,0,  // reserved
+    54,0,0,0, // start of pixel array
+    40,0,0,0, // info header size
+    0,0,0,0,  // image width
+    0,0,0,0,  // image height
+    1,0,      // number of color planes
+    24,0,     // bits per pixel
+    0,0,0,0,  // compression
+    0,0,0,0,  // image size (can be 0 for uncompressed images)
+    0,0,0,0,  // horizontal resolution (dpm)
+    0,0,0,0,  // vertical resolution (dpm)
+    0,0,0,0,  // colors in color table (0 = none)
+    0,0,0,0 };// important color count (0 = all colors are important)
+    
+  // Open file for writing
+  // The existing image file will be replaced
+  File file = fs.open(path, FILE_WRITE);
+
+  if(file){
+    // fill filesize, width and heigth in the header array
+    for(uint8_t i = 0; i < 4; i++) {
+        header[ 2 + i] = (char)((filesize>>(8 * i)) & 255);
+        header[18 + i] = (char)((image_width  >>(8 * i)) & 255);
+        header[22 + i] = (char)((image_height >>(8 * i)) & 255);
+    }
+    // write the header to the file
+    file.write(header, 54);
+    
+    // initialize padded pixel with 0 
+    for(uint16_t i = (image_width - 1) * 3; i < (image_width * 3 + pad); i++){
+      line_data[i]=0;
+    }
+    // The coordinate origin of a BMP image is at the bottom left.
+    // Therefore, the image must be read from bottom to top.
+    for(uint16_t y = image_height; y > 0; y--){
+      // get one line of the screen content
+      M5.Lcd.readRectRGB(0, y - 1, image_width, 1, line_data);
+      // BMP color order is: Blue, Green, Red
+      // return values from readRectRGB is: Red, Green, Blue
+      // therefore: R und B need to be swapped
+      for(uint16_t x = 0; x < image_width; x++){
+        swap = line_data[x * 3];
+        line_data[x * 3] = line_data[x * 3 + 2];
+        line_data[x * 3 + 2] = swap;
+      }
+      // write the line to the file
+      file.write(line_data, (image_width * 3) + pad);
+    }
+    file.close();
+    return true;
+  }
+  return false;
+}
+
+// M5Screen2bmp (dump the screen to a WiFi client)
+
+bool M5Screen2bmp(){
+  uint16_t image_height = M5.Lcd.height();
+  uint16_t image_width = M5.Lcd.width();
+  const uint16_t pad = (4 - (3 * image_width) % 4) % 4;
+  uint16_t filesize = 54 + (3 * image_width + pad) * image_height; 
+  unsigned char swap;
+  unsigned char line_data[image_width * 3 + pad];
+  unsigned char header[54] = { 
+    'B','M',  // BMP signature (Windows 3.1x, 95, NT, …)
+    0,0,0,0,  // image file size in bytes
+    0,0,0,0,  // reserved
+    54,0,0,0, // start of pixel array
+    40,0,0,0, // info header size
+    0,0,0,0,  // image width
+    0,0,0,0,  // image height
+    1,0,      // number of color planes
+    24,0,     // bits per pixel
+    0,0,0,0,  // compression
+    0,0,0,0,  // image size (can be 0 for uncompressed images)
+    0,0,0,0,  // horizontal resolution (dpm)
+    0,0,0,0,  // vertical resolution (dpm)
+    0,0,0,0,  // colors in color table (0 = none)
+    0,0,0,0 };// important color count (0 = all colors are important)
+
+  // fill filesize, width and heigth in the header array
+  for(uint8_t i = 0; i < 4; i++) {
+      header[ 2 + i] = (char)((filesize>>(8 * i)) & 255);
+      header[18 + i] = (char)((image_width  >> (8 * i)) & 255);
+      header[22 + i] = (char)((image_height >> (8 * i)) & 255);
+  }
+  // write the header to the file
+  httpClient.write(header, 54);
+  
+  // To keep the required memory low, the image is captured line by line
+  // initialize padded pixel with 0 
+  for(uint16_t i = (image_width - 1) * 3; i < (image_width * 3 + pad); i++){
+    line_data[i]=0;
+  }
+  // The coordinate origin of a BMP image is at the bottom left.
+  // Therefore, the image must be read from bottom to top.
+  for(uint16_t y = image_height; y > 0; y--){
+    // get one line of the screen content
+    M5.Lcd.readRectRGB(0, y - 1, image_width, 1, line_data);
+    // BMP color order is: Blue, Green, Red
+    // return values from readRectRGB is: Red, Green, Blue
+    // therefore: R und B need to be swapped
+    for(uint16_t x = 0; x < image_width; x++){
+      swap = line_data[x * 3];
+      line_data[x * 3] = line_data[x * 3 + 2];
+      line_data[x * 3 + 2] = swap;
+    }
+    // write the line to the file
+    httpClient.write(line_data, (image_width * 3) + pad);
+  }
+  return true;
+}
+
+// Get screenshot
+
+void getScreenshot()
+{
+  unsigned long timeout_millis = millis() + 2000;
+  String currentLine = "";                
+
+  httpClient = httpServer.available(); 
+
+  if(WiFi.status() == WL_CONNECTED){
+    //client.setNoDelay(1);
+    if (httpClient) {  
+      // Force a disconnect after 2 seconds
+      Serial.println("New Client.");  
+      // Loop while the client's connected
+      while (httpClient.connected()) { 
+        // If the client is still connected after 2 seconds,
+        // Something is wrong. So kill the connection
+        if(millis() > timeout_millis){
+          Serial.println("Force Client stop!");  
+          httpClient.stop();
+        } 
+        // If there's bytes to read from the client,
+        if (httpClient.available()) {             
+          char c = httpClient.read();            
+          Serial.write(c);    
+          // If the byte is a newline character             
+          if (c == '\n') {    
+            // Uwo newline characters in a row (empty line) are indicating
+            // The end of the client HTTP request, so send a response:
+            if (currentLine.length() == 0) {
+              // HTTP headers always start with a response code (e.g. HTTP/1.1 200 OK)
+              // and a content-type so the client knows what's coming, then a blank line,
+              // followed by the content:
+
+              screensaver = millis(); // Screensaver update !!!
+
+              switch (htmlGetRequest)
+              {
+                case GET_index_page: {
+                  httpClient.println("HTTP/1.1 200 OK");
+                  httpClient.println("Content-type:text/html");
+                  httpClient.println();
+                  httpClient.write_P(index_html, sizeof(index_html));
+                  break;
+                }
+                case GET_screenshot: {              
+                  httpClient.println("HTTP/1.1 200 OK");
+                  httpClient.println("Content-type:image/bmp");
+                  httpClient.println();
+                  M5Screen2bmp();
+                  break;
+                }
+                default:
+                  httpClient.println("HTTP/1.1 404 Not Found");
+                  httpClient.println("Content-type:text/html");
+                  httpClient.println();
+                  httpClient.print("404 Page not found.<br>");
+                  break;
+              }
+              // The HTTP response ends with another blank line:
+              httpClient.println();
+              // Break out of the while loop:
+              break;
+            } else {    // if a newline is found
+              // Analyze the currentLine:
+              // detect the specific GET requests:
+              if(currentLine.startsWith("GET /")){
+                htmlGetRequest = GET_unknown;
+                // If no specific target is requested
+                if(currentLine.startsWith("GET / ")){
+                  htmlGetRequest = GET_index_page;
+                }
+                // If the screenshot image is requested
+                if(currentLine.startsWith("GET /screenshot.bmp")){
+                  htmlGetRequest = GET_screenshot;
+                }
+                // If the button left was pressed on the HTML page
+                if(currentLine.startsWith("GET /buttonLeft")){
+                  buttonLeftPressed = true;
+                  htmlGetRequest = GET_index_page;
+                }
+                // If the button center was pressed on the HTML page
+                if(currentLine.startsWith("GET /buttonCenter")){
+                  buttonCenterPressed = true;
+                  htmlGetRequest = GET_index_page;
+                }
+                // If the button right was pressed on the HTML page
+                if(currentLine.startsWith("GET /buttonRight")){
+                  buttonRightPressed = true;
+                  htmlGetRequest = GET_index_page;
+                }
+              }
+              currentLine = "";
+            }
+          } else if (c != '\r') {  
+            // Add anything else than a carriage return
+            // character to the currentLine 
+            currentLine += c;      
+          }
+        }
+      }
+      // Close the connection
+      httpClient.stop();
+      Serial.println("Client Disconnected.");
+    }
+  }
+}
