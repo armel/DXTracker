@@ -170,6 +170,19 @@ void button(void *pvParameters)
   {
     getButton();
 
+    if(buttonLeftPressed) {
+      btnA = true;
+      buttonLeftPressed = false;
+    }
+    if(buttonCenterPressed) {
+      btnB = true;
+      buttonCenterPressed = false;
+    }
+    if(buttonRightPressed) {
+      btnC = true;
+      buttonRightPressed = false;
+    }
+
     /*
     if (btnA || btnB || btnC)
     {
