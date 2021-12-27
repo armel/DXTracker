@@ -103,6 +103,9 @@ void setup()
   posB = M5.Lcd.width();
   imgB.createSprite(M5.Lcd.width(), 20);
 
+  // Start server (for Web site Screen Capture)
+  httpServer.begin();     
+
   // Multitasking task for retreive rrf, spotnik and propag data
   xTaskCreatePinnedToCore(
       hamdata,      // Function to implement the task
@@ -193,6 +196,9 @@ void loop()
   // Manage temporisation and orientation
   temporisation();
   getAcceleration();
+
+  // Manage Web site Screen Capture
+  getScreenshot();
 
   // Manage refresh and alternance
   if(screenRefresh != 1)
