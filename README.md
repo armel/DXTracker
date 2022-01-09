@@ -55,10 +55,35 @@ Ligne 5, vérifier que la constante `BOARD` correspond bien à votre type de M5S
 ```
 #define BOARD CORE2
 ```
-
 ### Exclusion de fréquences
 
-Par défaut, les fréquences FT8 sont filtrées et ne seront pas affichées par le Cluster DX. Libre à vous de modifier cette liste de filtrage et d'ajouter ou de supprimer les fréquences que vous souhaitez. Pour se faire, éditer le tableau `frequencyExclude[]`, ligne 130. 
+Par défaut, les fréquences FT8 sont filtrées et ne seront pas affichées par le Cluster DX. Libre à vous de modifier cette liste de filtrage et d'ajouter ou de supprimer les fréquences que vous souhaitez. Pour se faire, éditer le tableau `frequencyExclude[]`, ligne 149. 
+
+## Fichier `platformio.ini`
+
+### Modèle M5Core2
+
+Si et seulement si __vous utilisez le M5Stack Core2__, éditer le fichier `platformio.ini` et modifier les lignes,
+
+```
+default_envs = m5stack-grey
+;default_envs = m5stack-core-esp32
+```
+
+Par,
+
+```
+;default_envs = m5stack-grey
+default_envs = m5stack-core-esp32
+```
+
+Cela revient à changer la plate-forme cible, le point-virgule étant un commentaire.
+
+En complément, comme déjà évoqué, vérifier que vous avez bien modifié la constante `BOARD` dans le fichier `src/DXTracker.h` en indiquant :
+
+```
+#define BOARD CORE2
+```
 
 ## Fichier `src/settings.h`
 
@@ -96,7 +121,7 @@ Les boutons gauche et droit permettent de passer plus rapidement d'une donnée s
 
 ## Serveur Web intégré 
 
-Cette fonctionnalité permet de visualiser votre DXTracker depuis un simple navigateur. Il est même possible de le piloter par ce biais, dans la mesure ou les boutons sont cliquables. Afin d'afficher votre DXTracker dans votre navigateur, il suffit d'aller sur `http://adresse_ip_de_votre_rrfremote/`. Pour rappel, l'adresse IP que récupère votre DXTracker s'affiche sur l'écran d'accueil, à l'allumage.
+Cette fonctionnalité permet de visualiser votre DXTracker depuis un simple navigateur. Il est même possible de le piloter par ce biais, dans la mesure ou les boutons sont cliquables. Afin d'afficher votre DXTracker dans votre navigateur, il suffit d'aller sur `http://adresse_ip_de_votre_dxtracker/`. Pour rappel, l'adresse IP que récupère votre DXTracker s'affiche sur l'écran d'accueil, à l'allumage.
 
 > Attention : c'est lent ! Et il n'y a pas de rafraîchissement automatique. Il faut cliquer sur le fond de l'image de l'écran pour faire une nouvelle > capture. Et sinon, comme dit, les boutons sont fonctionnels.
 
