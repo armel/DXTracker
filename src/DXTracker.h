@@ -31,10 +31,11 @@
 #include "settings.h"
 #include "FS.h"
 #include "SPIFFS.h"
+#include <M5StackUpdater.h>
 
 // Name and Version
 #define NAME "DXTracker"
-#define VERSION "0.1.5"
+#define VERSION "0.1.6"
 
 // Wifi
 WiFiClient clientHamQSL, clientSat;

@@ -16,6 +16,10 @@ void setup()
 
   // Init M5
   M5.begin(true, false, false, false);
+
+  // SD Updater
+  checkSDUpdater(SD);
+
   power();
 
   // Preferences
@@ -114,7 +118,7 @@ void setup()
       NULL,         // Task input parameter
       1,            // Priority of the task
       NULL,         // Task handle
-      0);           // Core where the task should run
+      1);           // Core where the task should run
 
   xTaskCreatePinnedToCore(
       button,       // Function to implement the task
@@ -123,7 +127,7 @@ void setup()
       NULL,         // Task input parameter
       1,            // Priority of the task
       NULL,         // Task handle
-      1);           // Core where the task should run
+      0);           // Core where the task should run
 
   // Accelelerometer
   M5.IMU.Init();
