@@ -66,15 +66,15 @@ Par défaut, les fréquences FT8 sont filtrées et ne seront pas affichées par 
 Si et seulement si __vous utilisez le M5Stack Core2__, éditer le fichier `platformio.ini` et modifier les lignes,
 
 ```
-default_envs = m5stack-grey
-;default_envs = m5stack-core-esp32
+default_envs = m5stack-basic-grey
+;default_envs = m5stack-core2
 ```
 
 Par,
 
 ```
-;default_envs = m5stack-grey
-default_envs = m5stack-core-esp32
+;default_envs = m5stack-basic-grey
+default_envs = m5stack-core2
 ```
 
 Cela revient à changer la plate-forme cible, le point-virgule étant un commentaire.

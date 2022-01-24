@@ -17,9 +17,17 @@ void setup()
   // Init M5
   M5.begin(true, false, false, false);
 
-  // SD Updater
-  checkSDUpdater(SD);
+  // SD Loader
+  while(millis() - screensaver < 2 * 1000) {
+    M5.update();
 
+    if(M5.BtnB.read()) {
+      updateFromFS(SPIFFS, "/rrfremote.bin");
+      ESP.restart(); 
+    }
+  }
+
+  // Init Power
   power();
 
   // Preferences
@@ -216,7 +224,7 @@ void loop()
   }
 
   // Manage screensaver
-  if (screensaverMode == 0 && millis() - screensaver > screensaverLimit)
+  if (screensaverMode == 0 && millis() - screensaver > TIMEOUT_SCREENSAVER)
   {
     for (uint8_t i = brightnessCurrent; i >= 1; i--)
     {
@@ -228,7 +236,7 @@ void loop()
     screensaverMode = 1;
     M5.Lcd.sleep();
   }
-  else if (screensaverMode == 1 && millis() - screensaver < screensaverLimit)
+  else if (screensaverMode == 1 && millis() - screensaver < TIMEOUT_SCREENSAVER)
   {
     M5.Lcd.wakeup();
     screensaverMode = 0;
@@ -240,5 +248,4 @@ void loop()
       delay(10);
     }
   }
-
 }
