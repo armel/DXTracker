@@ -17,15 +17,8 @@ void setup()
   // Init M5
   M5.begin(true, false, false, false);
 
-  // SD Loader
-  while(millis() - screensaver < 2 * 1000) {
-    M5.update();
-
-    if(M5.BtnB.read()) {
-      updateFromFS(SPIFFS, "/rrfremote.bin");
-      ESP.restart(); 
-    }
-  }
+  // Bin Loader
+  binLoader();
 
   // Init Power
   power();
@@ -51,7 +44,6 @@ void setup()
   screensaver = millis(); // Screensaver update !!!
 
   // SPIFFS
-  SPIFFS.begin(true);
   if(!SPIFFS.begin())
   {
     Serial.println("SPIFFS Mount Failed");

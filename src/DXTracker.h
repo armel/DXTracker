@@ -35,7 +35,6 @@
 #include "SPIFFS.h"
 #include <M5StackUpdater.h>
 
-
 // Name and Version
 #define NAME "DXTracker"
 #define VERSION "0.1.6"
@@ -86,6 +85,11 @@ int16_t posA;
 TFT_eSprite imgB = TFT_eSprite(&M5.Lcd); // Create Sprite object "img" with pointer to "tft" object
 String messageB = "";
 int16_t posB;
+
+// Bin loader
+File root;
+String binFilename[8];
+uint8_t binIndex = 0;
 
 // Propag data
 String solarData[] = {
