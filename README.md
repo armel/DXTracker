@@ -159,6 +159,8 @@ Placez vous à la racine du dossier RRFRemote, qui contient l'ensemble du projet
 
 Vous y trouverez un fichier `firmware.bin`. Copier le dans le répertoire `data` qui se trouve à la racine du dossier RRFRemote. Et profitez en pour le renommer en l'appelant, par exemple, `RRFRemote.bin`.
 
+> Si le dossier `data` n'existe pas, créé le.
+
 Faites de même avec l'application DXTracker. Placez vous à la racine du dossier DXTracker, qui contient l'ensemble du projet. Et allez dans le répertoire :
 
 - `.pio/build/m5stack-basic-grey`, si vous avez compilé pour un M5Stack GREY ou BASIC
@@ -166,7 +168,7 @@ Faites de même avec l'application DXTracker. Placez vous à la racine du dossie
 
 Vous y trouverez également un fichier `firmware.bin`. Copier le, lui aussi, dans le répertoire `data` qui se trouve à la racine du dossier RRFRemote. Et profitez en pour le renommer en l'appelant, par exemple, `DXTracker.bin`.
 
-> Hyper important, l'idée est bien de copier ces 2 binaires dans le même répertoire `data` (à la racine du dossier RRFRemote).
+> **Hyper important, l'idée est bien de copier ces 2 binaires dans le même répertoire `data`** (situé à la racine du dossier RRFRemote).
 
 A ce stade, vous devez donc avoir 2 fichiers binaires clairement identifiés : `RRFRemote.bin` et `DXTracker.bin` dans le répertoire `data` qui se trouve à la racine du dossier RRFRemote.
 
@@ -174,14 +176,16 @@ A ce stade, vous devez donc avoir 2 fichiers binaires clairement identifiés : `
 
 Passons à l'étape probablement la plus compliquée. Ouvrez le projet RRFRemote depuis Visual Studio Code, comme vous le feriez pour le compiler. 
 
-![Capture](https://github.com/armel/DXTracker/blob/main/img/flash.png)
+![Capture](https://github.com/armel/DXTracker/blob/main/img/flash_1.png)
 
-Cliquez sur l'icône Platformio (l'icone avec une tête de fourmi...). Déroulez la section :
+Etape 1, cliquez sur l'icône Platformio (l'icone avec une tête de fourmi...). Etape 2, déroulez la section :
 
 - `m5stack-basic-grey`, si vous avez compilé pour un M5Stack GREY ou BASIC
 - `m5stack-core2`, si vous avez compilé pour un M5Stack CORE2 ou AWS
 
-Allez dans la sous section `Platform`. Et cliquez sur `Upload Filesystem Image`.
+![Capture](https://github.com/armel/DXTracker/blob/main/img/flash_2.png)
+
+Enfin, étape 3, allez dans la sous section `Platform`. Et cliquez sur `Upload Filesystem Image`.
 
 Patientez. Le contenu du répertoire `data` va être écrit dans la mémoire Flash de votre M5Stack. Ca y est ? Vous y êtes !!!!
 
@@ -202,7 +206,7 @@ Les boutons gauche et droite, permettent de passer d'un binaire à un autre. Et 
 
 ### Limitation
 
-Je pense qu'il est possible de faire cohabiter 5 ou 6 applications, dans la mémoire Flash de votre M5Stack. En l'état, ca me semble suffisant. Si besoin, j'adapterais le code pour les binaires sur la carte SD. 
+Je pense qu'il est possible de faire cohabiter 5 ou 6 applications, dans la mémoire Flash de votre M5Stack. En l'état, ca me semble suffisant. Si besoin, j'adapterais le code pour les binaires sur la carte SD.  
 
 # That's all
 Bon trafic à tous, 88 & 73 de Armel F4HWN ! 
