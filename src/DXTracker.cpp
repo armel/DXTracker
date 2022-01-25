@@ -110,24 +110,25 @@ void setup()
   // Start server (for Web site Screen Capture)
   httpServer.begin();     
 
-  // Multitasking task for retreive rrf, spotnik and propag data
+  // Multitasking task for retreive propag data
   xTaskCreatePinnedToCore(
-      hamdata,      // Function to implement the task
-      "hamdata",    // Name of the task
-      16384,        // Stack size in words
-      NULL,         // Task input parameter
-      1,            // Priority of the task
-      NULL,         // Task handle
-      1);           // Core where the task should run
+      hamdata,        // Function to implement the task
+      "hamdata",      // Name of the task
+      16384,          // Stack size in words
+      NULL,           // Task input parameter
+      1,              // Priority of the task
+      &hamdataHandle, // Task handle
+      1);             // Core where the task should run
 
+  // Multitasking task for retreive button
   xTaskCreatePinnedToCore(
-      button,       // Function to implement the task
-      "button",     // Name of the task
-      8192,         // Stack size in words
-      NULL,         // Task input parameter
-      1,            // Priority of the task
-      NULL,         // Task handle
-      0);           // Core where the task should run
+      button,         // Function to implement the task
+      "button",       // Name of the task
+      8192,           // Stack size in words
+      NULL,           // Task input parameter
+      1,              // Priority of the task
+      &buttonHandle,  // Task handle
+      0);             // Core where the task should run
 
   // Accelelerometer
   M5.IMU.Init();

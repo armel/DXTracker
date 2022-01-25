@@ -191,7 +191,7 @@ Patientez. Le contenu du répertoire `data` va être écrit dans la mémoire Fla
 
 ### Utilisation
 
-Démarrez votre M5Stack. Vous devriez voir un écran noir, suivi de l'affichage de 1, 2, 3, 4 puis 5 petits points, en haut de l'écran. C'est le fameux Bin Loader ;)
+Démarrez votre M5Stack. Vous devriez voir un écran noir, suivi de l'affichage de 1, 2 puis 3 petits points, en haut de l'écran. C'est le fameux Bin Loader ;)
 
 Dès l'affichage du premier petit point, vous pouvez :
 

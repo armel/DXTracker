@@ -25,7 +25,7 @@ void hamdata(void *pvParameters)
       clientHamQTH.setInsecure();
       http.begin(clientHamQTH, endpointHamQTH);       // Specify the URL
       http.addHeader("Content-Type", "text/plain");   // Specify content-type header
-      http.setTimeout(1000);                          // Set Time Out
+      http.setTimeout(750);                          // Set Time Out
       httpCode = http.GET();                          // Make the request
       if (httpCode == 200)                            // Check for the returning code
       {
@@ -42,7 +42,7 @@ void hamdata(void *pvParameters)
         reloadState = "Greyline";
         clientGreyline.setInsecure();
         http.begin(clientGreyline, endpointGreyline);   // Specify the URL
-        http.setTimeout(1000);                          // Set Time Out
+        http.setTimeout(750);                          // Set Time Out
         httpCode = http.GET();                          // Make the request
         if (httpCode == 200)                            // Check for the returning code
         {
@@ -61,6 +61,7 @@ void hamdata(void *pvParameters)
 
           http.begin(clientGreyline, greylineData);     // Specify the URL
           httpCode = http.GET();                        // Make the request
+          http.setTimeout(750);                        // Set Time Out
           if (httpCode == 200)                          // Check for the returning code
           {
             if (httpCode == 200) {
@@ -102,7 +103,7 @@ void hamdata(void *pvParameters)
         reloadState = "Solar";
         http.begin(clientHamQSL, endpointHamQSL);       // Specify the URL
         http.addHeader("Content-Type", "text/plain");   // Specify content-type header
-        http.setTimeout(1000);                          // Set Time Out
+        http.setTimeout(750);                          // Set Time Out
         httpCode = http.GET();                          // Make the request
         if (httpCode == 200)                            // Check for the returning code
         {
@@ -118,7 +119,7 @@ void hamdata(void *pvParameters)
         reloadState = "Sat";
         http.begin(clientSat, endpointSat + "?lat=" + config[(configCurrent * 4) + 2] + "&lng=" + config[(configCurrent * 4) + 3] + "&format=text");       // Specify the URL
         http.addHeader("Content-Type", "text/plain");   // Specify content-type header
-        http.setTimeout(10000);                          // Set Time Out
+        http.setTimeout(2000);                           // Set Time Out
         httpCode = http.GET();                          // Make the request
         if (httpCode == 200)                            // Check for the returning code
         {

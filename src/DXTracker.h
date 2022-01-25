@@ -8,6 +8,7 @@
 #define GREY  2
 #define CORE2 3
 
+#define TIMEOUT_BIN_LOADER 3                // 3 sec
 #define TIMEOUT_SCREENSAVER 5 * 60 * 1000   // 5 min
 
 #if BOARD == BASIC
@@ -37,7 +38,7 @@
 
 // Name and Version
 #define NAME "DXTracker"
-#define VERSION "0.1.6"
+#define VERSION "0.1.8"
 
 // Wifi
 WiFiClient clientHamQSL, clientSat;
@@ -130,6 +131,10 @@ String propagKey[] = {
 };
 
 String cluster[50], call[50], frequency[50], band[50], country[50];
+
+// Task Handle
+TaskHandle_t hamdataHandle;
+TaskHandle_t buttonHandle;
 
 // Miscellaneous
 String tmpString;
