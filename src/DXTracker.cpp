@@ -16,6 +16,11 @@ void setup()
 
   // Init M5
   M5.begin(true, false, false, false);
+
+  // Bin Loader
+  binLoader();
+
+  // Init Power
   power();
 
   // Preferences
@@ -39,7 +44,6 @@ void setup()
   screensaver = millis(); // Screensaver update !!!
 
   // SPIFFS
-  SPIFFS.begin(true);
   if(!SPIFFS.begin())
   {
     Serial.println("SPIFFS Mount Failed");
@@ -114,7 +118,7 @@ void setup()
       NULL,         // Task input parameter
       1,            // Priority of the task
       NULL,         // Task handle
-      0);           // Core where the task should run
+      1);           // Core where the task should run
 
   xTaskCreatePinnedToCore(
       button,       // Function to implement the task
@@ -123,7 +127,7 @@ void setup()
       NULL,         // Task input parameter
       1,            // Priority of the task
       NULL,         // Task handle
-      1);           // Core where the task should run
+      0);           // Core where the task should run
 
   // Accelelerometer
   M5.IMU.Init();
@@ -212,7 +216,7 @@ void loop()
   }
 
   // Manage screensaver
-  if (screensaverMode == 0 && millis() - screensaver > screensaverLimit)
+  if (screensaverMode == 0 && millis() - screensaver > TIMEOUT_SCREENSAVER)
   {
     for (uint8_t i = brightnessCurrent; i >= 1; i--)
     {
@@ -224,7 +228,7 @@ void loop()
     screensaverMode = 1;
     M5.Lcd.sleep();
   }
-  else if (screensaverMode == 1 && millis() - screensaver < screensaverLimit)
+  else if (screensaverMode == 1 && millis() - screensaver < TIMEOUT_SCREENSAVER)
   {
     M5.Lcd.wakeup();
     screensaverMode = 0;
@@ -236,5 +240,4 @@ void loop()
       delay(10);
     }
   }
-
 }

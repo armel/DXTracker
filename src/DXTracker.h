@@ -8,6 +8,8 @@
 #define GREY  2
 #define CORE2 3
 
+#define TIMEOUT_SCREENSAVER 5 * 60 * 1000   // 5 min
+
 #if BOARD == BASIC
   #define M5STACK_MPU6886
   #include <M5Stack.h>
@@ -31,10 +33,11 @@
 #include "settings.h"
 #include "FS.h"
 #include "SPIFFS.h"
+#include <M5StackUpdater.h>
 
 // Name and Version
 #define NAME "DXTracker"
-#define VERSION "0.1.5"
+#define VERSION "0.1.6"
 
 // Wifi
 WiFiClient clientHamQSL, clientSat;
@@ -82,6 +85,11 @@ int16_t posA;
 TFT_eSprite imgB = TFT_eSprite(&M5.Lcd); // Create Sprite object "img" with pointer to "tft" object
 String messageB = "";
 int16_t posB;
+
+// Bin loader
+File root;
+String binFilename[8];
+uint8_t binIndex = 0;
 
 // Propag data
 String solarData[] = {
@@ -140,12 +148,10 @@ uint8_t configCurrent = 0;
 uint8_t brightnessCurrent = 128;
 uint8_t messageCurrent = 0;
 
-uint32_t screensaver;
-uint32_t screensaverLimit = 30 * 60 * 1000;  // 30 minutes
-
 int16_t parenthesisBegin = 0;
 int16_t parenthesisLast = 0;
 
+uint32_t screensaver;
 uint32_t frequencyExclude[] = {
   1840, 1842, 3573, 5357,	
   7056, 7071, 7074, 7078,

@@ -66,15 +66,15 @@ Par défaut, les fréquences FT8 sont filtrées et ne seront pas affichées par 
 Si et seulement si __vous utilisez le M5Stack Core2__, éditer le fichier `platformio.ini` et modifier les lignes,
 
 ```
-default_envs = m5stack-grey
-;default_envs = m5stack-core-esp32
+default_envs = m5stack-basic-grey
+;default_envs = m5stack-core2
 ```
 
 Par,
 
 ```
-;default_envs = m5stack-grey
-default_envs = m5stack-core-esp32
+;default_envs = m5stack-basic-grey
+default_envs = m5stack-core2
 ```
 
 Cela revient à changer la plate-forme cible, le point-virgule étant un commentaire.
@@ -131,6 +131,78 @@ Mais pourquoi avoir développé une telle fonctionnalité ? Pour 2 raisons :
 - deuxièmement, ca permet de prendre de belle capture d'écran du DXTracker, la preuve ;)
 
 ![Capture](https://github.com/armel/DXTracker/blob/main/img/screenshot.png)
+
+## Utilisation du Bin Loader (_power user only..._)
+
+Evolution récente de mes développements, il est désormais possible de stocker plusieurs applications dans la mémoire Flash de votre M5Stack. Au démarrage, une procédure est prévue pour charger une application en particulier.
+
+### Préparation
+
+Je vais détailler ici la procédure pour déployer l'application RRFRemote et DXTRacker sur un même M5Stack.
+
+#### Etape 1 - Compilation
+
+Commencez par compiler vos applications, comme vous aviez l'habitude de le faire. Rien ne change ici. Par exemple, commencez par compiler l'application RRFRemote. Puis faites de même avec l'application DXTracker. 
+
+> À noter que l'application 705SMeter dispose aussi du Bin Loader. Mais elle n'a d'intérêt que si vous disposez d'un IC 705.
+
+#### Etape 2 - Collecte des fichiers binaires
+
+Ca y est, vous avez compiler l'application RRFRemote et DXTracker ? C'est parfait.
+
+Chaque compilation a produit un binaire. C'est ce binaire qui est envoyé / flashé sur votre M5Stack, via la connexion USB.
+
+Placez vous à la racine du dossier RRFRemote, qui contient l'ensemble du projet. Et allez dans le répertoire :
+
+- `.pio/build/m5stack-basic-grey`, si vous avez compilé pour un M5Stack GREY ou BASIC
+- `.pio/build/m5stack-core2`, si vous avez compilé pour un M5Stack CORE2 ou AWS
+
+Vous y trouverez un fichier `firmware.bin`. Copier le dans le répertoire `data` qui se trouve à la racine du dossier RRFRemote. Et profitez en pour le renommer en l'appelant, par exemple, `RRFRemote.bin`.
+
+Faites de même avec l'application DXTracker. Placez vous à la racine du dossier DXTracker, qui contient l'ensemble du projet. Et allez dans le répertoire :
+
+- `.pio/build/m5stack-basic-grey`, si vous avez compilé pour un M5Stack GREY ou BASIC
+- `.pio/build/m5stack-core2`, si vous avez compilé pour un M5Stack CORE2 ou AWS
+
+Vous y trouverez également un fichier `firmware.bin`. Copier le, lui aussi, dans le répertoire `data` qui se trouve à la racine du dossier RRFRemote. Et profitez en pour le renommer en l'appelant, par exemple, `DXTracker.bin`.
+
+> Hyper important, l'idée est bien de copier ces 2 binaires dans le même répertoire `data` (à la racine du dossier RRFRemote).
+
+A ce stade, vous devez donc avoir 2 fichiers binaires clairement identifiés : `RRFRemote.bin` et `DXTracker.bin` dans le répertoire `data` qui se trouve à la racine du dossier RRFRemote.
+
+#### Etape 3 - Copie dans la mémoire Flash du M5Stack
+
+Passons à l'étape probablement la plus compliquée. Ouvrez le projet RRFRemote depuis Visual Studio Code, comme vous le feriez pour le compiler. 
+
+![Capture](https://github.com/armel/DXTracker/blob/main/img/flash.png)
+
+Cliquez sur l'icône Platformio (l'icone avec une tête de fourmi...). Déroulez la section :
+
+- `m5stack-basic-grey`, si vous avez compilé pour un M5Stack GREY ou BASIC
+- `m5stack-core2`, si vous avez compilé pour un M5Stack CORE2 ou AWS
+
+Allez dans la sous section `Platform`. Et cliquez sur `Upload Filesystem Image`.
+
+Patientez. Le contenu du répertoire `data` va être écrit dans la mémoire Flash de votre M5Stack. Ca y est ? Vous y êtes !!!!
+
+### Utilisation
+
+Démarrez votre M5Stack. Vous devriez voir un écran noir, suivi de l'affichage de 1, 2, 3, 4 puis 5 petits points, en haut de l'écran. C'est le fameux Bin Loader ;)
+
+Dès l'affichage du premier petit point, vous pouvez :
+
+- soit appuyez sur le bouton gauche ou droite, pour lancer l'application par défaut.
+- soit appuyez sur le bouton central. Dans ce cas, le menu du Bin Loader s'affiche et vous propose la liste des binaires disponnibles en mémoire Flash. 
+
+Si vous avez parfaitement suivi la procédure, vous devriez avoir le choix entre `RRFRemote.bin` et `DXTracker.bin`.
+
+Les boutons gauche et droite, permettent de passer d'un binaire à un autre. Et le bouton central permet de valider le binaire en cours de sélection. Dans ce cas, l'application selectionnée sera chargée ;)
+
+> Le chargement prend environ 20 secondes. C'est supportable.
+
+### Limitation
+
+Je pense qu'il est possible de faire cohabiter 5 ou 6 applications, dans la mémoire Flash de votre M5Stack. En l'état, ca me semble suffisant. Si besoin, j'adapterais le code pour les binaires sur la carte SD. 
 
 # That's all
 Bon trafic à tous, 88 & 73 de Armel F4HWN ! 
