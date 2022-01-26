@@ -695,17 +695,17 @@ void binLoader() {
     M5.Lcd.setTextDatum(CC_DATUM);
 
     for (uint8_t i = TIMEOUT_BIN_LOADER * 10; i > 0; i--) {
-      M5.update();
+      getButton();
 
       if( i % 10 == 0) {
         tmpName += ".";
         M5.Lcd.drawString(tmpName, 160, 20);
       }
 
-      if(M5.BtnA.wasPressed() || M5.BtnC.wasPressed()) {
+      if(btnA || btnC) {
         return;
       }
-      else if(M5.BtnB.wasPressed()) {
+      else if(btnB) {
         click = 1;
         break;
       }
@@ -715,6 +715,11 @@ void binLoader() {
   }
 
   while(click == 1) {
+    while(btnB != 0) {
+      getButton();
+      vTaskDelay(100);
+    }
+
     M5.Lcd.setTextFont(1);
     M5.Lcd.setTextSize(2);
 
@@ -722,15 +727,15 @@ void binLoader() {
     M5.Lcd.setTextDatum(CC_DATUM);
     M5.Lcd.drawString("Bin Loader", 160, 20);
 
-    M5.update();
+    getButton();
 
-    if(M5.BtnA.wasPressed()) {
+    if(btnA) {
       cursor--;
     }
-    else if(M5.BtnC.wasPressed()) {
+    else if(btnC) {
       cursor++;
     }
-    else if(M5.BtnB.wasPressed()) {
+    else if(btnB) {
       updateFromFS(SPIFFS, binFilename[cursor]);
       ESP.restart(); 
     }
