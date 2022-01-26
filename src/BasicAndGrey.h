@@ -1,7 +1,7 @@
 // Copyright (c) F4HWN Armel. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-int btnA, btnB, btnC = 0;
+int btnA, btnB, btnC;
 
 // Power init
 void power()

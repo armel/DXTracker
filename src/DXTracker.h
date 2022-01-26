@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 // Board
-#define BOARD BASIC
+#define BOARD CORE2
 
 #define BASIC 1
 #define GREY  2
@@ -15,13 +15,16 @@
   #define M5STACK_MPU6886
   #include <M5Stack.h>
   #include "BasicAndGrey.h"
+  #include "WebIndexBasicAndGrey.h"
 #elif BOARD == GREY
   #define M5STACK_MPU6886
   #include <M5Stack.h>
   #include "BasicAndGrey.h"
+  #include "WebIndexBasicAndGrey.h"
 #elif BOARD == CORE2
   #include <M5Core2.h>
   #include "Core2.h"
+  #include "WebIndexCore2.h"
 #endif
 
 #undef min
@@ -38,7 +41,7 @@
 
 // Name and Version
 #define NAME "DXTracker"
-#define VERSION "0.1.8"
+#define VERSION "0.1.9"
 
 // Wifi
 WiFiClient clientHamQSL, clientSat;
@@ -47,8 +50,6 @@ WiFiClient httpClient;
 WiFiServer httpServer(80);
 
 // Web site Screen Capture stuff
-#include "WebIndex.h"
-
 #define GET_unknown 0
 #define GET_index_page  1
 #define GET_screenshot  2
