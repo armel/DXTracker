@@ -17,11 +17,14 @@ void setup()
   // Init M5
   M5.begin(true, false, false, false);
 
-  // Bin Loader
-  binLoader();
-
   // Init Power
   power();
+
+  // Init Speaker
+  speaker();
+
+  // Bin Loader
+  binLoader();
 
   // Preferences
   preferences.begin(NAME);
@@ -126,9 +129,9 @@ void setup()
       "button",       // Name of the task
       8192,           // Stack size in words
       NULL,           // Task input parameter
-      1,              // Priority of the task
+      2,              // Priority of the task
       &buttonHandle,  // Task handle
-      0);             // Core where the task should run
+      1);             // Core where the task should run
 
   // Accelelerometer
   M5.IMU.Init();
@@ -192,15 +195,20 @@ void loop()
   // Let's clean
   clear();
 
+  // Manage acceleration
+  getAcceleration();
+
   // Print data, messages and greyline
   propagData();
+
   clusterAndSatMessage();
+
   propagMessage();
+
   greyline();
 
   // Manage temporisation and orientation
   temporisation();
-  getAcceleration();
 
   // Manage Web site Screen Capture
   getScreenshot();
@@ -221,7 +229,7 @@ void loop()
   {
     for (uint8_t i = brightnessCurrent; i >= 1; i--)
     {
-      M5.Lcd.setBrightness(i);
+      setBrightness(i);
       scrollA(0);
       scrollB(0);
       delay(10);
@@ -235,7 +243,7 @@ void loop()
     screensaverMode = 0;
     for (uint8_t i = 1; i <= brightnessCurrent; i++)
     {
-      M5.Lcd.setBrightness(i);
+      setBrightness(i);
       scrollA(0);
       scrollB(0);
       delay(10);
