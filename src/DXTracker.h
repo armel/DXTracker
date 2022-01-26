@@ -23,6 +23,7 @@
   #include "WebIndexBasicAndGrey.h"
 #elif BOARD == CORE2
   #include <M5Core2.h>
+  #include "Core2SPK.h"
   #include "Core2.h"
   #include "WebIndexCore2.h"
 #endif
@@ -41,7 +42,7 @@
 
 // Name and Version
 #define NAME "DXTracker"
-#define VERSION "0.1.9"
+#define VERSION "0.2.1"
 
 // Wifi
 WiFiClient clientHamQSL, clientSat;
@@ -151,7 +152,7 @@ boolean greylineRefresh = 0;
 uint8_t htmlGetRequest;
 uint8_t alternance = 0;
 uint8_t configCurrent = 0;
-uint8_t brightnessCurrent = 128;
+uint8_t brightnessCurrent = 64;
 uint8_t messageCurrent = 0;
 
 int16_t parenthesisBegin = 0;

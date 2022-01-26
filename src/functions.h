@@ -363,7 +363,7 @@ void clusterAndSatMessage()
 
 // Draw Greyline
 void greyline()
-{
+{  
   if(greylineRefresh == 1)
   {
     // Draw greyline
@@ -384,6 +384,8 @@ void getAcceleration()
 
   if(BOARD == GREY || BOARD == CORE2) {
     M5.IMU.getAccelData(&accX,&accY,&accZ);
+
+    //Serial.println((accY * 1000) < -500);
 
     if(int(accY * 1000) < -500 && M5.Lcd.getRotation() != 3) {
       M5.Lcd.setRotation(3);
@@ -681,6 +683,25 @@ void binLoader() {
   if(!SPIFFS.begin())
   {
     Serial.println("SPIFFS Mount Failed");
+
+    M5.Lcd.setTextFont(1);
+    M5.Lcd.setTextSize(2);
+
+    M5.Lcd.setTextColor(TFT_WHITE, TFT_BLACK);
+    M5.Lcd.setTextDatum(CC_DATUM);
+    M5.Lcd.drawString("Flash File System", 160, 20);
+    M5.Lcd.drawString("needs to be formated.", 160, 50);
+    M5.Lcd.drawString("It takes around 4 minutes.", 160, 100);
+    M5.Lcd.drawString("Please, wait until ", 160, 150);
+    M5.Lcd.drawString("the application starts !", 160, 180);
+
+    Serial.println("SPIFFS Formating...");
+
+    SPIFFS.format();    // Format SPIFFS...
+
+    M5.Lcd.setTextFont(0);
+    M5.Lcd.setTextSize(0);
+
     return;
   }
   
