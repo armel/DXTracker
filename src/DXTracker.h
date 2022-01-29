@@ -8,8 +8,9 @@
 #define GREY  2
 #define CORE2 3
 
-#define TIMEOUT_BIN_LOADER 3                // 3 sec
-#define TIMEOUT_SCREENSAVER 5 * 60 * 1000   // 5 min
+#define TIMEOUT_BIN_LOADER    3               // 3 sec
+#define TIMEOUT_SCREENSAVER   5 * 60 * 1000   // 5 min
+#define TIMEOUT_TEMPORISATION 10 * 1000       // 10 sec
 
 #if BOARD == BASIC
   #define M5STACK_MPU6886
@@ -42,7 +43,7 @@
 
 // Name and Version
 #define NAME "DXTracker"
-#define VERSION "0.2.1"
+#define VERSION "0.2.2"
 
 // Wifi
 WiFiClient clientHamQSL, clientSat;
@@ -145,10 +146,10 @@ String reloadState = "";
 
 boolean decoded = 0;
 boolean startup = 0;
-boolean screenRefresh = 0;
 boolean screensaverMode = 0;
 boolean greylineRefresh = 0;
 
+uint8_t screenRefresh = 1;
 uint8_t htmlGetRequest;
 uint8_t alternance = 0;
 uint8_t configCurrent = 0;
@@ -158,6 +159,7 @@ uint8_t messageCurrent = 0;
 int16_t parenthesisBegin = 0;
 int16_t parenthesisLast = 0;
 
+uint32_t temporisation;
 uint32_t screensaver;
 uint32_t frequencyExclude[] = {
   1840, 1842, 3573, 5357,	
@@ -169,3 +171,6 @@ uint32_t frequencyExclude[] = {
   50310, 50313, 50328, 50323,
   70100, 144174, 222065, 432065
 };
+
+#undef SPI_READ_FREQUENCY
+#define SPI_READ_FREQUENCY 40000000
