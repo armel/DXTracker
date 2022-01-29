@@ -6,13 +6,14 @@ void hamdata(void *pvParameters)
 {
   File f;
   HTTPClient http;
-  uint32_t limit = 1 * 30 * 1000; // Retry 30 secondes
+  uint32_t timer = 0, wait = 0, limit = 1 * 30 * 1000; // Retry 30 secondes
   uint16_t len, httpCode;
   static uint8_t counter = 1;
   static uint8_t counterWakeUp = 1;
 
   for (;;)
   {
+    timer = millis();
     // If on Startup
     if(startup == 0 && (WiFi.status() == WL_CONNECTED)) {
 
@@ -25,23 +26,25 @@ void hamdata(void *pvParameters)
         httpCode = http.GET();                          // Make the request
         if (httpCode == 200)                            // Check for the returning code
         {
-          greylineData = http.getString(); // Get data
+          tmpString = http.getString(); // Get data
 
-          greylineData.replace("<img src=\"", ">>>");
-          greylineData.replace("\" alt=\"Grey Line Map\"", "<<<");
+          M5.Lcd.drawString("Greyline Preload", 160, 180);
 
-          int16_t parenthesisBegin = greylineData.indexOf(">>>");
-          int16_t parenthesisLast = greylineData.indexOf("<<<");
+          tmpString.replace("<img src=\"", ">>>");
+          tmpString.replace("\" alt=\"Grey Line Map\"", "<<<");
+
+          int16_t parenthesisBegin = tmpString.indexOf(">>>");
+          int16_t parenthesisLast = tmpString.indexOf("<<<");
 
           if (parenthesisBegin > 0)
           {
-            greylineData = greylineData.substring(parenthesisBegin + 4, parenthesisLast);
+            tmpString = tmpString.substring(parenthesisBegin + 4, parenthesisLast);
           }
 
-          http.begin(clientGreyline, greylineData);     // Specify the URL
-          httpCode = http.GET();                        // Make the request
-          http.setTimeout(750);                        // Set Time Out
-          if (httpCode == 200)                          // Check for the returning code
+          http.begin(clientGreyline, tmpString);      // Specify the URL
+          httpCode = http.GET();                      // Make the request
+          http.setTimeout(750);                       // Set Time Out
+          if (httpCode == 200)                        // Check for the returning code
           {
             if (httpCode == 200) {
               greylineRefresh = 1;
@@ -57,6 +60,7 @@ void hamdata(void *pvParameters)
               WiFiClient *stream = &clientGreyline;
 
               // Read all data from server
+              M5.Lcd.drawString("Greyline Loading", 160, 180);
               while (http.connected() && (len > 0 || len == -1)) {
                 int c = stream->readBytes(buff, std::min((size_t)len, sizeof(buff)));          
                 // Write it to file
@@ -70,6 +74,7 @@ void hamdata(void *pvParameters)
             }
           }
         }
+        greylineData = "Ok";
         http.end(); // Free the resources
       }
 
@@ -79,7 +84,7 @@ void hamdata(void *pvParameters)
         clientHamQTH.setInsecure();
         http.begin(clientHamQTH, endpointHamQTH);       // Specify the URL
         http.addHeader("Content-Type", "text/plain");   // Specify content-type header
-        http.setTimeout(750);                          // Set Time Out
+        http.setTimeout(750);                           // Set Time Out
         httpCode = http.GET();                          // Make the request
         if (httpCode == 200)                            // Check for the returning code
         {
@@ -93,7 +98,7 @@ void hamdata(void *pvParameters)
         reloadState = "Solar";
         http.begin(clientHamQSL, endpointHamQSL);       // Specify the URL
         http.addHeader("Content-Type", "text/plain");   // Specify content-type header
-        http.setTimeout(750);                          // Set Time Out
+        http.setTimeout(750);                           // Set Time Out
         httpCode = http.GET();                          // Make the request
         if (httpCode == 200)                            // Check for the returning code
         {
@@ -107,7 +112,7 @@ void hamdata(void *pvParameters)
         reloadState = "Sat";
         http.begin(clientSat, endpointSat + "?lat=" + config[(configCurrent * 4) + 2] + "&lng=" + config[(configCurrent * 4) + 3] + "&format=text");       // Specify the URL
         http.addHeader("Content-Type", "text/plain");   // Specify content-type header
-        http.setTimeout(2000);                           // Set Time Out
+        http.setTimeout(2000);                          // Set Time Out
         httpCode = http.GET();                          // Make the request
         if (httpCode == 200)                            // Check for the returning code
         {
@@ -127,15 +132,13 @@ void hamdata(void *pvParameters)
     }
     // Else
     else if(startup == 1 && (WiFi.status() == WL_CONNECTED)) {
-      Serial.println("----------");
-      Serial.println(counter);
 
       if(counterWakeUp == 1)
       {
         screensaver = millis(); // Screensaver update !!!
       }
 
-      if(counter == 1) // Check the current connection status
+      if(counter == 1) // Refresh greyline only sometimes
       {
         Serial.println("Greyline");
         reloadState = "Greyline";
@@ -164,7 +167,6 @@ void hamdata(void *pvParameters)
           if (httpCode == 200)                          // Check for the returning code
           {
             if (httpCode == 200) {
-              greylineRefresh = 1;
               // Open file
               f = SPIFFS.open("/greyline.jpg", "w+");
 
@@ -188,7 +190,25 @@ void hamdata(void *pvParameters)
               // Close file
               f.close();
             }
+            greylineRefresh = 1;
           }
+        }
+        http.end(); // Free the resources
+        reloadState = " ";
+        vTaskDelay(pdMS_TO_TICKS(200));
+      }
+
+      if(counter == 1) // Refresh solar only sometimes
+      {
+        Serial.println("HamQSL");
+        reloadState = "Solar";
+        http.begin(clientHamQSL, endpointHamQSL);       // Specify the URL
+        http.addHeader("Content-Type", "text/plain");   // Specify content-type header
+        http.setTimeout(750);                           // Set Time Out
+        httpCode = http.GET();                          // Make the request
+        if (httpCode == 200)                            // Check for the returning code
+        {
+          hamQSLData = http.getString(); // Get data
         }
         http.end(); // Free the resources
         reloadState = " ";
@@ -205,20 +225,6 @@ void hamdata(void *pvParameters)
       if (httpCode == 200)                            // Check for the returning code
       {
         hamQTHData = http.getString(); // Get data
-      }
-      http.end(); // Free the resources
-      reloadState = " ";
-      vTaskDelay(pdMS_TO_TICKS(200));
-  
-      Serial.println("HamQSL");
-      reloadState = "Solar";
-      http.begin(clientHamQSL, endpointHamQSL);       // Specify the URL
-      http.addHeader("Content-Type", "text/plain");   // Specify content-type header
-      http.setTimeout(750);                           // Set Time Out
-      httpCode = http.GET();                          // Make the request
-      if (httpCode == 200)                            // Check for the returning code
-      {
-        hamQSLData = http.getString(); // Get data
       }
       http.end(); // Free the resources
       reloadState = " ";
@@ -256,7 +262,23 @@ void hamdata(void *pvParameters)
       counterWakeUp = (counterWakeUp++ < 120) ? counterWakeUp : 1;
   
       // Pause
-      vTaskDelay(pdMS_TO_TICKS(limit));
+      wait = millis() - timer;
+
+      /*
+      Serial.println(counter);
+      if (wait < limit) {
+        Serial.println(limit - wait);
+      }
+      else {
+        Serial.println(0);
+      }
+      Serial.println("----------");
+      */
+
+      if (wait < limit)
+      {
+        vTaskDelay(pdMS_TO_TICKS(limit - wait));
+      }
     }
   }
 }
@@ -314,7 +336,7 @@ void button(void *pvParameters)
       screensaver = millis(); // Screensaver update !!!
       if(screensaverMode == 1)
       {
-        //Serial.println("Wake up");
+        Serial.println("Wake up");
         btnA = 0;
         btnB = 0;
         btnC = 0;
@@ -335,7 +357,6 @@ void button(void *pvParameters)
           messageCurrent = (messageCurrent++ < 3) ? messageCurrent : 0;
           posA = 80;
           posB = 80;
-          screenRefresh = 1;
         }
 
         change = (change < 0) ? 11 : change;
@@ -344,7 +365,8 @@ void button(void *pvParameters)
         if (change != alternance)
         {
           alternance = change;
-          screenRefresh = 1;
+          temporisation = millis(); // Temporisation update !!!
+          screenRefresh = 2;
         }
       }
     }

@@ -62,9 +62,9 @@ bool isCharging()
 void getButton()
 {
   M5.update();
-  btnA = myBtnA.read();
-  btnB = myBtnB.read();
-  btnC = myBtnC.read();
+  btnA = myBtnA.isPressed();
+  btnB = myBtnB.isPressed();
+  btnC = myBtnC.isPressed();
 
   if(btnA || btnB || btnC) 
   {

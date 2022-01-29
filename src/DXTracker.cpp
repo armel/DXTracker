@@ -121,7 +121,7 @@ void setup()
       NULL,           // Task input parameter
       1,              // Priority of the task
       &hamdataHandle, // Task handle
-      1);             // Core where the task should run
+      0);             // Core where the task should run
 
   // Multitasking task for retreive button
   xTaskCreatePinnedToCore(
@@ -129,7 +129,7 @@ void setup()
       "button",       // Name of the task
       8192,           // Stack size in words
       NULL,           // Task input parameter
-      2,              // Priority of the task
+      1,              // Priority of the task
       &buttonHandle,  // Task handle
       1);             // Core where the task should run
 
@@ -192,61 +192,37 @@ void setup()
 // Main loop
 void loop()
 {
-  // Let's clean
-  clear();
-
   // Manage acceleration
   getAcceleration();
 
-  // Print data, messages and greyline
+  // Let's clean if necessary
+  clear();
+
+  // View propag datas
   propagData();
 
+  // Prepare cluster and sat scroll message
   clusterAndSatMessage();
 
+  // Prepare propag scroll message
   propagMessage();
 
+  // View greyline
   greyline();
 
-  // Manage temporisation and orientation
-  temporisation();
+  // Manage scroll
+  scroll();
 
   // Manage Web site Screen Capture
   getScreenshot();
 
-  // Manage refresh and alternance
-  if(screenRefresh != 1)
-  {
+  // Manage screensaver
+  wakeAndSleep();
+
+  // Manage alternance
+  if(screenRefresh == 0 && millis() - temporisation > TIMEOUT_TEMPORISATION) {
+    temporisation = millis();
     alternance++;
     alternance = (alternance > 11) ? 0 : alternance;
-  }
-  else
-  {
-    screenRefresh = 0;
-  }
-
-  // Manage screensaver
-  if (screensaverMode == 0 && millis() - screensaver > TIMEOUT_SCREENSAVER)
-  {
-    for (uint8_t i = brightnessCurrent; i >= 1; i--)
-    {
-      setBrightness(i);
-      scrollA(0);
-      scrollB(0);
-      delay(10);
-    }
-    screensaverMode = 1;
-    M5.Lcd.sleep();
-  }
-  else if (screensaverMode == 1 && millis() - screensaver < TIMEOUT_SCREENSAVER)
-  {
-    M5.Lcd.wakeup();
-    screensaverMode = 0;
-    for (uint8_t i = 1; i <= brightnessCurrent; i++)
-    {
-      setBrightness(i);
-      scrollA(0);
-      scrollB(0);
-      delay(10);
-    }
   }
 }

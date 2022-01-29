@@ -24,10 +24,13 @@ String getValue(String data, char separator, uint16_t index)
 // Clear screen
 void clear()
 {
-  M5.Lcd.fillRect(0, 0, 320, 44, M5.Lcd.color565(TFT_BACK.r, TFT_BACK.g, TFT_BACK.b));
-  M5.Lcd.drawFastHLine(  0, 0, 320, TFT_WHITE);
-  M5.Lcd.drawFastHLine(  0, 44, 320, TFT_WHITE);
-  M5.Lcd.drawFastHLine(  0, 100, 320, TFT_WHITE);
+  if(screenRefresh == 1) {
+    M5.Lcd.clear();
+    M5.Lcd.fillRect(0, 0, 320, 44, M5.Lcd.color565(TFT_BACK.r, TFT_BACK.g, TFT_BACK.b));
+    M5.Lcd.drawFastHLine(  0, 0, 320, TFT_WHITE);
+    M5.Lcd.drawFastHLine(  0, 44, 320, TFT_WHITE);
+    M5.Lcd.drawFastHLine(  0, 100, 320, TFT_WHITE);
+  }
 }
 
 // Manage message cycle
@@ -80,7 +83,7 @@ void scrollA(uint8_t pause)
     posA = imgA.textWidth(messageA) + 80;
   }
 
-  delay(pause);
+  vTaskDelay(pdMS_TO_TICKS(pause));
 }
 
 // Build scroll B
@@ -121,22 +124,35 @@ void scrollB(uint8_t pause)
     posB = imgB.textWidth(messageB) + 80;
   }
 
-  delay(pause);
+  vTaskDelay(pdMS_TO_TICKS(pause));
 }
 
 // Draw title
 void title(String title)
 {
-  // Title
-  M5.Lcd.setTextColor(TFT_WHITE, M5.Lcd.color565(TFT_BACK.r, TFT_BACK.g, TFT_BACK.b));
-  M5.Lcd.setFreeFont(&dot15pt7b);
-  M5.Lcd.setTextDatum(CC_DATUM);
-  M5.Lcd.setTextPadding(320);
-  M5.Lcd.drawString(title, 160, 16);
+  static String titleOld;
+  static String baselineOld;
+  static String reloadStateOld;
+  static uint8_t batteryOld;
 
-  M5.Lcd.setFreeFont(0);
-  M5.Lcd.setTextDatum(CC_DATUM);
-  M5.Lcd.setTextPadding(320);
+  if(screenRefresh == 1 || screenRefresh == 2) {
+    titleOld = "";
+    baselineOld = "";
+    reloadStateOld = "";
+    batteryOld = 0;
+    screenRefresh = 0;
+  }
+
+  // Title
+  if(title != titleOld) { // Refresh
+    titleOld = title;
+
+    M5.Lcd.setTextColor(TFT_WHITE, M5.Lcd.color565(TFT_BACK.r, TFT_BACK.g, TFT_BACK.b));
+    M5.Lcd.setFreeFont(&dot15pt7b);
+    M5.Lcd.setTextDatum(CC_DATUM);
+    M5.Lcd.setTextPadding(320);
+    M5.Lcd.drawString(title, 160, 16);
+  }
 
   if(alternance % 2 == 0)
   {
@@ -158,27 +174,25 @@ void title(String title)
     tmpString = String(NAME) + " Version " + String(VERSION);
   }
 
-  M5.Lcd.drawString(tmpString, 160, 36);
+  if(tmpString != baselineOld) { // Refresh
+    baselineOld = tmpString;
 
-// On right, view reload data
+    M5.Lcd.setFreeFont(0);
+    M5.Lcd.setTextDatum(CC_DATUM);
+    M5.Lcd.setTextPadding(320);
+    M5.Lcd.drawString(tmpString, 160, 36);
+  }
+
+  // On right, view reload data
   tmpString = reloadState;
   tmpString.trim();
 
-  if(tmpString != "")
-  {
-    /*
-    M5.Lcd.fillRect(2, 38, 13, 5, M5.Lcd.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b));
-    M5.Lcd.fillRect(3, 38, 11, 4, M5.Lcd.color565(TFT_BACK.r, TFT_BACK.g, TFT_BACK.b));
-    M5.Lcd.drawFastVLine(8, 31, 10, M5.Lcd.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b));
-    M5.Lcd.drawLine(8, 40, 5, 37, M5.Lcd.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b));
-    M5.Lcd.drawLine(8, 40, 11, 37, M5.Lcd.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b));
-    */
+  if(tmpString != "" && tmpString != reloadStateOld) { // Refresh
+    reloadStateOld = tmpString;
 
     M5.Lcd.drawFastHLine(2, 35, 10, M5.Lcd.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b));
     M5.Lcd.drawLine(12, 35, 8, 31, M5.Lcd.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b));
     M5.Lcd.drawLine(12, 35, 8, 39, M5.Lcd.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b));
-
-    //M5.Lcd.drawFastHLine(0, 30, 320, M5.Lcd.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b));
 
     M5.Lcd.setTextColor(M5.Lcd.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b), M5.Lcd.color565(TFT_BACK.r, TFT_BACK.g, TFT_BACK.b));
     M5.Lcd.setTextPadding(60);
@@ -188,9 +202,12 @@ void title(String title)
 
   // On left, view battery level
   uint8_t val = map(getBatteryLevel(1), 0, 100, 0, 16);
-  M5.Lcd.drawRect(294, 30, 20, 12, M5.Lcd.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b));
-  M5.Lcd.drawRect(313, 33, 4, 6, M5.Lcd.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b));
-  M5.Lcd.fillRect(296, 32, val, 8, M5.Lcd.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b));
+
+  if(val != batteryOld) { // Refresh
+    M5.Lcd.drawRect(294, 30, 20, 12, M5.Lcd.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b));
+    M5.Lcd.drawRect(313, 33, 4, 6, M5.Lcd.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b));
+    M5.Lcd.fillRect(296, 32, val, 8, M5.Lcd.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b));
+  }
 }
 
 // Draw Propag Data
@@ -389,30 +406,58 @@ void getAcceleration()
 
     if(int(accY * 1000) < -500 && M5.Lcd.getRotation() != 3) {
       M5.Lcd.setRotation(3);
-      M5.Lcd.clear();
-      clear();
+      screenRefresh = 1;
       greylineRefresh = 1;
     }
     else if(int(accY * 1000) > 500 && M5.Lcd.getRotation() != 1) {
       M5.Lcd.setRotation(1);
-      M5.Lcd.clear();
-      clear();
+      screenRefresh = 1;
       greylineRefresh = 1;
     }
   }
 }
 
-// Manage temporisation
-void temporisation()
+// Manage scroll
+void scroll()
 {
-  for(uint16_t i = 0; i <= 200; i += 1)
+  if(screenRefresh == 1)
   {
-    if(screenRefresh == 1)
-    {
-      break;
-    }
+    return;
+  }
+
+  for(uint16_t i = 0; i < 10; i += 1)
+  {
     scrollA(5);
     scrollB(5);
+  }
+}
+
+// Manage screensaver
+void wakeAndSleep()
+{
+  if (screensaverMode == 0 && millis() - screensaver > TIMEOUT_SCREENSAVER)
+  {
+    for (uint8_t i = brightnessCurrent; i >= 1; i--)
+    {
+      setBrightness(i);
+      scrollA(0);
+      scrollB(0);
+      delay(10);
+    }
+    screensaverMode = 1;
+    M5.Lcd.sleep();
+  }
+  else if (screensaverMode == 1 && millis() - screensaver < TIMEOUT_SCREENSAVER)
+  {
+    M5.Lcd.wakeup();
+    screensaverMode = 0;
+    for (uint8_t i = 1; i <= brightnessCurrent; i++)
+    {
+      setBrightness(i);
+      scrollA(0);
+      scrollB(0);
+      delay(10);
+    }
   }
 }
 
