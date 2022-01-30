@@ -43,6 +43,8 @@ void hamdata(void *pvParameters)
             tmpString = tmpString.substring(parenthesisBegin + 4, parenthesisLast);
           }
 
+          Serial.println(tmpString);
+
           http.begin(clientGreyline, tmpString);      // Specify the URL
           httpCode = http.GET();                      // Make the request
           http.setTimeout(750);                       // Set Time Out
@@ -50,12 +52,12 @@ void hamdata(void *pvParameters)
           {
             if (httpCode == 200) {
               // Open file
-              f = SPIFFS.open("/greyline.jpg", "w+");
+              f = SPIFFS.open("/tmp.jpg", "w+");
 
               // Get size
               len = http.getSize();
               // Create buffer for read
-              uint8_t buff[128] = { 0 };
+              uint8_t buff[512] = { 0 };
 
               // Get TCP stream
               WiFiClient *stream = &clientGreyline;
@@ -69,16 +71,24 @@ void hamdata(void *pvParameters)
                 if (len > 0) {
                   len -= c;
                 }
-                yield();
+                vTaskDelay(pdMS_TO_TICKS(10));
               }
               // Close file
               f.close();
             }
           }
         }
-        greylineRefresh = 1;
-        greylineData = "Ok";
         http.end(); // Free the resources
+        decoded = JpegDec.decodeFsFile("/tmp.jpg");
+        if (decoded) {
+          SPIFFS.rename("/tmp.jpg", "/greyline.jpg");
+          Serial.println("Rename file");
+          greylineRefresh = 1;
+          greylineData = "Ok";
+        }
+        else {
+          Serial.println("Bad download !");
+        }
         vTaskDelay(pdMS_TO_TICKS(200));
       }
 
@@ -153,32 +163,36 @@ void hamdata(void *pvParameters)
         httpCode = http.GET();                          // Make the request
         if (httpCode == 200)                            // Check for the returning code
         {
-          greylineData = http.getString(); // Get data
+          tmpString = http.getString(); // Get data
 
-          greylineData.replace("<img src=\"", ">>>");
-          greylineData.replace("\" alt=\"Grey Line Map\"", "<<<");
+          Serial.println(tmpString.length());
 
-          int16_t parenthesisBegin = greylineData.indexOf(">>>");
-          int16_t parenthesisLast = greylineData.indexOf("<<<");
+          tmpString.replace("<img src=\"", ">>>");
+          tmpString.replace("\" alt=\"Grey Line Map\"", "<<<");
+
+          int16_t parenthesisBegin = tmpString.indexOf(">>>");
+          int16_t parenthesisLast = tmpString.indexOf("<<<");
 
           if (parenthesisBegin > 0)
           {
-            greylineData = greylineData.substring(parenthesisBegin + 4, parenthesisLast);
+            tmpString = tmpString.substring(parenthesisBegin + 4, parenthesisLast);
           }
 
-          http.begin(clientGreyline, greylineData);     // Specify the URL
+          Serial.println(tmpString);
+
+          http.begin(clientGreyline, tmpString);     // Specify the URL
           httpCode = http.GET();                        // Make the request
           http.setTimeout(750);                         // Set Time Out
           if (httpCode == 200)                          // Check for the returning code
           {
             if (httpCode == 200) {
               // Open file
-              f = SPIFFS.open("/greyline.jpg", "w+");
+              f = SPIFFS.open("/tmp.jpg", "w+");
 
               // Get size
               len = http.getSize();
               // Create buffer for read
-              uint8_t buff[128] = { 0 };
+              uint8_t buff[512] = { 0 };
 
               // Get TCP stream
               WiFiClient *stream = &clientGreyline;
@@ -191,15 +205,23 @@ void hamdata(void *pvParameters)
                 if (len > 0) {
                   len -= c;
                 }
-                yield();
+                vTaskDelay(pdMS_TO_TICKS(10));
               }
               // Close file
               f.close();
             }
-            greylineRefresh = 1;
           }
         }
         http.end(); // Free the resources
+        decoded = JpegDec.decodeFsFile("/tmp.jpg");
+        if (decoded) {
+          SPIFFS.rename("/tmp.jpg", "/greyline.jpg");
+          Serial.println("Rename file");
+          greylineRefresh = 1;
+        }
+        else {
+          Serial.println("Bad download !");
+        }
         reloadState = "";
       }
       else if(counter == 2) // Refresh solar only sometimes

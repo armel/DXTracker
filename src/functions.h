@@ -202,8 +202,9 @@ void title(String title)
     }
 
     M5.Lcd.setTextColor(M5.Lcd.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b), M5.Lcd.color565(TFT_BACK.r, TFT_BACK.g, TFT_BACK.b));
-    M5.Lcd.setTextPadding(60);
+    M5.Lcd.setFreeFont(0);
     M5.Lcd.setTextDatum(ML_DATUM);
+    M5.Lcd.setTextPadding(60);
     M5.Lcd.drawString(tmpString, 18, 36);
   }
 
