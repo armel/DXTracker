@@ -6,7 +6,7 @@ void hamdata(void *pvParameters)
 {
   File f;
   HTTPClient http;
-  uint32_t timer = 0, wait = 0, limit = 1 * 30 * 1000; // Retry 30 secondes
+  uint32_t timer = 0, wait = 0, limit = 1 * 6 * 1000; // Retry 60 secondes
   uint16_t len, httpCode;
   static uint8_t counter = 1;
   static uint8_t counterWakeUp = 1;
@@ -14,6 +14,8 @@ void hamdata(void *pvParameters)
   for (;;)
   {
     timer = millis();
+    //Serial.println(counter);
+
     // If on Startup
     if(startup == 0 && (WiFi.status() == WL_CONNECTED)) {
 
@@ -22,7 +24,7 @@ void hamdata(void *pvParameters)
         reloadState = "Greyline";
         clientGreyline.setInsecure();
         http.begin(clientGreyline, endpointGreyline);   // Specify the URL
-        http.setTimeout(750);                          // Set Time Out
+        http.setTimeout(750);                           // Set Time Out
         httpCode = http.GET();                          // Make the request
         if (httpCode == 200)                            // Check for the returning code
         {
@@ -47,14 +49,13 @@ void hamdata(void *pvParameters)
           if (httpCode == 200)                        // Check for the returning code
           {
             if (httpCode == 200) {
-              greylineRefresh = 1;
               // Open file
               f = SPIFFS.open("/greyline.jpg", "w+");
 
               // Get size
               len = http.getSize();
               // Create buffer for read
-              uint8_t buff[1024] = { 0 };
+              uint8_t buff[128] = { 0 };
 
               // Get TCP stream
               WiFiClient *stream = &clientGreyline;
@@ -62,20 +63,23 @@ void hamdata(void *pvParameters)
               // Read all data from server
               M5.Lcd.drawString("Greyline Loading", 160, 180);
               while (http.connected() && (len > 0 || len == -1)) {
-                int c = stream->readBytes(buff, std::min((size_t)len, sizeof(buff)));          
+                int c = stream->readBytes(buff, std::min((size_t)len, sizeof(buff)));
                 // Write it to file
                 f.write(buff, c);
                 if (len > 0) {
                   len -= c;
                 }
+                yield();
               }
               // Close file
               f.close();
             }
           }
         }
+        greylineRefresh = 1;
         greylineData = "Ok";
         http.end(); // Free the resources
+        vTaskDelay(pdMS_TO_TICKS(200));
       }
 
       if(hamQTHData == "") {
@@ -91,6 +95,7 @@ void hamdata(void *pvParameters)
           hamQTHData = http.getString(); // Get data
         }
         http.end(); // Free the resources
+        vTaskDelay(pdMS_TO_TICKS(200));
       }
 
       if(hamQSLData == "") {
@@ -105,6 +110,7 @@ void hamdata(void *pvParameters)
           hamQSLData = http.getString(); // Get data
         }
         http.end(); // Free the resources
+        vTaskDelay(pdMS_TO_TICKS(200));
       }
 
       if(satData == "") {
@@ -125,10 +131,9 @@ void hamdata(void *pvParameters)
           }
         }
         http.end(); // Free the resources
+        vTaskDelay(pdMS_TO_TICKS(200));
       }
-
       counter = 2;
-      vTaskDelay(pdMS_TO_TICKS(limit / 10));
     }
     // Else
     else if(startup == 1 && (WiFi.status() == WL_CONNECTED)) {
@@ -173,7 +178,7 @@ void hamdata(void *pvParameters)
               // Get size
               len = http.getSize();
               // Create buffer for read
-              uint8_t buff[1024] = { 0 };
+              uint8_t buff[128] = { 0 };
 
               // Get TCP stream
               WiFiClient *stream = &clientGreyline;
@@ -186,6 +191,7 @@ void hamdata(void *pvParameters)
                 if (len > 0) {
                   len -= c;
                 }
+                yield();
               }
               // Close file
               f.close();
@@ -194,11 +200,9 @@ void hamdata(void *pvParameters)
           }
         }
         http.end(); // Free the resources
-        reloadState = " ";
-        vTaskDelay(pdMS_TO_TICKS(200));
+        reloadState = "";
       }
-
-      if(counter == 1) // Refresh solar only sometimes
+      else if(counter == 2) // Refresh solar only sometimes
       {
         Serial.println("HamQSL");
         reloadState = "Solar";
@@ -211,61 +215,60 @@ void hamdata(void *pvParameters)
           hamQSLData = http.getString(); // Get data
         }
         http.end(); // Free the resources
-        reloadState = " ";
-        vTaskDelay(pdMS_TO_TICKS(200));
+        reloadState = "";
       }
-
-      Serial.println("HamQTH");
-      reloadState = "Cluster";
-      clientHamQTH.setInsecure();
-      http.begin(clientHamQTH, endpointHamQTH);       // Specify the URL
-      http.addHeader("Content-Type", "text/plain");   // Specify content-type header
-      http.setTimeout(750);                           // Set Time Out
-      httpCode = http.GET();                          // Make the request
-      if (httpCode == 200)                            // Check for the returning code
+      else if(counter == 3)
       {
-        hamQTHData = http.getString(); // Get data
-      }
-      http.end(); // Free the resources
-      reloadState = " ";
-      vTaskDelay(pdMS_TO_TICKS(200));
-
-      Serial.println("Sat");
-      reloadState = "Sat";
-      http.begin(clientSat, endpointSat + "?lat=" + config[(configCurrent * 4) + 2] + "&lng=" + config[(configCurrent * 4) + 3] + "&format=text");       // Specify the URL
-      http.addHeader("Content-Type", "text/plain");   // Specify content-type header
-      http.setTimeout(2000);                          // Set Time Out
-      httpCode = http.GET();                          // Make the request
-      if (httpCode == 200)                            // Check for the returning code
-      {
-        String tmpString = http.getString(); // Get data
-        tmpString.trim();
-
-        if(tmpString != "")
+        Serial.println("HamQTH");
+        reloadState = "Cluster";
+        clientHamQTH.setInsecure();
+        http.begin(clientHamQTH, endpointHamQTH);       // Specify the URL
+        http.addHeader("Content-Type", "text/plain");   // Specify content-type header
+        http.setTimeout(750);                           // Set Time Out
+        httpCode = http.GET();                          // Make the request
+        if (httpCode == 200)                            // Check for the returning code
         {
-          satData = tmpString;
+          hamQTHData = http.getString(); // Get data
         }
+        http.end(); // Free the resources
+        reloadState = "";
       }
-      http.end(); // Free the resources
-      reloadState = " ";
-      vTaskDelay(pdMS_TO_TICKS(200));
+      else {
+        Serial.println("Sat");
+        reloadState = "Sat";
+        http.begin(clientSat, endpointSat + "?lat=" + config[(configCurrent * 4) + 2] + "&lng=" + config[(configCurrent * 4) + 3] + "&format=text");       // Specify the URL
+        http.addHeader("Content-Type", "text/plain");   // Specify content-type header
+        http.setTimeout(2000);                          // Set Time Out
+        httpCode = http.GET();                          // Make the request
+        if (httpCode == 200)                            // Check for the returning code
+        {
+          String tmpString = http.getString(); // Get data
+          tmpString.trim();
+
+          if(tmpString != "")
+          {
+            satData = tmpString;
+          }
+        }
+        http.end(); // Free the resources
+        reloadState = "";
+      }
 
       // Counter manager
 
-      counter = (counter++ < 10) ? counter : 1;
-      if(counter % 5 == 0)
+      counter = (counter++ < 4) ? counter : 1;
+      if(counter % 2 == 0)
       {
         int change = messageCurrent;
         change = (change++ < 3) ? change : 0;
         messageCurrent = change;
       }
-      counterWakeUp = (counterWakeUp++ < 120) ? counterWakeUp : 1;
+      counterWakeUp = (counterWakeUp++ < 20) ? counterWakeUp : 1;
   
       // Pause
       wait = millis() - timer;
 
       /*
-      Serial.println(counter);
       if (wait < limit) {
         Serial.println(limit - wait);
       }
@@ -274,7 +277,7 @@ void hamdata(void *pvParameters)
       }
       Serial.println("----------");
       */
-
+     
       if (wait < limit)
       {
         vTaskDelay(pdMS_TO_TICKS(limit - wait));
@@ -292,6 +295,8 @@ void button(void *pvParameters)
 
   for (;;)
   {
+    //Serial.print(">>>button");
+    //Serial.println(millis());
     getButton();
 
     if(buttonLeftPressed) {
@@ -370,6 +375,6 @@ void button(void *pvParameters)
         }
       }
     }
-    vTaskDelay(pdMS_TO_TICKS(200));
+    vTaskDelay(pdMS_TO_TICKS(250));
   }
 }

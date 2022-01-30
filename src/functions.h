@@ -146,6 +146,7 @@ void title(String title)
   // Title
   if(title != titleOld) { // Refresh
     titleOld = title;
+    reloadStateOld = " ";
 
     M5.Lcd.setTextColor(TFT_WHITE, M5.Lcd.color565(TFT_BACK.r, TFT_BACK.g, TFT_BACK.b));
     M5.Lcd.setFreeFont(&dot15pt7b);
@@ -185,14 +186,20 @@ void title(String title)
 
   // On right, view reload data
   tmpString = reloadState;
-  tmpString.trim();
-
-  if(tmpString != "" && tmpString != reloadStateOld) { // Refresh
+  
+  if(tmpString != reloadStateOld) { // Refresh
     reloadStateOld = tmpString;
 
-    M5.Lcd.drawFastHLine(2, 35, 10, M5.Lcd.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b));
-    M5.Lcd.drawLine(12, 35, 8, 31, M5.Lcd.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b));
-    M5.Lcd.drawLine(12, 35, 8, 39, M5.Lcd.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b));
+    if(tmpString != "") {
+      M5.Lcd.drawFastHLine(2, 35, 10, M5.Lcd.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b));
+      M5.Lcd.drawLine(12, 35, 8, 31, M5.Lcd.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b));
+      M5.Lcd.drawLine(12, 35, 8, 39, M5.Lcd.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b));
+    }
+    else {
+      M5.Lcd.drawFastHLine(2, 35, 10, M5.Lcd.color565(TFT_BACK.r, TFT_BACK.g, TFT_BACK.b));
+      M5.Lcd.drawLine(12, 35, 8, 31, M5.Lcd.color565(TFT_BACK.r, TFT_BACK.g, TFT_BACK.b));
+      M5.Lcd.drawLine(12, 35, 8, 39, M5.Lcd.color565(TFT_BACK.r, TFT_BACK.g, TFT_BACK.b));
+    }
 
     M5.Lcd.setTextColor(M5.Lcd.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b), M5.Lcd.color565(TFT_BACK.r, TFT_BACK.g, TFT_BACK.b));
     M5.Lcd.setTextPadding(60);
@@ -387,8 +394,9 @@ void greyline()
     decoded = JpegDec.decodeFsFile("/greyline.jpg");
     if (decoded) {
       M5.Lcd.drawJpgFile(SPIFFS, "/greyline.jpg", 0, 101, 320, 139, 0, 11, JPEG_DIV_2);
+      greylineRefresh = 0;
+      //Serial.println("Greyline view !!!");
     }
-    greylineRefresh = 0;
   }
 }
 

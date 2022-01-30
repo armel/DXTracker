@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 // Board
-#define BOARD BASIC
+#define BOARD CORE2
 
 #define BASIC 1
 #define GREY  2
@@ -37,13 +37,13 @@
 #include <JPEGDecoder.h>
 #include "font.h"
 #include "settings.h"
-#include "FS.h"
-#include "SPIFFS.h"
+#include <FS.h>
+#include <SPIFFS.h>
 #include <M5StackUpdater.h>
 
 // Name and Version
 #define NAME "DXTracker"
-#define VERSION "0.2.2"
+#define VERSION "0.2.3"
 
 // Wifi
 WiFiClient clientHamQSL, clientSat;
