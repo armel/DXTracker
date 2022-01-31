@@ -142,6 +142,7 @@ TaskHandle_t buttonHandle;
 // Miscellaneous
 String tmpString;
 String greylineData = "", hamQSLData = "", hamQTHData = "", satData = "";
+String greylineUrl = "";
 String reloadState = "";
 
 boolean decoded = 0;

@@ -396,7 +396,6 @@ void greyline()
     if (decoded) {
       M5.Lcd.drawJpgFile(SPIFFS, "/greyline.jpg", 0, 101, 320, 139, 0, 11, JPEG_DIV_2);
       greylineRefresh = 0;
-      //Serial.println("Greyline view !!!");
     }
   }
 }
@@ -704,7 +703,19 @@ void getScreenshot()
   }
 }
 
-// List files on SPIFFS
+// List all files on SPIFFS
+void listAllFiles(){
+  File root = SPIFFS.open("/"); 
+  File file = root.openNextFile();
+ 
+  while(file){
+      Serial.print("FILE: ");
+      Serial.println(file.name());
+      file = root.openNextFile();
+  }
+}
+
+// List all files on SPIFFS
 void getBinaryList(File dir)
 {
   while (true) {
