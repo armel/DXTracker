@@ -34,7 +34,7 @@ void hamdata(void *pvParameters)
         {
           tmpString = http.getString(); // Get data
 
-          M5.Lcd.drawString("Greyline Preload", 160, 180);
+          M5.Lcd.drawString("Greyline Preload", 160, 160);
 
           tmpString.replace("<img src=\"", ">>>");
           tmpString.replace("\" alt=\"Grey Line Map\"", "<<<");
@@ -55,7 +55,7 @@ void hamdata(void *pvParameters)
 
         if(greylineUrl != "") {
           check = 0;
-          M5.Lcd.drawString("Greyline loading", 160, 180);
+          M5.Lcd.drawString("Greyline Loading", 160, 160);
           File f = SPIFFS.open("/tmp.jpg", "w+");
           if (f) {
             http.begin(greylineUrl);
@@ -100,6 +100,21 @@ void hamdata(void *pvParameters)
         vTaskDelay(pdMS_TO_TICKS(200));
       }
 
+      if(hamQSLData == "") {
+        Serial.println("HamQSL Startup");
+        reloadState = "Solar";
+        http.begin(clientHamQSL, endpointHamQSL);       // Specify the URL
+        http.addHeader("Content-Type", "text/plain");   // Specify content-type header
+        http.setTimeout(750);                           // Set Time Out
+        httpCode = http.GET();                          // Make the request
+        if (httpCode == 200)                            // Check for the returning code
+        {
+          hamQSLData = http.getString(); // Get data
+        }
+        http.end(); // Free the resources
+        vTaskDelay(pdMS_TO_TICKS(200));
+      }
+
       if(hamQTHData == "") {
         Serial.println("HamQTH Startup");
         reloadState = "Cluster";
@@ -111,21 +126,6 @@ void hamdata(void *pvParameters)
         if (httpCode == 200)                            // Check for the returning code
         {
           hamQTHData = http.getString(); // Get data
-        }
-        http.end(); // Free the resources
-        vTaskDelay(pdMS_TO_TICKS(200));
-      }
-
-      if(hamQSLData == "") {
-        Serial.println("HamQSL Startup");
-        reloadState = "Solar";
-        http.begin(clientHamQSL, endpointHamQSL);       // Specify the URL
-        http.addHeader("Content-Type", "text/plain");   // Specify content-type header
-        http.setTimeout(750);                           // Set Time Out
-        httpCode = http.GET();                          // Make the request
-        if (httpCode == 200)                            // Check for the returning code
-        {
-          hamQSLData = http.getString(); // Get data
         }
         http.end(); // Free the resources
         vTaskDelay(pdMS_TO_TICKS(200));
@@ -259,7 +259,7 @@ void hamdata(void *pvParameters)
         http.end(); // Free the resources
         reloadState = "";
       }
-      else if(counter == 3)
+      else if(counter >= 2)
       {
         Serial.println("HamQTH");
         reloadState = "Cluster";
@@ -274,8 +274,9 @@ void hamdata(void *pvParameters)
         }
         http.end(); // Free the resources
         reloadState = "";
-      }
-      else {
+     
+        vTaskDelay(pdMS_TO_TICKS(100));
+
         Serial.println("Sat");
         reloadState = "Sat";
         http.begin(clientSat, endpointSat + "?lat=" + config[(configCurrent * 4) + 2] + "&lng=" + config[(configCurrent * 4) + 3] + "&format=text");       // Specify the URL
