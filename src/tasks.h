@@ -2,33 +2,39 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 // Multitasking task for retreive propag data and greyline
+ 
 void hamdata(void *pvParameters)
 {
   File f;
   HTTPClient http;
-  uint32_t timer = 0, wait = 0, limit = 1 * 30 * 1000; // Retry 30 secondes
-  uint16_t len, httpCode;
+  uint32_t timer = 0, wait = 0, limit = 1 * 60 * 1000; // Retry 60 secondes
+  uint16_t check, httpCode;
   static uint8_t counter = 1;
   static uint8_t counterWakeUp = 1;
 
   for (;;)
   {
     timer = millis();
+    Serial.println(counter);
+
     // If on Startup
     if(startup == 0 && (WiFi.status() == WL_CONNECTED)) {
 
       if(greylineData == "") {
         Serial.println("Greyline Startup");
         reloadState = "Greyline";
+        greylineUrl = "";
         clientGreyline.setInsecure();
         http.begin(clientGreyline, endpointGreyline);   // Specify the URL
-        http.setTimeout(750);                          // Set Time Out
+        http.addHeader("User-Agent","M5Stack");         // Specify header
+        http.addHeader("Connection","keep-alive");      // Specify header
+        http.setTimeout(750);                           // Set Time Out
         httpCode = http.GET();                          // Make the request
         if (httpCode == 200)                            // Check for the returning code
         {
           tmpString = http.getString(); // Get data
 
-          M5.Lcd.drawString("Greyline Preload", 160, 180);
+          M5.Lcd.drawString("Greyline Preload", 160, 160);
 
           tmpString.replace("<img src=\"", ">>>");
           tmpString.replace("\" alt=\"Grey Line Map\"", "<<<");
@@ -38,44 +44,75 @@ void hamdata(void *pvParameters)
 
           if (parenthesisBegin > 0)
           {
-            tmpString = tmpString.substring(parenthesisBegin + 4, parenthesisLast);
+            greylineUrl = tmpString.substring(parenthesisBegin + 4, parenthesisLast);
           }
 
-          http.begin(clientGreyline, tmpString);      // Specify the URL
-          httpCode = http.GET();                      // Make the request
-          http.setTimeout(750);                       // Set Time Out
-          if (httpCode == 200)                        // Check for the returning code
-          {
+          Serial.println(greylineUrl);
+        }
+        http.end(); // Free the resources
+
+        vTaskDelay(pdMS_TO_TICKS(100));
+
+        if(greylineUrl != "") {
+          check = 0;
+          M5.Lcd.drawString("Greyline Loading", 160, 160);
+          File f = SPIFFS.open("/tmp.jpg", "w+");
+          if (f) {
+            http.begin(greylineUrl);
+            int httpCode = http.GET();
             if (httpCode == 200) {
-              greylineRefresh = 1;
-              // Open file
-              f = SPIFFS.open("/greyline.jpg", "w+");
-
-              // Get size
-              len = http.getSize();
-              // Create buffer for read
-              uint8_t buff[1024] = { 0 };
-
-              // Get TCP stream
-              WiFiClient *stream = &clientGreyline;
-
-              // Read all data from server
-              M5.Lcd.drawString("Greyline Loading", 160, 180);
-              while (http.connected() && (len > 0 || len == -1)) {
-                int c = stream->readBytes(buff, std::min((size_t)len, sizeof(buff)));          
-                // Write it to file
-                f.write(buff, c);
-                if (len > 0) {
-                  len -= c;
-                }
-              }
-              // Close file
-              f.close();
+              http.writeToStream(&f);
+              vTaskDelay(pdMS_TO_TICKS(100));
             }
+            else {
+              check = 1;
+            }
+            f.close();
+            http.end(); // Free the resources
           }
         }
-        greylineData = "Ok";
+        else {
+          check = 1;
+        }
+
+        if(check == 0) {
+          decoded = JpegDec.decodeFsFile("/tmp.jpg");
+          if (decoded) {
+            SPIFFS.remove("/greyline.jpg");
+            SPIFFS.rename("/tmp.jpg", "/greyline.jpg");
+            vTaskDelay(pdMS_TO_TICKS(100));
+            Serial.println("Rename file");
+            greylineRefresh = 1;
+            greylineData = "Ok";
+          }
+          else {
+            check = 2;
+          }
+        }
+
+        if(check == 1) {
+          Serial.println("HTTP Error !");
+        }
+        else if(check == 2) {
+          Serial.println("Image Corrupt !");
+        }
+
+        vTaskDelay(pdMS_TO_TICKS(200));
+      }
+
+      if(hamQSLData == "") {
+        Serial.println("HamQSL Startup");
+        reloadState = "Solar";
+        http.begin(clientHamQSL, endpointHamQSL);       // Specify the URL
+        http.addHeader("Content-Type", "text/plain");   // Specify content-type header
+        http.setTimeout(750);                           // Set Time Out
+        httpCode = http.GET();                          // Make the request
+        if (httpCode == 200)                            // Check for the returning code
+        {
+          hamQSLData = http.getString(); // Get data
+        }
         http.end(); // Free the resources
+        vTaskDelay(pdMS_TO_TICKS(200));
       }
 
       if(hamQTHData == "") {
@@ -91,20 +128,7 @@ void hamdata(void *pvParameters)
           hamQTHData = http.getString(); // Get data
         }
         http.end(); // Free the resources
-      }
-
-      if(hamQSLData == "") {
-        Serial.println("HamQSL Startup");
-        reloadState = "Solar";
-        http.begin(clientHamQSL, endpointHamQSL);       // Specify the URL
-        http.addHeader("Content-Type", "text/plain");   // Specify content-type header
-        http.setTimeout(750);                           // Set Time Out
-        httpCode = http.GET();                          // Make the request
-        if (httpCode == 200)                            // Check for the returning code
-        {
-          hamQSLData = http.getString(); // Get data
-        }
-        http.end(); // Free the resources
+        vTaskDelay(pdMS_TO_TICKS(200));
       }
 
       if(satData == "") {
@@ -125,10 +149,9 @@ void hamdata(void *pvParameters)
           }
         }
         http.end(); // Free the resources
+        vTaskDelay(pdMS_TO_TICKS(200));
       }
-
       counter = 2;
-      vTaskDelay(pdMS_TO_TICKS(limit / 10));
     }
     // Else
     else if(startup == 1 && (WiFi.status() == WL_CONNECTED)) {
@@ -142,63 +165,86 @@ void hamdata(void *pvParameters)
       {
         Serial.println("Greyline");
         reloadState = "Greyline";
+        greylineUrl = "";
         clientGreyline.setInsecure();
         http.begin(clientGreyline, endpointGreyline);   // Specify the URL
-        http.setTimeout(750);                           // Set Time Out
+        http.addHeader("User-Agent","M5Stack");         // Specify header
+        http.addHeader("Connection","keep-alive");      // Specify header
+        http.setTimeout(500);                           // Set Time Out
         httpCode = http.GET();                          // Make the request
         if (httpCode == 200)                            // Check for the returning code
         {
-          greylineData = http.getString(); // Get data
+          tmpString = http.getString(); // Get data
+          http.end();
 
-          greylineData.replace("<img src=\"", ">>>");
-          greylineData.replace("\" alt=\"Grey Line Map\"", "<<<");
+          tmpString.replace("<img src=\"", ">>>");
+          tmpString.replace("\" alt=\"Grey Line Map\"", "<<<");
 
-          int16_t parenthesisBegin = greylineData.indexOf(">>>");
-          int16_t parenthesisLast = greylineData.indexOf("<<<");
+          int16_t parenthesisBegin = tmpString.indexOf(">>>");
+          int16_t parenthesisLast = tmpString.indexOf("<<<");
 
           if (parenthesisBegin > 0)
           {
-            greylineData = greylineData.substring(parenthesisBegin + 4, parenthesisLast);
+            greylineUrl = tmpString.substring(parenthesisBegin + 4, parenthesisLast);
           }
 
-          http.begin(clientGreyline, greylineData);     // Specify the URL
-          httpCode = http.GET();                        // Make the request
-          http.setTimeout(750);                         // Set Time Out
-          if (httpCode == 200)                          // Check for the returning code
-          {
-            if (httpCode == 200) {
-              // Open file
-              f = SPIFFS.open("/greyline.jpg", "w+");
-
-              // Get size
-              len = http.getSize();
-              // Create buffer for read
-              uint8_t buff[1024] = { 0 };
-
-              // Get TCP stream
-              WiFiClient *stream = &clientGreyline;
-
-              // Read all data from server
-              while (http.connected() && (len > 0 || len == -1)) {
-                int c = stream->readBytes(buff, std::min((size_t)len, sizeof(buff)));          
-                // Write it to file
-                f.write(buff, c);
-                if (len > 0) {
-                  len -= c;
-                }
-              }
-              // Close file
-              f.close();
-            }
-            greylineRefresh = 1;
-          }
+          Serial.println(greylineUrl);
         }
         http.end(); // Free the resources
-        reloadState = " ";
-        vTaskDelay(pdMS_TO_TICKS(200));
-      }
 
-      if(counter == 1) // Refresh solar only sometimes
+        vTaskDelay(pdMS_TO_TICKS(100));
+
+        if(greylineUrl != "") {
+          check = 0;
+          File f = SPIFFS.open("/tmp.jpg", "w+");
+          Serial.println("A");
+          if (f) {
+            http.begin(greylineUrl);
+            Serial.println("B");
+            int httpCode = http.GET();
+            if (httpCode == 200) {
+              http.writeToStream(&f);
+              Serial.println("C");
+              vTaskDelay(pdMS_TO_TICKS(100));
+            } else {
+              check = 1;
+            }
+            Serial.println("D");
+            f.close();        
+            http.end(); // Free the resources
+          }
+        }
+        else {
+          check = 1;
+        }
+
+        if(check == 0) {
+          decoded = JpegDec.decodeFsFile("/tmp.jpg");
+          if (decoded) {
+            SPIFFS.remove("/greyline.jpg");
+            SPIFFS.rename("/tmp.jpg", "/greyline.jpg");
+            vTaskDelay(pdMS_TO_TICKS(100));
+            Serial.println("Rename file");
+            greylineRefresh = 1;
+            greylineData = "Ok";
+          }
+          else {
+            check = 2;
+          }
+        }
+
+        if(check == 1) {
+          Serial.println("HTTP Error !");
+          counter = 0;
+        }
+        else if(check == 2) {
+          Serial.println("Image Corrupt !");
+          counter = 0;
+        }
+
+        reloadState = "";
+      }
+      else if(counter == 2) // Refresh solar only sometimes
       {
         Serial.println("HamQSL");
         reloadState = "Solar";
@@ -211,73 +257,77 @@ void hamdata(void *pvParameters)
           hamQSLData = http.getString(); // Get data
         }
         http.end(); // Free the resources
-        reloadState = " ";
-        vTaskDelay(pdMS_TO_TICKS(200));
+        reloadState = "";
       }
-
-      Serial.println("HamQTH");
-      reloadState = "Cluster";
-      clientHamQTH.setInsecure();
-      http.begin(clientHamQTH, endpointHamQTH);       // Specify the URL
-      http.addHeader("Content-Type", "text/plain");   // Specify content-type header
-      http.setTimeout(750);                           // Set Time Out
-      httpCode = http.GET();                          // Make the request
-      if (httpCode == 200)                            // Check for the returning code
+      else if(counter >= 2)
       {
-        hamQTHData = http.getString(); // Get data
-      }
-      http.end(); // Free the resources
-      reloadState = " ";
-      vTaskDelay(pdMS_TO_TICKS(200));
-
-      Serial.println("Sat");
-      reloadState = "Sat";
-      http.begin(clientSat, endpointSat + "?lat=" + config[(configCurrent * 4) + 2] + "&lng=" + config[(configCurrent * 4) + 3] + "&format=text");       // Specify the URL
-      http.addHeader("Content-Type", "text/plain");   // Specify content-type header
-      http.setTimeout(2000);                          // Set Time Out
-      httpCode = http.GET();                          // Make the request
-      if (httpCode == 200)                            // Check for the returning code
-      {
-        String tmpString = http.getString(); // Get data
-        tmpString.trim();
-
-        if(tmpString != "")
+        Serial.println("HamQTH");
+        reloadState = "Cluster";
+        clientHamQTH.setInsecure();
+        http.begin(clientHamQTH, endpointHamQTH);       // Specify the URL
+        http.addHeader("Content-Type", "text/plain");   // Specify content-type header
+        http.setTimeout(750);                           // Set Time Out
+        httpCode = http.GET();                          // Make the request
+        if (httpCode == 200)                            // Check for the returning code
         {
-          satData = tmpString;
+          hamQTHData = http.getString(); // Get data
         }
+        http.end(); // Free the resources
+        reloadState = "";
+     
+        vTaskDelay(pdMS_TO_TICKS(100));
+
+        Serial.println("Sat");
+        reloadState = "Sat";
+        http.begin(clientSat, endpointSat + "?lat=" + config[(configCurrent * 4) + 2] + "&lng=" + config[(configCurrent * 4) + 3] + "&format=text");       // Specify the URL
+        http.addHeader("Content-Type", "text/plain");   // Specify content-type header
+        http.setTimeout(2000);                          // Set Time Out
+        httpCode = http.GET();                          // Make the request
+        if (httpCode == 200)                            // Check for the returning code
+        {
+          String tmpString = http.getString(); // Get data
+          tmpString.trim();
+
+          if(tmpString != "")
+          {
+            satData = tmpString;
+          }
+        }
+        http.end(); // Free the resources
+        reloadState = "";
       }
-      http.end(); // Free the resources
-      reloadState = " ";
-      vTaskDelay(pdMS_TO_TICKS(200));
 
       // Counter manager
 
-      counter = (counter++ < 10) ? counter : 1;
-      if(counter % 5 == 0)
+      counter = (counter++ < 4) ? counter : 1;
+      if(counter % 2 == 0)
       {
         int change = messageCurrent;
         change = (change++ < 3) ? change : 0;
         messageCurrent = change;
       }
-      counterWakeUp = (counterWakeUp++ < 120) ? counterWakeUp : 1;
+      counterWakeUp = (counterWakeUp++ < 20) ? counterWakeUp : 1;
   
       // Pause
       wait = millis() - timer;
 
       /*
-      Serial.println(counter);
       if (wait < limit) {
         Serial.println(limit - wait);
       }
       else {
         Serial.println(0);
       }
-      Serial.println("----------");
       */
 
+      Serial.println("----------");
+     
       if (wait < limit)
       {
         vTaskDelay(pdMS_TO_TICKS(limit - wait));
+      }
+      else {
+        vTaskDelay(pdMS_TO_TICKS(100));
       }
     }
   }
@@ -292,6 +342,8 @@ void button(void *pvParameters)
 
   for (;;)
   {
+    //Serial.print(">>>button");
+    //Serial.println(millis());
     getButton();
 
     if(buttonLeftPressed) {
@@ -370,6 +422,6 @@ void button(void *pvParameters)
         }
       }
     }
-    vTaskDelay(pdMS_TO_TICKS(200));
+    vTaskDelay(pdMS_TO_TICKS(250));
   }
 }

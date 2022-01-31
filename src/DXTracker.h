@@ -37,13 +37,13 @@
 #include <JPEGDecoder.h>
 #include "font.h"
 #include "settings.h"
-#include "FS.h"
-#include "SPIFFS.h"
+#include <FS.h>
+#include <SPIFFS.h>
 #include <M5StackUpdater.h>
 
 // Name and Version
 #define NAME "DXTracker"
-#define VERSION "0.2.2"
+#define VERSION "0.2.4"
 
 // Wifi
 WiFiClient clientHamQSL, clientSat;
@@ -142,6 +142,7 @@ TaskHandle_t buttonHandle;
 // Miscellaneous
 String tmpString;
 String greylineData = "", hamQSLData = "", hamQTHData = "", satData = "";
+String greylineUrl = "";
 String reloadState = "";
 
 boolean decoded = 0;

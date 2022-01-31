@@ -155,22 +155,23 @@ void setup()
 
   while(greylineData == "" || hamQSLData == "" || hamQTHData == "" || satData == "") 
   {
-    M5.Lcd.drawString("Loading data", 160, 120);
+    M5.Lcd.drawString("Loading datas", 160, 100);
     delay(250);
-    M5.Lcd.drawString(" ", 160, 120);
+    M5.Lcd.drawString(" ", 160, 100);
     delay(250);
+    M5.Lcd.drawString("It takes a while, so please wait !", 160, 120);
 
-    if(hamQTHData != "")
-    {
-      M5.Lcd.drawString("Cluster Ok", 160, 160);
-    }
     if(greylineData != "")
     {
-      M5.Lcd.drawString("Greyline Ok", 160, 180);
+      M5.Lcd.drawString("Greyline Ok", 160, 160);
     }
     if(hamQSLData != "")
     {
-      M5.Lcd.drawString("Solar Ok", 160, 200);
+      M5.Lcd.drawString("Solar Ok", 160, 180);
+    }
+    if(hamQTHData != "")
+    {
+      M5.Lcd.drawString("Cluster Ok", 160, 200);
     }
     if(satData != "")
     {
@@ -180,10 +181,11 @@ void setup()
 
   startup = 1;
 
-  M5.Lcd.drawString("Loading data", 160, 120);
-  M5.Lcd.drawString("Cluster Ok", 160, 160);
-  M5.Lcd.drawString("Greyline Ok", 160, 180);
-  M5.Lcd.drawString("Solar Ok", 160, 200);
+  M5.Lcd.drawString("", 160, 100);
+  M5.Lcd.drawString("", 160, 120);
+  M5.Lcd.drawString("Greyline Ok", 160, 160);
+  M5.Lcd.drawString("Solar Ok", 160, 180);
+  M5.Lcd.drawString("Cluster Ok", 160, 200);
   M5.Lcd.drawString("Sat Ok", 160, 220);
   
   delay(500);

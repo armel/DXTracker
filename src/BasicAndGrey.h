@@ -37,18 +37,6 @@ void speaker()
   M5.Speaker.update();
 }
 
-// Manage Tone
-void totTone()
-{
-  M5.Speaker.tone(2000);
-}
-
-// Manage Mute
-void totMute()
-{
-  M5.Speaker.mute();
-}
-
 // Manage brightness
 void setBrightness(uint8_t value)
 {

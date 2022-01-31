@@ -88,20 +88,6 @@ void speaker()
   vibration(200);
 }
 
-// Manage Tone
-void totTone()
-{
-  _Core2SPK.playBeep(5000, 100, 2000, false);
-  vTaskDelay(pdMS_TO_TICKS(100));
-  //M5.Axp.SetLed(1);
-}
-
-// Manage Mute
-void totMute()
-{
-  //M5.Axp.SetLed(0);
-}
-
 // Manage brightness
 void setBrightness(uint8_t value)
 {
