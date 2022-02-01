@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 // Board
-#define BOARD CORE2
+#define BOARD BASIC
 
 #define BASIC 1
 #define GREY  2
