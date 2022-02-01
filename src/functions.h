@@ -47,6 +47,30 @@ String binarise()
   return "00";
 }
 
+// Get local time
+void updateLocalTime()
+{
+  char timeStringBuff[20];  //20 chars should be enough
+  char utcStringBuff[20];   //20 chars should be enough
+
+  struct tm timeinfo;
+
+  if(!getLocalTime(&timeinfo)){
+    Serial.println("Failed to obtain time");
+    return;
+  }
+  
+  strftime(timeStringBuff, sizeof(timeStringBuff), "%H:%M:%S %d-%m-%y", &timeinfo);
+  strftime(utcStringBuff, sizeof(utcStringBuff), "%z", &timeinfo);
+
+  sscanf(utcStringBuff, "%d", &utc);
+  utc = utc / 100;
+
+  //Serial.println(utc);
+
+  dateString = String(timeStringBuff);
+}
+
 // Build scroll A
 void buildScrollA()
 {
@@ -157,18 +181,11 @@ void title(String title)
 
   if(alternance % 2 == 0)
   {
-    // Update date and time
-    tmpString = hamQSLData;
-    tmpString.replace("<updated>", "(");
-    tmpString.replace("</updated>", ")");
-    parenthesisBegin = tmpString.indexOf("(");
-    parenthesisLast = tmpString.indexOf(")");
-    if (parenthesisBegin > 0)
-    {
-      tmpString = tmpString.substring(parenthesisBegin + 1, parenthesisLast);
-    }
-
-    tmpString.trim();
+    tmpString = "Update at " + dateString;
+  }
+  else if(alternance == 5)
+  {
+    tmpString = String(WiFi.localIP().toString().c_str());
   }
   else
   {
@@ -178,6 +195,7 @@ void title(String title)
   if(tmpString != baselineOld) { // Refresh
     baselineOld = tmpString;
 
+    M5.Lcd.setTextColor(TFT_WHITE, M5.Lcd.color565(TFT_BACK.r, TFT_BACK.g, TFT_BACK.b));
     M5.Lcd.setFreeFont(0);
     M5.Lcd.setTextDatum(CC_DATUM);
     M5.Lcd.setTextPadding(320);
@@ -394,7 +412,7 @@ void greyline()
     // Draw greyline
     decoded = JpegDec.decodeFsFile("/greyline.jpg");
     if (decoded) {
-      M5.Lcd.drawJpgFile(SPIFFS, "/greyline.jpg", 0, 101, 320, 139, 0, 11, JPEG_DIV_2);
+      M5.Lcd.drawJpgFile(SPIFFS, "/greyline.jpg", 0, 101, 320, 139, 0, 11);
       greylineRefresh = 0;
     }
   }

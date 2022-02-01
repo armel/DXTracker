@@ -103,6 +103,10 @@ void setup()
 
   M5.Lcd.drawString(String(WiFi.localIP().toString().c_str()), 160, 70);
 
+  // Init and get time
+  configTzTime(ntpTimeZone, ntpServer);
+  updateLocalTime();
+
   // Scroll
   posA = M5.Lcd.width();
   imgA.createSprite(M5.Lcd.width(), 20);

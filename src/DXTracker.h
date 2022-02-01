@@ -43,11 +43,11 @@
 
 // Name and Version
 #define NAME "DXTracker"
-#define VERSION "0.2.4"
+#define VERSION "0.2.5"
 
 // Wifi
-WiFiClient clientHamQSL, clientSat;
-WiFiClientSecure clientGreyline, clientHamQTH;
+WiFiClient clientHamQSL, clientSat, clientGreyline;
+WiFiClientSecure clientHamQTH;
 WiFiClient httpClient;
 WiFiServer httpServer(80);
 
@@ -75,10 +75,22 @@ typedef struct __attribute__((__packed__))
 colorType TFT_BACK = {48, 48, 48};
 colorType TFT_GRAY = {128, 128, 128};
 
+// Timezone
+const char* ntpServer = "pool.ntp.org";
+const char* ntpTimeZone = "CET-1CEST-2,M3.5.0/02:00:00,M10.5.0/03:00:00"; // For Europe/Paris
+//const char* ntpTimeZone = "CET-1CEST,M3.5.0,M10.5.0/3"; // For Europe/Brussels
+//const char* ntpTimeZone = "EET-2EEST,M3.5.0/3,M10.5.0/4"; // For Europe/Sofia 
+//const char* ntpTimeZone = "EST5EDT,M3.2.0,M11.1.0"; // For America/Montreal
+//const char* ntpTimeZone = "AST4"; // For America/Martinique
+//const char* ntpTimeZone = "AST4"; // For America/Guadeloupe
+//const char* ntpTimeZone = "NCT-11"; // For Pacific/Noumea
+
+int utc = 1;
+
 // HTTP endpoint
 String endpointHamQSL = "http://www.hamqsl.com/solarxml.php";
 String endpointSat = "http://rrf2.f5nlg.ovh:8080/cgi-bin/DXSat.py";
-String endpointGreyline = "https://dx.qsl.net/propagation/greyline.html";
+String endpointGreyline = "http://rrf2.f5nlg.ovh:8080/greyline.jpg";
 String endpointHamQTH = "https://www.hamqth.com/dxc_csv.php?limit=50";
 
 // Scroll
@@ -141,6 +153,7 @@ TaskHandle_t buttonHandle;
 
 // Miscellaneous
 String tmpString;
+String dateString;
 String greylineData = "", hamQSLData = "", hamQTHData = "", satData = "";
 String greylineUrl = "";
 String reloadState = "";
@@ -150,6 +163,7 @@ boolean startup = 0;
 boolean screensaverMode = 0;
 boolean greylineRefresh = 0;
 
+uint8_t *greylineDatas;
 uint8_t screenRefresh = 1;
 uint8_t htmlGetRequest;
 uint8_t alternance = 0;

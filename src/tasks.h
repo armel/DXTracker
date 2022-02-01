@@ -24,63 +24,32 @@ void hamdata(void *pvParameters)
         Serial.println("Greyline Startup");
         reloadState = "Greyline";
         greylineUrl = "";
-        clientGreyline.setInsecure();
         http.begin(clientGreyline, endpointGreyline);   // Specify the URL
         http.addHeader("User-Agent","M5Stack");         // Specify header
         http.addHeader("Connection","keep-alive");      // Specify header
         http.setTimeout(750);                           // Set Time Out
-        httpCode = http.GET();                          // Make the request
-        if (httpCode == 200)                            // Check for the returning code
-        {
-          tmpString = http.getString(); // Get data
-
-          M5.Lcd.drawString("Greyline Preload", 160, 160);
-
-          tmpString.replace("<img src=\"", ">>>");
-          tmpString.replace("\" alt=\"Grey Line Map\"", "<<<");
-
-          int16_t parenthesisBegin = tmpString.indexOf(">>>");
-          int16_t parenthesisLast = tmpString.indexOf("<<<");
-
-          if (parenthesisBegin > 0)
-          {
-            greylineUrl = tmpString.substring(parenthesisBegin + 4, parenthesisLast);
+        check = 0;
+        f = SPIFFS.open("/tmp.jpg", "w+");
+        if (f) {
+          int httpCode = http.GET();
+          if (httpCode == 200) {
+            http.writeToStream(&f);
+            vTaskDelay(pdMS_TO_TICKS(50));
           }
-
-          Serial.println(greylineUrl);
+          else {
+            check = 1;
+          }
         }
+
+        f.close();
         http.end(); // Free the resources
-
-        vTaskDelay(pdMS_TO_TICKS(100));
-
-        if(greylineUrl != "") {
-          check = 0;
-          M5.Lcd.drawString("Greyline Loading", 160, 160);
-          File f = SPIFFS.open("/tmp.jpg", "w+");
-          if (f) {
-            http.begin(greylineUrl);
-            int httpCode = http.GET();
-            if (httpCode == 200) {
-              http.writeToStream(&f);
-              vTaskDelay(pdMS_TO_TICKS(100));
-            }
-            else {
-              check = 1;
-            }
-            f.close();
-            http.end(); // Free the resources
-          }
-        }
-        else {
-          check = 1;
-        }
 
         if(check == 0) {
           decoded = JpegDec.decodeFsFile("/tmp.jpg");
           if (decoded) {
             SPIFFS.remove("/greyline.jpg");
             SPIFFS.rename("/tmp.jpg", "/greyline.jpg");
-            vTaskDelay(pdMS_TO_TICKS(100));
+            vTaskDelay(pdMS_TO_TICKS(50));
             Serial.println("Rename file");
             greylineRefresh = 1;
             greylineData = "Ok";
@@ -166,64 +135,31 @@ void hamdata(void *pvParameters)
         Serial.println("Greyline");
         reloadState = "Greyline";
         greylineUrl = "";
-        clientGreyline.setInsecure();
         http.begin(clientGreyline, endpointGreyline);   // Specify the URL
         http.addHeader("User-Agent","M5Stack");         // Specify header
         http.addHeader("Connection","keep-alive");      // Specify header
         http.setTimeout(500);                           // Set Time Out
-        httpCode = http.GET();                          // Make the request
-        if (httpCode == 200)                            // Check for the returning code
-        {
-          tmpString = http.getString(); // Get data
-          http.end();
-
-          tmpString.replace("<img src=\"", ">>>");
-          tmpString.replace("\" alt=\"Grey Line Map\"", "<<<");
-
-          int16_t parenthesisBegin = tmpString.indexOf(">>>");
-          int16_t parenthesisLast = tmpString.indexOf("<<<");
-
-          if (parenthesisBegin > 0)
-          {
-            greylineUrl = tmpString.substring(parenthesisBegin + 4, parenthesisLast);
+        check = 0;
+        f = SPIFFS.open("/tmp.jpg", "w+");
+        if (f) {
+          int httpCode = http.GET();
+          if (httpCode == 200) {
+            http.writeToStream(&f);
+            vTaskDelay(pdMS_TO_TICKS(50));
+          } else {
+            check = 1;
           }
-
-          Serial.println(greylineUrl);
         }
+
+        f.close();
         http.end(); // Free the resources
-
-        vTaskDelay(pdMS_TO_TICKS(100));
-
-        if(greylineUrl != "") {
-          check = 0;
-          File f = SPIFFS.open("/tmp.jpg", "w+");
-          Serial.println("A");
-          if (f) {
-            http.begin(greylineUrl);
-            Serial.println("B");
-            int httpCode = http.GET();
-            if (httpCode == 200) {
-              http.writeToStream(&f);
-              Serial.println("C");
-              vTaskDelay(pdMS_TO_TICKS(100));
-            } else {
-              check = 1;
-            }
-            Serial.println("D");
-            f.close();        
-            http.end(); // Free the resources
-          }
-        }
-        else {
-          check = 1;
-        }
 
         if(check == 0) {
           decoded = JpegDec.decodeFsFile("/tmp.jpg");
           if (decoded) {
             SPIFFS.remove("/greyline.jpg");
             SPIFFS.rename("/tmp.jpg", "/greyline.jpg");
-            vTaskDelay(pdMS_TO_TICKS(100));
+            vTaskDelay(pdMS_TO_TICKS(50));
             Serial.println("Rename file");
             greylineRefresh = 1;
             greylineData = "Ok";
@@ -300,6 +236,7 @@ void hamdata(void *pvParameters)
       // Counter manager
 
       counter = (counter++ < 4) ? counter : 1;
+      updateLocalTime();
       if(counter % 2 == 0)
       {
         int change = messageCurrent;
