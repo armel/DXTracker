@@ -7,7 +7,7 @@ void hamdata(void *pvParameters)
 {
   File f;
   HTTPClient http;
-  uint32_t timer = 0, wait = 0, limit = 1 * 10 * 1000; // Retry 60 secondes
+  uint32_t timer = 0, wait = 0, limit = 1 * 60 * 1000; // Retry 60 secondes
   uint16_t check, httpCode;
   static uint8_t counter = 1;
   static uint8_t counterWakeUp = 1;
