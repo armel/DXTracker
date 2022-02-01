@@ -217,7 +217,6 @@ void title(String title)
       M5.Lcd.drawFastHLine(2, 35, 10, M5.Lcd.color565(TFT_BACK.r, TFT_BACK.g, TFT_BACK.b));
       M5.Lcd.drawLine(12, 35, 8, 31, M5.Lcd.color565(TFT_BACK.r, TFT_BACK.g, TFT_BACK.b));
       M5.Lcd.drawLine(12, 35, 8, 39, M5.Lcd.color565(TFT_BACK.r, TFT_BACK.g, TFT_BACK.b));
-      updateLocalTime();
     }
 
     M5.Lcd.setTextColor(M5.Lcd.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b), M5.Lcd.color565(TFT_BACK.r, TFT_BACK.g, TFT_BACK.b));

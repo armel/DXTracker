@@ -34,17 +34,14 @@ void hamdata(void *pvParameters)
           int httpCode = http.GET();
           if (httpCode == 200) {
             http.writeToStream(&f);
-            vTaskDelay(pdMS_TO_TICKS(100));
+            vTaskDelay(pdMS_TO_TICKS(50));
           }
           else {
             check = 1;
           }
-          f.close();
-        }
-        else {
-          check = 1;
         }
 
+        f.close();
         http.end(); // Free the resources
 
         if(check == 0) {
@@ -52,7 +49,7 @@ void hamdata(void *pvParameters)
           if (decoded) {
             SPIFFS.remove("/greyline.jpg");
             SPIFFS.rename("/tmp.jpg", "/greyline.jpg");
-            vTaskDelay(pdMS_TO_TICKS(100));
+            vTaskDelay(pdMS_TO_TICKS(50));
             Serial.println("Rename file");
             greylineRefresh = 1;
             greylineData = "Ok";
@@ -148,16 +145,13 @@ void hamdata(void *pvParameters)
           int httpCode = http.GET();
           if (httpCode == 200) {
             http.writeToStream(&f);
-            vTaskDelay(pdMS_TO_TICKS(100));
+            vTaskDelay(pdMS_TO_TICKS(50));
           } else {
             check = 1;
           }
-          f.close();        
-        }
-        else {
-          check = 1;
         }
 
+        f.close();
         http.end(); // Free the resources
 
         if(check == 0) {
@@ -165,7 +159,7 @@ void hamdata(void *pvParameters)
           if (decoded) {
             SPIFFS.remove("/greyline.jpg");
             SPIFFS.rename("/tmp.jpg", "/greyline.jpg");
-            vTaskDelay(pdMS_TO_TICKS(100));
+            vTaskDelay(pdMS_TO_TICKS(50));
             Serial.println("Rename file");
             greylineRefresh = 1;
             greylineData = "Ok";
@@ -242,6 +236,7 @@ void hamdata(void *pvParameters)
       // Counter manager
 
       counter = (counter++ < 4) ? counter : 1;
+      updateLocalTime();
       if(counter % 2 == 0)
       {
         int change = messageCurrent;
