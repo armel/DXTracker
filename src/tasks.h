@@ -87,7 +87,6 @@ void hamdata(void *pvParameters)
       if(hamQTHData == "") {
         Serial.println("HamQTH Startup");
         reloadState = "Cluster";
-        clientHamQTH.setInsecure();
         http.begin(clientHamQTH, endpointHamQTH);       // Specify the URL
         http.addHeader("Content-Type", "text/plain");   // Specify content-type header
         http.setTimeout(750);                           // Set Time Out
@@ -199,7 +198,6 @@ void hamdata(void *pvParameters)
       {
         Serial.println("HamQTH");
         reloadState = "Cluster";
-        clientHamQTH.setInsecure();
         http.begin(clientHamQTH, endpointHamQTH);       // Specify the URL
         http.addHeader("Content-Type", "text/plain");   // Specify content-type header
         http.setTimeout(750);                           // Set Time Out
