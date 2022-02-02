@@ -43,11 +43,11 @@
 
 // Name and Version
 #define NAME "DXTracker"
-#define VERSION "0.2.5"
+#define VERSION "0.2.6"
+#define GREYLINE 1
 
 // Wifi
-WiFiClient clientHamQSL, clientSat, clientGreyline;
-WiFiClientSecure clientHamQTH;
+WiFiClient clientHamQSL, clientSat, clientGreyline, clientHamQTH;
 WiFiClient httpClient;
 WiFiServer httpServer(80);
 
@@ -90,8 +90,13 @@ int utc = 1;
 // HTTP endpoint
 String endpointHamQSL = "http://www.hamqsl.com/solarxml.php";
 String endpointSat = "http://rrf2.f5nlg.ovh:8080/cgi-bin/DXSat.py";
-String endpointGreyline = "http://rrf2.f5nlg.ovh:8080/greyline.jpg";
-String endpointHamQTH = "https://www.hamqth.com/dxc_csv.php?limit=50";
+String endpointHamQTH = "http://rrf2.f5nlg.ovh:8080/cgi-bin/DXCluster.py";
+
+#if GREYLINE == 1 
+  String endpointGreyline = "http://rrf2.f5nlg.ovh:8080/greyline.jpg";
+#elif GREYLINE == 2
+  String endpointGreyline = "http://rrf2.f5nlg.ovh:8080/sunmap.jpg";
+#endif
 
 // Scroll
 TFT_eSprite imgA = TFT_eSprite(&M5.Lcd); // Create Sprite object "img" with pointer to "tft" object
