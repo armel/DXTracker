@@ -9,7 +9,7 @@
 #define CORE2 3
 
 #define TIMEOUT_BIN_LOADER    3               // 3 sec
-#define TIMEOUT_SCREENSAVER   5 * 1 * 1000   // 5 min
+#define TIMEOUT_SCREENSAVER   5 * 60 * 1000   // 5 min
 #define TIMEOUT_TEMPORISATION 10 * 1000       // 10 sec
 
 #if BOARD == BASIC
