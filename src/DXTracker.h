@@ -43,7 +43,7 @@
 
 // Name and Version
 #define NAME "DXTracker"
-#define VERSION "0.2.6"
+#define VERSION "0.2.7"
 #define GREYLINE 1
 
 // Wifi
