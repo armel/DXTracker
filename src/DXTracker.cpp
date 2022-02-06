@@ -163,7 +163,8 @@ void setup()
       greylineSelect = 1;
       preferences.putUInt("map", greylineSelect);
       break;
-    }    
+    }
+    delay(100);   
   }
 
  if(greylineSelect == 0) {
@@ -174,8 +175,8 @@ void setup()
       M5.Lcd.drawString("Current map", 240, 90);
   }
 
-  //Serial.println(greylineSelect);
-  //Serial.println(endpointGreyline[greylineSelect]);
+  Serial.println(greylineSelect);
+  Serial.println(endpointGreyline[greylineSelect]);
 
   // Multitasking task for retreive propag data
   xTaskCreatePinnedToCore(
