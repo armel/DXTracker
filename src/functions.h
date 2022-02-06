@@ -234,6 +234,19 @@ void title(String title)
     M5.Lcd.drawRect(313, 33, 4, 6, M5.Lcd.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b));
     M5.Lcd.fillRect(296, 32, val, 8, M5.Lcd.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b));
   }
+
+  if(isCharging()) {
+    M5.Lcd.setTextFont(2);
+    M5.Lcd.setTextPadding(0);
+    M5.Lcd.drawString("D", 280, 36);
+    M5.Lcd.drawLine(277, 33, 280, 33, M5.Lcd.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b));
+    M5.Lcd.drawLine(277, 38, 280, 38, M5.Lcd.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b));
+    M5.Lcd.drawLine(286, 35, 289, 35, M5.Lcd.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b));
+    M5.Lcd.drawLine(286, 36, 289, 36, M5.Lcd.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b));
+  }
+  else {
+    M5.Lcd.fillRect(277, 30, 16, 12, M5.Lcd.color565(TFT_BACK.r, TFT_BACK.g, TFT_BACK.b));
+  }
 }
 
 // Draw Propag Data
