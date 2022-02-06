@@ -24,7 +24,7 @@ void hamdata(void *pvParameters)
         Serial.println("Greyline Startup");
         reloadState = "Greyline";
         greylineUrl = "";
-        http.begin(clientGreyline, endpointGreyline);   // Specify the URL
+        http.begin(clientGreyline, endpointGreyline[greylineSelect]);   // Specify the URL
         http.addHeader("User-Agent","M5Stack");         // Specify header
         http.addHeader("Connection","keep-alive");      // Specify header
         http.setTimeout(750);                           // Set Time Out
@@ -134,7 +134,7 @@ void hamdata(void *pvParameters)
         Serial.println("Greyline");
         reloadState = "Greyline";
         greylineUrl = "";
-        http.begin(clientGreyline, endpointGreyline);   // Specify the URL
+        http.begin(clientGreyline, endpointGreyline[greylineSelect]);   // Specify the URL
         http.addHeader("User-Agent","M5Stack");         // Specify header
         http.addHeader("Connection","keep-alive");      // Specify header
         http.setTimeout(500);                           // Set Time Out
