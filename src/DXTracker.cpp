@@ -27,7 +27,7 @@ void setup()
   binLoader();
 
   // Preferences
-  preferences.begin(NAME);
+  preferences.begin("DXTracker");
 
   size_t n = sizeof(config) / sizeof(config[0]);
   n = (n / 4) - 1;
@@ -77,7 +77,7 @@ void setup()
       delay(500);
       if(attempt % 2 == 0)
       {
-        M5.Lcd.drawString("Connexion en cours", 160, 70);
+        M5.Lcd.drawString("Connecting in progress", 160, 70);
       }
       else 
       {
@@ -117,7 +117,67 @@ void setup()
   // Start server (for Web site Screen Capture)
   httpServer.begin();     
 
-  // Multitasking task for retreive propag data
+  // Accelelerometer
+  M5.IMU.Init();
+
+  // Clear screen
+  for (uint8_t i = 0; i <= 120; i++)
+  {
+    M5.Lcd.drawFastHLine(0, i, 320, TFT_BLACK);
+    M5.Lcd.drawFastHLine(0, 240 - i, 320, TFT_BLACK);
+    delay(5);
+  }
+
+  // Select map
+  greylineSelect = preferences.getUInt("map", 0);
+
+  M5.Lcd.setTextColor(TFT_WHITE, TFT_BLACK);
+  M5.Lcd.setTextSize(1);  // Font size scaling is x1
+  M5.Lcd.setTextFont(2);  // Font 2 selected
+  M5.Lcd.setTextDatum(CC_DATUM);
+  M5.Lcd.setTextPadding(160);
+
+  M5.Lcd.drawString("Select Left", 80, 10);
+  M5.Lcd.drawString("Select Right", 240, 10);
+
+  if(greylineSelect == 0) {
+      M5.Lcd.drawString("Current map", 80, 90);
+      M5.Lcd.drawString("", 240, 90);
+  } else {
+      M5.Lcd.drawString("", 80, 90);
+      M5.Lcd.drawString("Current map", 240, 90);
+  }
+
+  M5.Lcd.drawJpg(map_greyline, sizeof(map_greyline), 20, 20, 120, 60);
+  M5.Lcd.drawJpg(map_sunmap, sizeof(map_sunmap), 180, 20, 120, 60);
+
+  temporisation = millis();
+  while(millis() - temporisation < TIMEOUT_MAP) {
+    getButton();
+    if(btnA == 1) {
+      greylineSelect = 0;
+      preferences.putUInt("map", greylineSelect);
+      break;
+    }
+    if(btnC == 1) {
+      greylineSelect = 1;
+      preferences.putUInt("map", greylineSelect);
+      break;
+    }    
+  }
+
+ if(greylineSelect == 0) {
+      M5.Lcd.drawString("Current map", 80, 90);
+      M5.Lcd.drawString("", 240, 90);
+  } else {
+      M5.Lcd.drawString("", 80, 90);
+      M5.Lcd.drawString("Current map", 240, 90);
+  }
+  
+  Serial.println(greylineSelect);
+  Serial.println(endpointGreyline[greylineSelect]);
+
+ // Multitasking task for retreive propag data
   xTaskCreatePinnedToCore(
       hamdata,        // Function to implement the task
       "hamdata",      // Name of the task
@@ -137,18 +197,8 @@ void setup()
       &buttonHandle,  // Task handle
       1);             // Core where the task should run
 
-  // Accelelerometer
-  M5.IMU.Init();
-
   // Let's go after temporisation
-  delay(1000);
-
-  for (uint8_t i = 0; i <= 120; i++)
-  {
-    M5.Lcd.drawFastHLine(0, i, 320, TFT_BLACK);
-    M5.Lcd.drawFastHLine(0, 240 - i, 320, TFT_BLACK);
-    delay(5);
-  }
+  delay(250);
 
   // Waiting for data
   M5.Lcd.setTextColor(TFT_WHITE, TFT_BLACK);
@@ -159,40 +209,43 @@ void setup()
 
   while(greylineData == "" || hamQSLData == "" || hamQTHData == "" || satData == "") 
   {
-    M5.Lcd.drawString("Loading datas", 160, 100);
+    M5.Lcd.drawString("Loading datas", 160, 110);
     delay(250);
-    M5.Lcd.drawString(" ", 160, 100);
+    M5.Lcd.drawString(" ", 160, 110);
     delay(250);
-    M5.Lcd.drawString("It takes a while, so please wait !", 160, 120);
+    M5.Lcd.drawString("It takes a while, so please wait !", 160, 130);
 
     if(greylineData != "")
     {
-      M5.Lcd.drawString("Greyline Ok", 160, 160);
+      M5.Lcd.drawString("Greyline Ok", 160, 170);
     }
     if(hamQSLData != "")
     {
-      M5.Lcd.drawString("Solar Ok", 160, 180);
+      M5.Lcd.drawString("Solar Ok", 160, 190);
     }
     if(hamQTHData != "")
     {
-      M5.Lcd.drawString("Cluster Ok", 160, 200);
+      M5.Lcd.drawString("Cluster Ok", 160, 210);
     }
     if(satData != "")
     {
-      M5.Lcd.drawString("Sat Ok", 160, 220);
+      M5.Lcd.drawString("Sat Ok", 160, 230);
     }
   }
 
   startup = 1;
-
-  M5.Lcd.drawString("", 160, 100);
-  M5.Lcd.drawString("", 160, 120);
-  M5.Lcd.drawString("Greyline Ok", 160, 160);
-  M5.Lcd.drawString("Solar Ok", 160, 180);
-  M5.Lcd.drawString("Cluster Ok", 160, 200);
-  M5.Lcd.drawString("Sat Ok", 160, 220);
   
   delay(500);
+
+  for (uint8_t i = 0; i <= 120; i++)
+  {
+    M5.Lcd.drawFastHLine(0, i, 320, TFT_BLACK);
+    M5.Lcd.drawFastHLine(0, 240 - i, 320, TFT_BLACK);
+    delay(5);
+  }
+
+  // And clear
+  screenRefresh = 1;
 }
 
 // Main loop

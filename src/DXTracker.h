@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 // Board
-#define BOARD BASIC
+#define BOARD CORE2
 
 #define BASIC 1
 #define GREY  2
@@ -10,6 +10,7 @@
 
 #define TIMEOUT_BIN_LOADER    3               // 3 sec
 #define TIMEOUT_SCREENSAVER   5 * 60 * 1000   // 5 min
+#define TIMEOUT_MAP           5 * 1000        // 5 sec
 #define TIMEOUT_TEMPORISATION 10 * 1000       // 10 sec
 
 #if BOARD == BASIC
@@ -35,6 +36,7 @@
 #include <HTTPClient.h>
 #include <Preferences.h>
 #include <JPEGDecoder.h>
+#include "map.h"
 #include "font.h"
 #include "settings.h"
 #include <FS.h>
@@ -44,7 +46,6 @@
 // Name and Version
 #define NAME "DXTracker"
 #define VERSION "0.2.8"
-#define GREYLINE 1
 
 // Wifi
 WiFiClient clientHamQSL, clientSat, clientGreyline, clientHamQTH;
@@ -92,11 +93,10 @@ String endpointHamQSL = "http://www.hamqsl.com/solarxml.php";
 String endpointSat = "http://rrf2.f5nlg.ovh:8080/cgi-bin/DXSat.py";
 String endpointHamQTH = "http://rrf2.f5nlg.ovh:8080/cgi-bin/DXCluster.py";
 
-#if GREYLINE == 1 
-  String endpointGreyline = "http://rrf2.f5nlg.ovh:8080/greyline.jpg";
-#elif GREYLINE == 2
-  String endpointGreyline = "http://rrf2.f5nlg.ovh:8080/sunmap.jpg";
-#endif
+String endpointGreyline[2] = {
+  "http://rrf2.f5nlg.ovh:8080/greyline.jpg",
+  "http://rrf2.f5nlg.ovh:8080/sunmap.jpg"
+};
 
 // Scroll
 TFT_eSprite imgA = TFT_eSprite(&M5.Lcd); // Create Sprite object "img" with pointer to "tft" object
@@ -167,8 +167,8 @@ boolean decoded = 0;
 boolean startup = 0;
 boolean screensaverMode = 0;
 boolean greylineRefresh = 0;
+boolean greylineSelect = 0;
 
-uint8_t *greylineDatas;
 uint8_t screenRefresh = 1;
 uint8_t htmlGetRequest;
 uint8_t alternance = 0;
