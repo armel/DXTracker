@@ -175,8 +175,8 @@ void setup()
       M5.Lcd.drawString("Current map", 240, 90);
   }
 
-  Serial.println(greylineSelect);
-  Serial.println(endpointGreyline[greylineSelect]);
+  //Serial.println(greylineSelect);
+  //Serial.println(endpointGreyline[greylineSelect]);
 
   // Multitasking task for retreive propag data
   xTaskCreatePinnedToCore(
