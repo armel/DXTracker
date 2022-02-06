@@ -173,11 +173,11 @@ void setup()
       M5.Lcd.drawString("", 80, 90);
       M5.Lcd.drawString("Current map", 240, 90);
   }
-  
-  Serial.println(greylineSelect);
-  Serial.println(endpointGreyline[greylineSelect]);
 
- // Multitasking task for retreive propag data
+  //Serial.println(greylineSelect);
+  //Serial.println(endpointGreyline[greylineSelect]);
+
+  // Multitasking task for retreive propag data
   xTaskCreatePinnedToCore(
       hamdata,        // Function to implement the task
       "hamdata",      // Name of the task
