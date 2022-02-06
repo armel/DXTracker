@@ -235,7 +235,10 @@ void title(String title)
     M5.Lcd.fillRect(296, 32, val, 8, M5.Lcd.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b));
   }
 
+  // What a dirty code...
   if(isCharging()) {
+    M5.Lcd.fillRect(277, 30, 16, 12, M5.Lcd.color565(TFT_BACK.r, TFT_BACK.g, TFT_BACK.b));
+    M5.Lcd.setTextColor(M5.Lcd.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b), M5.Lcd.color565(TFT_BACK.r, TFT_BACK.g, TFT_BACK.b));
     M5.Lcd.setTextFont(2);
     M5.Lcd.setTextPadding(0);
     M5.Lcd.drawString("D", 280, 36);
