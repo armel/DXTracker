@@ -45,7 +45,7 @@
 
 // Name and Version
 #define NAME "DXTracker"
-#define VERSION "0.2.8"
+#define VERSION "0.2.9"
 
 // Wifi
 WiFiClient clientHamQSL, clientSat, clientGreyline, clientHamQTH;
