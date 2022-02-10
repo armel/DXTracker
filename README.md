@@ -1,4 +1,15 @@
 # DXTracker
+![basic](https://img.shields.io/badge/M5Stack-BASIC-blue)
+![grey](https://img.shields.io/badge/M5Stack-GREY-blue)
+![fire](https://img.shields.io/badge/M5Stack-FIRE-orange)
+![core2](https://img.shields.io/badge/M5Stack-CORE2-green)
+![aws](https://img.shields.io/badge/M5Stack-AWS-orange)
+
+![licence](https://img.shields.io/github/license/armel/DXTracker)
+![language](https://img.shields.io/github/languages/top/armel/DXTracker)
+![size](https://img.shields.io/github/repo-size/armel/DXTracker)
+![version](https://img.shields.io/github/v/release/armel/DXTracker)
+![activity](https://img.shields.io/github/commit-activity/y/armel/DXTracker)
 
 Le projet DXTracker propose plusieurs fonctionnalités permettant de suivre l'activité du Soleil, les conditions d'ouverture et l'activité du trafic sur les bandes Radio Amateurs, ainsi que les prévisions de passages des satellites Radio Amateurs.
 
