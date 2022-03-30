@@ -219,6 +219,9 @@ Les boutons gauche et droite, permettent de passer d'un binaire à un autre. Et 
 
 Je pense qu'il est possible de faire cohabiter 5 ou 6 applications, dans la mémoire Flash de votre M5Stack. En l'état, ca me semble suffisant. Si besoin, j'adapterais le code pour les binaires sur la carte SD.  
 
+# Donations
+If you find this app fun and useful then [offer me a beer](https://www.paypal.me/F4HWN) :)
+
 # That's all
 Bon trafic à tous, 88 & 73 de Armel F4HWN ! 
 	
