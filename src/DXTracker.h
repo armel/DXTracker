@@ -45,7 +45,7 @@
 
 // Name and Version
 #define NAME "DXTracker"
-#define VERSION "1.0.0"
+#define VERSION "1.0.1"
 
 // Wifi
 WiFiClient clientHamQSL, clientSat, clientGreyline, clientHamQTH;
@@ -109,7 +109,7 @@ int16_t posB;
 
 // Bin loader
 File root;
-String binFilename[8];
+String binFilename[128];
 uint8_t binIndex = 0;
 
 // Propag data
