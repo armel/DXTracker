@@ -77,7 +77,7 @@ void buildScrollA()
   int16_t h = 20;
   int16_t w;
 
-  imgA.setFreeFont(&FreeSans9pt7b); 
+  imgA.setFont(&FreeSans9pt7b); 
   w = imgA.textWidth(messageA) + 80;
   // We could just use fillSprite(color) but lets be a bit more creative...
   while (h--)
@@ -103,7 +103,7 @@ void scrollA(uint8_t pause)
   if (posA == 0)
   {
     //posA = M5.Lcd.width();
-    imgA.setFreeFont(&FreeSans9pt7b); 
+    imgA.setFont(&FreeSans9pt7b); 
     posA = imgA.textWidth(messageA) + 80;
   }
 
@@ -171,7 +171,7 @@ void title(String title)
     reloadStateOld = " ";
 
     M5.Lcd.setTextColor(TFT_WHITE, M5.Lcd.color565(TFT_BACK.r, TFT_BACK.g, TFT_BACK.b));
-    M5.Lcd.setFreeFont(&dot15pt7b);
+    M5.Lcd.setFont(&dot15pt7b);
     M5.Lcd.setTextDatum(CC_DATUM);
     M5.Lcd.setTextPadding(320);
     M5.Lcd.drawString(title, 160, 16);
@@ -194,7 +194,7 @@ void title(String title)
     baselineOld = tmpString;
 
     M5.Lcd.setTextColor(TFT_WHITE, M5.Lcd.color565(TFT_BACK.r, TFT_BACK.g, TFT_BACK.b));
-    M5.Lcd.setFreeFont(0);
+    M5.Lcd.setFont(0);
     M5.Lcd.setTextDatum(CC_DATUM);
     M5.Lcd.setTextPadding(320);
     M5.Lcd.drawString(tmpString, 160, 36);
@@ -218,7 +218,7 @@ void title(String title)
     }
 
     M5.Lcd.setTextColor(M5.Lcd.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b), M5.Lcd.color565(TFT_BACK.r, TFT_BACK.g, TFT_BACK.b));
-    M5.Lcd.setFreeFont(0);
+    M5.Lcd.setFont(0);
     M5.Lcd.setTextDatum(ML_DATUM);
     M5.Lcd.setTextPadding(60);
     M5.Lcd.drawString(tmpString, 18, 36);
@@ -233,14 +233,14 @@ void title(String title)
     
   if(isCharging()) {
     M5.Lcd.setTextColor(M5.Lcd.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b), M5.Lcd.color565(TFT_BACK.r, TFT_BACK.g, TFT_BACK.b));
-    M5.Lcd.setFreeFont(0);
+    M5.Lcd.setFont(0);
     M5.Lcd.setTextDatum(CC_DATUM);
     M5.Lcd.setTextPadding(0);
     M5.Lcd.drawString("+", 288, 37);
   }
   else {
     M5.Lcd.setTextColor(M5.Lcd.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b), M5.Lcd.color565(TFT_BACK.r, TFT_BACK.g, TFT_BACK.b));
-    M5.Lcd.setFreeFont(0);
+    M5.Lcd.setFont(0);
     M5.Lcd.setTextDatum(CC_DATUM);
     M5.Lcd.setTextPadding(0);
     M5.Lcd.drawString(" ", 288, 37);
@@ -425,31 +425,6 @@ void greyline()
     if (decoded) {
       M5.Lcd.drawJpgFile(SPIFFS, "/greyline.jpg", 0, 101, 320, 139, 0, 11);
       greylineRefresh = 0;
-    }
-  }
-}
-
-// Detect rotation
-void getAcceleration()
-{
-  float accX = 0.0F;
-  float accY = 0.0F;
-  float accZ = 0.0F;
-
-  if(BOARD == GREY || BOARD == CORE2) {
-    M5.IMU.getAccelData(&accX,&accY,&accZ);
-
-    //Serial.println((accY * 1000) < -500);
-
-    if(int(accY * 1000) < -500 && M5.Lcd.getRotation() != 3) {
-      M5.Lcd.setRotation(3);
-      screenRefresh = 1;
-      greylineRefresh = 1;
-    }
-    else if(int(accY * 1000) > 500 && M5.Lcd.getRotation() != 1) {
-      M5.Lcd.setRotation(1);
-      screenRefresh = 1;
-      greylineRefresh = 1;
     }
   }
 }
@@ -666,7 +641,12 @@ void getScreenshot()
                   httpClient.println("HTTP/1.1 200 OK");
                   httpClient.println("Content-type:text/html");
                   httpClient.println();
-                  httpClient.write_P(index_html, sizeof(index_html));
+                  if(M5.getBoard() == m5::board_t::board_M5Stack) {
+                    httpClient.write_P(index_m5stack_html, sizeof(index_m5stack_html));
+                  }
+                  else if(M5.getBoard() == m5::board_t::board_M5StackCore2) {
+                    httpClient.write_P(index_core2_html, sizeof(index_core2_html));
+                  }
                   break;
                 }
                 case GET_screenshot: {              
@@ -799,14 +779,17 @@ void binLoader()
   root = SPIFFS.open("/");
   getBinaryList(root, "SP");
 
-
-  if (SD.begin()) {
+  if (SD.begin(GPIO_NUM_4, SPI, 25000000)) 
+  {
     root = SD.open("/");
     getBinaryList(root, "SD");
   }
 
   if (binIndex != 0)
   {
+    // QRCode
+    M5.Lcd.qrcode("https://github.com/armel/ICSMeter", 90, 80, 140, 6);
+
     M5.Lcd.setTextFont(1);
     M5.Lcd.setTextSize(1);
 
@@ -825,11 +808,13 @@ void binLoader()
 
       if (btnA || btnC)
       {
+        SD.end(); // If not Bluetooth doesn't work !!!
         return;
       }
       else if (btnB)
       {
         click = 1;
+        M5.Lcd.fillRect(0, 0, 320, 240, TFT_BLACK);
         break;
       }
 
@@ -903,11 +888,12 @@ void binLoader()
         {
           tmpName = ">> " + tmpName + " <<";
 
-          M5.Lcd.setTextSize(1);
           if(binFilename[cursor].substring(0, 4) == "SP_/") {
+            M5.Lcd.setTextSize(1);
             M5.Lcd.drawString("SPI Flash File Storage", 160, 50);
           }
           else {
+            M5.Lcd.setTextSize(1);
             M5.Lcd.drawString("SD Card Storage", 160, 50);
           }
         }
@@ -919,4 +905,5 @@ void binLoader()
     }
     vTaskDelay(100);
   }
+  SD.end(); // If not Bluetooth doesn't work !!!
 }

@@ -34,67 +34,14 @@ Le projet DXTracker propose plusieurs fonctionnalités permettant de suivre l'ac
 - Prévisions de passages des satellites Radio Amateurs,
 - Cluster DX.
 
-![DXTracker](https://github.com/armel/DXTracker/blob/main/img/DXTracker.jpeg)
-
+![Map1](https://github.com/armel/DXTracker/blob/main/img/Map_1.png)
+![Map2](https://github.com/armel/DXTracker/blob/main/img/Map_2.png)
 
 # Installation
 
 ## Pré-ambule
 
 Le plus simple est d'installer [PlateformIO for VSCode](https://platformio.org/install/ide?install=vscode) sur votre PC (Linux ou Windows) ou sur votre Mac (Intel ou M1). C'est un environnement de développement multiplateforme et multilangage performant, en plus d'être agréable à utiliser.
-
-## Fichier `src/DXTracker.h`
-
-### Constante BOARD
-
-Ligne 5, vérifier que la constante `BOARD` correspond bien à votre type de M5Stack (par défaut, la constante est initialisée à `GREY`). Donc, indiquer : 
-
-- `GREY` si vous avez un M5Stack GREY
-
-```
-#define BOARD GREY
-```
-
-- `BASIC` si vous avez un M5Stack BASIC
-
-```
-#define BOARD BASIC
-```
-
-- `CORE2` si vous avez un M5Stack CORE2
-
-```
-#define BOARD CORE2
-```
-### Exclusion de fréquences
-
-Par défaut, les fréquences FT8 sont filtrées et ne seront pas affichées par le Cluster DX. Libre à vous de modifier cette liste de filtrage et d'ajouter ou de supprimer les fréquences que vous souhaitez. Pour se faire, éditer le tableau `frequencyExclude[]`, ligne 149. 
-
-## Fichier `platformio.ini`
-
-### Modèle M5Core2
-
-Si et seulement si __vous utilisez le M5Stack Core2__, éditer le fichier `platformio.ini` et modifier les lignes,
-
-```
-default_envs = m5stack-basic-grey
-;default_envs = m5stack-core2
-```
-
-Par,
-
-```
-;default_envs = m5stack-basic-grey
-default_envs = m5stack-core2
-```
-
-Cela revient à changer la plate-forme cible, le point-virgule étant un commentaire.
-
-En complément, comme déjà évoqué, vérifier que vous avez bien modifié la constante `BOARD` dans le fichier `src/DXTracker.h` en indiquant :
-
-```
-#define BOARD CORE2
-```
 
 ## Fichier `src/settings.h`
 
@@ -116,6 +63,12 @@ const char *config[] = {
   "iPhone8", "mdp_iphone", "48.8482855", "2.2708201"
 };
 ```
+
+## Fichier `src/DXTracker.h`
+
+### Exclusion de fréquences
+
+Par défaut, les fréquences FT8 sont filtrées et ne seront pas affichées par le Cluster DX. Libre à vous de modifier cette liste de filtrage et d'ajouter ou de supprimer les fréquences que vous souhaitez. Pour se faire, éditer le tableau `frequencyExclude[]`, ligne 149. 
 
 # Pour finir
 Compiler et uploader le projet sur votre M5Stack. C'est terminé.

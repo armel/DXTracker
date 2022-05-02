@@ -1,27 +1,24 @@
 // Copyright (c) F4HWN Armel. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+#include "settings.h"
 #include "DXTracker.h"
+#include "map.h"
+#include "font.h"
+#include "tools.h"
+#include "webIndex.h"
 #include "functions.h"
 #include "tasks.h"
 
 // Setup
 void setup()
 {
-  // Debug
-  Serial.begin(115200);
-
   // Init screensaver timer
   screensaver = millis();
 
   // Init M5
-  M5.begin(true, true, false, false);
-
-  // Init Power
-  power();
-
-  // Init Speaker
-  speaker();
+  auto cfg = M5.config();
+  M5.begin(cfg);
 
   // Bin Loader
   binLoader();
@@ -54,11 +51,11 @@ void setup()
   }
 
   // Title
-  M5.Lcd.setFreeFont(&rounded_led_board10pt7b);
+  M5.Lcd.setFont(&rounded_led_board10pt7b);
   M5.Lcd.setTextColor(TFT_WHITE, M5.Lcd.color565(TFT_BACK.r, TFT_BACK.g, TFT_BACK.b));
   M5.Lcd.setTextDatum(CC_DATUM);
   M5.Lcd.drawString(String(NAME), 160, 20);
-  M5.Lcd.setFreeFont(0);
+  M5.Lcd.setFont(0);
   M5.Lcd.drawString("Version " + String(VERSION) + " by F4HWN", 160, 50);
 
   // QRCode
@@ -116,9 +113,6 @@ void setup()
 
   // Start server (for Web site Screen Capture)
   httpServer.begin();     
-
-  // Accelelerometer
-  M5.IMU.Init();
 
   // Clear screen
   for (uint8_t i = 0; i <= 120; i++)
@@ -252,9 +246,6 @@ void setup()
 // Main loop
 void loop()
 {
-  // Manage acceleration
-  getAcceleration();
-
   // Let's clean if necessary
   clear();
 
