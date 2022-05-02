@@ -1,34 +1,14 @@
 // Copyright (c) F4HWN Armel. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-// Board
-#define BOARD BASIC
-
-#define BASIC 1
-#define GREY  2
-#define CORE2 3
+#define VERSION "1.1.0"
+#define AUTHOR "F4HWN"
+#define NAME "DXTracker"
 
 #define TIMEOUT_BIN_LOADER    3               // 3 sec
 #define TIMEOUT_SCREENSAVER   5 * 60 * 1000   // 5 min
 #define TIMEOUT_MAP           5 * 1000        // 5 sec
 #define TIMEOUT_TEMPORISATION 10 * 1000       // 10 sec
-
-#if BOARD == BASIC
-  #define M5STACK_MPU6886
-  #include <M5Stack.h>
-  #include "BasicAndGrey.h"
-  #include "WebIndexBasicAndGrey.h"
-#elif BOARD == GREY
-  #define M5STACK_MPU6886
-  #include <M5Stack.h>
-  #include "BasicAndGrey.h"
-  #include "WebIndexBasicAndGrey.h"
-#elif BOARD == CORE2
-  #include <M5Core2.h>
-  #include "Core2SPK.h"
-  #include "Core2.h"
-  #include "WebIndexCore2.h"
-#endif
 
 #undef min
 
@@ -36,16 +16,11 @@
 #include <HTTPClient.h>
 #include <Preferences.h>
 #include <JPEGDecoder.h>
-#include "map.h"
-#include "font.h"
-#include "settings.h"
 #include <FS.h>
 #include <SPIFFS.h>
+#include <M5Unified.h>
 #include <M5StackUpdater.h>
 
-// Name and Version
-#define NAME "DXTracker"
-#define VERSION "1.0.2"
 
 // Wifi
 WiFiClient clientHamQSL, clientSat, clientGreyline, clientHamQTH;
@@ -99,11 +74,11 @@ String endpointGreyline[2] = {
 };
 
 // Scroll
-TFT_eSprite imgA = TFT_eSprite(&M5.Lcd); // Create Sprite object "img" with pointer to "tft" object
+LGFX_Sprite imgA(&M5.Lcd); // Create Sprite object "img" with pointer to "tft" object
 String messageA = "";
 int16_t posA;
 
-TFT_eSprite imgB = TFT_eSprite(&M5.Lcd); // Create Sprite object "img" with pointer to "tft" object
+LGFX_Sprite imgB(&M5.Lcd); // Create Sprite object "img" with pointer to "tft" object
 String messageB = "";
 int16_t posB;
 
