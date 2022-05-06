@@ -11,6 +11,10 @@
 ![version](https://img.shields.io/github/v/release/armel/DXTracker)
 ![activity](https://img.shields.io/github/commit-activity/y/armel/DXTracker)
 
+**For Germans, take a look at this other excellent [video](https://www.youtube.com/watch?v=UR8D_PGrvio&ab_channel=ManuelLausmann) released by [@ManuelLausmann](https://twitter.com/ManuelLausmann).**
+
+**Many thanks to them and all my [donors](#donations)🙏🏻** 
+
 Le projet DXTracker propose plusieurs fonctionnalités permettant de suivre l'activité du Soleil, les conditions d'ouverture et l'activité du trafic sur les bandes Radio Amateurs, ainsi que les prévisions de passages des satellites Radio Amateurs.
 
 À ce titre, le DXTracker affiche en temps réel, les informations suivantes :
