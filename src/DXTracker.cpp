@@ -6,7 +6,7 @@
 #include "map.h"
 #include "font.h"
 #include "tools.h"
-#include "WebIndex.h"
+#include "webIndex.h"
 #include "functions.h"
 #include "tasks.h"
 
