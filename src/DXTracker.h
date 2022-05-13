@@ -1,7 +1,7 @@
 // Copyright (c) F4HWN Armel. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#define VERSION "1.1.0"
+#define VERSION "1.1.1"
 #define AUTHOR "F4HWN"
 #define NAME "DXTracker"
 
@@ -21,7 +21,6 @@
 #include <M5Unified.h>
 #include <M5StackUpdater.h>
 
-
 // Wifi
 WiFiClient clientHamQSL, clientSat, clientGreyline, clientHamQTH;
 WiFiClient httpClient;
@@ -31,6 +30,9 @@ WiFiServer httpServer(80);
 #define GET_unknown 0
 #define GET_index_page  1
 #define GET_screenshot  2
+
+// Display
+M5GFX &display(M5.Lcd);
 
 // Flags for button presses via Web site Screen Capture
 bool buttonLeftPressed = false;

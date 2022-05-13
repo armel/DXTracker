@@ -20,6 +20,9 @@ void setup()
   auto cfg = M5.config();
   M5.begin(cfg);
 
+  // Init Display
+  display.begin();
+
   // Bin Loader
   binLoader();
 
@@ -39,8 +42,8 @@ void setup()
   }
 
   // LCD
-  M5.Lcd.setBrightness(brightnessCurrent);
-  M5.Lcd.fillScreen(M5.Lcd.color565(TFT_BACK.r, TFT_BACK.g, TFT_BACK.b));
+  display.setBrightness(brightnessCurrent);
+  display.fillScreen(display.color565(TFT_BACK.r, TFT_BACK.g, TFT_BACK.b));
   screensaver = millis(); // Screensaver update !!!
 
   // SPIFFS
@@ -51,34 +54,34 @@ void setup()
   }
 
   // Title
-  M5.Lcd.setFont(&rounded_led_board10pt7b);
-  M5.Lcd.setTextColor(TFT_WHITE, M5.Lcd.color565(TFT_BACK.r, TFT_BACK.g, TFT_BACK.b));
-  M5.Lcd.setTextDatum(CC_DATUM);
-  M5.Lcd.drawString(String(NAME), 160, 20);
-  M5.Lcd.setFont(0);
-  M5.Lcd.drawString("Version " + String(VERSION) + " by F4HWN", 160, 50);
+  display.setFont(&rounded_led_board10pt7b);
+  display.setTextColor(TFT_WHITE, display.color565(TFT_BACK.r, TFT_BACK.g, TFT_BACK.b));
+  display.setTextDatum(CC_DATUM);
+  display.drawString(String(NAME), 160, 20);
+  display.setFont(0);
+  display.drawString("Version " + String(VERSION) + " by F4HWN", 160, 50);
 
   // QRCode
-  M5.Lcd.qrcode("https://github.com/armel/DXTracker", 90, 80, 140, 6);
+  display.qrcode("https://github.com/armel/DXTracker", 90, 80, 140, 6);
 
   // We start by connecting to the WiFi network
-  M5.Lcd.setTextPadding(320);
+  display.setTextPadding(320);
 
   while(true)
   {
     uint8_t attempt = 1;
-    M5.Lcd.drawString(String(config[(configCurrent * 4)]), 160, 60);
+    display.drawString(String(config[(configCurrent * 4)]), 160, 60);
     WiFi.begin(config[(configCurrent * 4)], config[(configCurrent * 4) + 1]);
     while (WiFi.status() != WL_CONNECTED)
     {
       delay(500);
       if(attempt % 2 == 0)
       {
-        M5.Lcd.drawString("Connecting in progress", 160, 70);
+        display.drawString("Connecting in progress", 160, 70);
       }
       else 
       {
-        M5.Lcd.drawString(" ", 160, 70);
+        display.drawString(" ", 160, 70);
       }
       attempt++;
       if(attempt > 10) {
@@ -98,18 +101,18 @@ void setup()
     }
   }
 
-  M5.Lcd.drawString(String(WiFi.localIP().toString().c_str()), 160, 70);
+  display.drawString(String(WiFi.localIP().toString().c_str()), 160, 70);
 
   // Init and get time
   configTzTime(ntpTimeZone, ntpServer);
   updateLocalTime();
 
   // Scroll
-  posA = M5.Lcd.width();
-  imgA.createSprite(M5.Lcd.width(), 20);
+  posA = display.width();
+  imgA.createSprite(display.width(), 20);
 
-  posB = M5.Lcd.width();
-  imgB.createSprite(M5.Lcd.width(), 20);
+  posB = display.width();
+  imgB.createSprite(display.width(), 20);
 
   // Start server (for Web site Screen Capture)
   httpServer.begin();     
@@ -117,33 +120,33 @@ void setup()
   // Clear screen
   for (uint8_t i = 0; i <= 120; i++)
   {
-    M5.Lcd.drawFastHLine(0, i, 320, TFT_BLACK);
-    M5.Lcd.drawFastHLine(0, 240 - i, 320, TFT_BLACK);
+    display.drawFastHLine(0, i, 320, TFT_BLACK);
+    display.drawFastHLine(0, 240 - i, 320, TFT_BLACK);
     delay(5);
   }
 
   // Select map
   greylineSelect = preferences.getUInt("map", 0);
 
-  M5.Lcd.setTextColor(TFT_WHITE, TFT_BLACK);
-  M5.Lcd.setTextSize(1);  // Font size scaling is x1
-  M5.Lcd.setTextFont(2);  // Font 2 selected
-  M5.Lcd.setTextDatum(CC_DATUM);
-  M5.Lcd.setTextPadding(160);
+  display.setTextColor(TFT_WHITE, TFT_BLACK);
+  display.setTextSize(1);  // Font size scaling is x1
+  display.setTextFont(2);  // Font 2 selected
+  display.setTextDatum(CC_DATUM);
+  display.setTextPadding(160);
 
-  M5.Lcd.drawString("Select Left", 80, 10);
-  M5.Lcd.drawString("Select Right", 240, 10);
+  display.drawString("Select Left", 80, 10);
+  display.drawString("Select Right", 240, 10);
 
   if(greylineSelect == 0) {
-      M5.Lcd.drawString("Current map", 80, 90);
-      M5.Lcd.drawString("", 240, 90);
+      display.drawString("Current map", 80, 90);
+      display.drawString("", 240, 90);
   } else {
-      M5.Lcd.drawString("", 80, 90);
-      M5.Lcd.drawString("Current map", 240, 90);
+      display.drawString("", 80, 90);
+      display.drawString("Current map", 240, 90);
   }
 
-  M5.Lcd.drawJpg(map_greyline, sizeof(map_greyline), 20, 20, 120, 60);
-  M5.Lcd.drawJpg(map_sunmap, sizeof(map_sunmap), 180, 20, 120, 60);
+  display.drawJpg(map_greyline, sizeof(map_greyline), 20, 20, 120, 60);
+  display.drawJpg(map_sunmap, sizeof(map_sunmap), 180, 20, 120, 60);
 
   temporisation = millis();
   while(millis() - temporisation < TIMEOUT_MAP) {
@@ -162,11 +165,11 @@ void setup()
   }
 
  if(greylineSelect == 0) {
-      M5.Lcd.drawString("Current map", 80, 90);
-      M5.Lcd.drawString("", 240, 90);
+      display.drawString("Current map", 80, 90);
+      display.drawString("", 240, 90);
   } else {
-      M5.Lcd.drawString("", 80, 90);
-      M5.Lcd.drawString("Current map", 240, 90);
+      display.drawString("", 80, 90);
+      display.drawString("Current map", 240, 90);
   }
 
   //Serial.println(greylineSelect);
@@ -196,35 +199,35 @@ void setup()
   delay(250);
 
   // Waiting for data
-  M5.Lcd.setTextColor(TFT_WHITE, TFT_BLACK);
-  M5.Lcd.setTextSize(1);  // Font size scaling is x1
-  M5.Lcd.setTextFont(2);  // Font 2 selected
-  M5.Lcd.setTextDatum(CC_DATUM);
-  M5.Lcd.setTextPadding(320);
+  display.setTextColor(TFT_WHITE, TFT_BLACK);
+  display.setTextSize(1);  // Font size scaling is x1
+  display.setTextFont(2);  // Font 2 selected
+  display.setTextDatum(CC_DATUM);
+  display.setTextPadding(320);
 
   while(greylineData == "" || hamQSLData == "" || hamQTHData == "" || satData == "") 
   {
-    M5.Lcd.drawString("Loading datas", 160, 110);
+    display.drawString("Loading datas", 160, 110);
     delay(250);
-    M5.Lcd.drawString(" ", 160, 110);
+    display.drawString(" ", 160, 110);
     delay(250);
-    M5.Lcd.drawString("It takes a while, so please wait !", 160, 130);
+    display.drawString("It takes a while, so please wait !", 160, 130);
 
     if(greylineData != "")
     {
-      M5.Lcd.drawString("Greyline Ok", 160, 170);
+      display.drawString("Greyline Ok", 160, 170);
     }
     if(hamQSLData != "")
     {
-      M5.Lcd.drawString("Solar Ok", 160, 190);
+      display.drawString("Solar Ok", 160, 190);
     }
     if(hamQTHData != "")
     {
-      M5.Lcd.drawString("Cluster Ok", 160, 210);
+      display.drawString("Cluster Ok", 160, 210);
     }
     if(satData != "")
     {
-      M5.Lcd.drawString("Sat Ok", 160, 230);
+      display.drawString("Sat Ok", 160, 230);
     }
   }
 
@@ -234,8 +237,8 @@ void setup()
 
   for (uint8_t i = 0; i <= 120; i++)
   {
-    M5.Lcd.drawFastHLine(0, i, 320, TFT_BLACK);
-    M5.Lcd.drawFastHLine(0, 240 - i, 320, TFT_BLACK);
+    display.drawFastHLine(0, i, 320, TFT_BLACK);
+    display.drawFastHLine(0, 240 - i, 320, TFT_BLACK);
     delay(5);
   }
 
