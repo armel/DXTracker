@@ -25,11 +25,11 @@ String getValue(String data, char separator, uint16_t index)
 void clear()
 {
   if(screenRefresh == 1) {
-    M5.Lcd.clear();
-    M5.Lcd.fillRect(0, 0, 320, 44, M5.Lcd.color565(TFT_BACK.r, TFT_BACK.g, TFT_BACK.b));
-    M5.Lcd.drawFastHLine(  0, 0, 320, TFT_WHITE);
-    M5.Lcd.drawFastHLine(  0, 44, 320, TFT_WHITE);
-    M5.Lcd.drawFastHLine(  0, 100, 320, TFT_WHITE);
+    display.clear();
+    display.fillRect(0, 0, 320, 44, display.color565(TFT_BACK.r, TFT_BACK.g, TFT_BACK.b));
+    display.drawFastHLine(  0, 0, 320, TFT_WHITE);
+    display.drawFastHLine(  0, 44, 320, TFT_WHITE);
+    display.drawFastHLine(  0, 100, 320, TFT_WHITE);
   }
 }
 
@@ -100,9 +100,9 @@ void scrollA(uint8_t pause)
   imgA.pushSprite(0, 52);
 
   posA -= 1;
-  if (posA == 0)
+  if (posA < 0)
   {
-    //posA = M5.Lcd.width();
+    //posA = display.width();
     imgA.setFont(&FreeSans9pt7b); 
     posA = imgA.textWidth(messageA) + 80;
   }
@@ -124,7 +124,7 @@ void buildScrollB()
     imgB.drawFastHLine(0, h, w, TFT_BLACK);
 
   // Now print text on top of the graphics
-  imgB.setTextColor(M5.Lcd.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b)); // Gray text, no background colour
+  imgB.setTextColor(display.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b)); // Gray text, no background colour
   imgB.setTextWrap(false);      // Turn of wrap so we can print past end of sprite
 
   // Need to print twice so text appears to wrap around at left and right edges
@@ -140,9 +140,9 @@ void scrollB(uint8_t pause)
   imgB.pushSprite(0, 74);
 
   posB -= 1;
-  if (posB == 0)
+  if (posB < 0)
   {
-    //posB = M5.Lcd.width();
+    //posB = display.width();
     imgB.setTextSize(1);          // Font size scaling is x1
     imgB.setTextFont(2);          // Font 2 selected
     posB = imgB.textWidth(messageB) + 80;
@@ -170,11 +170,11 @@ void title(String title)
     titleOld = title;
     reloadStateOld = " ";
 
-    M5.Lcd.setTextColor(TFT_WHITE, M5.Lcd.color565(TFT_BACK.r, TFT_BACK.g, TFT_BACK.b));
-    M5.Lcd.setFont(&dot15pt7b);
-    M5.Lcd.setTextDatum(CC_DATUM);
-    M5.Lcd.setTextPadding(320);
-    M5.Lcd.drawString(title, 160, 16);
+    display.setTextColor(TFT_WHITE, display.color565(TFT_BACK.r, TFT_BACK.g, TFT_BACK.b));
+    display.setFont(&dot15pt7b);
+    display.setTextDatum(CC_DATUM);
+    display.setTextPadding(320);
+    display.drawString(title, 160, 16);
   }
 
   if(alternance % 2 == 0)
@@ -193,11 +193,11 @@ void title(String title)
   if(tmpString != baselineOld) { // Refresh
     baselineOld = tmpString;
 
-    M5.Lcd.setTextColor(TFT_WHITE, M5.Lcd.color565(TFT_BACK.r, TFT_BACK.g, TFT_BACK.b));
-    M5.Lcd.setFont(0);
-    M5.Lcd.setTextDatum(CC_DATUM);
-    M5.Lcd.setTextPadding(320);
-    M5.Lcd.drawString(tmpString, 160, 36);
+    display.setTextColor(TFT_WHITE, display.color565(TFT_BACK.r, TFT_BACK.g, TFT_BACK.b));
+    display.setFont(0);
+    display.setTextDatum(CC_DATUM);
+    display.setTextPadding(320);
+    display.drawString(tmpString, 160, 36);
   }
 
   // On right, view reload data
@@ -207,43 +207,43 @@ void title(String title)
     reloadStateOld = tmpString;
 
     if(tmpString != "") {
-      M5.Lcd.drawFastHLine(2, 35, 10, M5.Lcd.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b));
-      M5.Lcd.drawLine(12, 35, 8, 31, M5.Lcd.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b));
-      M5.Lcd.drawLine(12, 35, 8, 39, M5.Lcd.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b));
+      display.drawFastHLine(2, 35, 10, display.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b));
+      display.drawLine(12, 35, 8, 31, display.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b));
+      display.drawLine(12, 35, 8, 39, display.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b));
     }
     else {
-      M5.Lcd.drawFastHLine(2, 35, 10, M5.Lcd.color565(TFT_BACK.r, TFT_BACK.g, TFT_BACK.b));
-      M5.Lcd.drawLine(12, 35, 8, 31, M5.Lcd.color565(TFT_BACK.r, TFT_BACK.g, TFT_BACK.b));
-      M5.Lcd.drawLine(12, 35, 8, 39, M5.Lcd.color565(TFT_BACK.r, TFT_BACK.g, TFT_BACK.b));
+      display.drawFastHLine(2, 35, 10, display.color565(TFT_BACK.r, TFT_BACK.g, TFT_BACK.b));
+      display.drawLine(12, 35, 8, 31, display.color565(TFT_BACK.r, TFT_BACK.g, TFT_BACK.b));
+      display.drawLine(12, 35, 8, 39, display.color565(TFT_BACK.r, TFT_BACK.g, TFT_BACK.b));
     }
 
-    M5.Lcd.setTextColor(M5.Lcd.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b), M5.Lcd.color565(TFT_BACK.r, TFT_BACK.g, TFT_BACK.b));
-    M5.Lcd.setFont(0);
-    M5.Lcd.setTextDatum(ML_DATUM);
-    M5.Lcd.setTextPadding(60);
-    M5.Lcd.drawString(tmpString, 18, 36);
+    display.setTextColor(display.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b), display.color565(TFT_BACK.r, TFT_BACK.g, TFT_BACK.b));
+    display.setFont(0);
+    display.setTextDatum(ML_DATUM);
+    display.setTextPadding(60);
+    display.drawString(tmpString, 18, 36);
   }
 
   // On left, view battery level
   uint8_t val = map(getBatteryLevel(1), 0, 100, 0, 16);
 
-  M5.Lcd.drawRect(294, 30, 20, 12, M5.Lcd.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b));
-  M5.Lcd.drawRect(313, 33, 4, 6, M5.Lcd.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b));
-  M5.Lcd.fillRect(296, 32, val, 8, M5.Lcd.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b));
+  display.drawRect(294, 30, 20, 12, display.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b));
+  display.drawRect(313, 33, 4, 6, display.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b));
+  display.fillRect(296, 32, val, 8, display.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b));
     
   if(isCharging()) {
-    M5.Lcd.setTextColor(M5.Lcd.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b), M5.Lcd.color565(TFT_BACK.r, TFT_BACK.g, TFT_BACK.b));
-    M5.Lcd.setFont(0);
-    M5.Lcd.setTextDatum(CC_DATUM);
-    M5.Lcd.setTextPadding(0);
-    M5.Lcd.drawString("+", 288, 37);
+    display.setTextColor(display.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b), display.color565(TFT_BACK.r, TFT_BACK.g, TFT_BACK.b));
+    display.setFont(0);
+    display.setTextDatum(CC_DATUM);
+    display.setTextPadding(0);
+    display.drawString("+", 288, 37);
   }
   else {
-    M5.Lcd.setTextColor(M5.Lcd.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b), M5.Lcd.color565(TFT_BACK.r, TFT_BACK.g, TFT_BACK.b));
-    M5.Lcd.setFont(0);
-    M5.Lcd.setTextDatum(CC_DATUM);
-    M5.Lcd.setTextPadding(0);
-    M5.Lcd.drawString(" ", 288, 37);
+    display.setTextColor(display.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b), display.color565(TFT_BACK.r, TFT_BACK.g, TFT_BACK.b));
+    display.setFont(0);
+    display.setTextDatum(CC_DATUM);
+    display.setTextPadding(0);
+    display.drawString(" ", 288, 37);
   }
 }
 
@@ -423,7 +423,7 @@ void greyline()
     // Draw greyline
     decoded = JpegDec.decodeFsFile("/greyline.jpg");
     if (decoded) {
-      M5.Lcd.drawJpgFile(SPIFFS, "/greyline.jpg", 0, 101, 320, 139, 0, 11);
+      display.drawJpgFile(SPIFFS, "/greyline.jpg", 0, 101, 320, 139, 0, 11);
       greylineRefresh = 0;
     }
   }
@@ -457,11 +457,11 @@ void wakeAndSleep()
       delay(10);
     }
     screensaverMode = 1;
-    M5.Lcd.sleep();
+    display.sleep();
   }
   else if (screensaverMode == 1 && millis() - screensaver < TIMEOUT_SCREENSAVER)
   {
-    M5.Lcd.wakeup();
+    display.wakeup();
     screensaverMode = 0;
     for (uint8_t i = 1; i <= brightnessCurrent; i++)
     {
@@ -476,8 +476,8 @@ void wakeAndSleep()
 // M5Screen2bmp (dump the screen to a file)
 
 bool M5Screen2bmp(fs::FS &fs, const char * path){
-  uint16_t image_height = M5.Lcd.height();
-  uint16_t image_width = M5.Lcd.width();
+  uint16_t image_height = display.height();
+  uint16_t image_width = display.width();
   const uint16_t pad = (4 - (3 * image_width) % 4) % 4;
   uint16_t filesize = 54 + (3 * image_width + pad) * image_height; 
   unsigned char swap;
@@ -521,7 +521,7 @@ bool M5Screen2bmp(fs::FS &fs, const char * path){
     // Therefore, the image must be read from bottom to top.
     for(uint16_t y = image_height; y > 0; y--){
       // get one line of the screen content
-      M5.Lcd.readRectRGB(0, y - 1, image_width, 1, line_data);
+      display.readRectRGB(0, y - 1, image_width, 1, line_data);
       // BMP color order is: Blue, Green, Red
       // return values from readRectRGB is: Red, Green, Blue
       // therefore: R und B need to be swapped
@@ -542,8 +542,8 @@ bool M5Screen2bmp(fs::FS &fs, const char * path){
 // M5Screen2bmp (dump the screen to a WiFi client)
 
 bool M5Screen2bmp(){
-  uint16_t image_height = M5.Lcd.height();
-  uint16_t image_width = M5.Lcd.width();
+  uint16_t image_height = display.height();
+  uint16_t image_width = display.width();
   const uint16_t pad = (4 - (3 * image_width) % 4) % 4;
   uint16_t filesize = 54 + (3 * image_width + pad) * image_height; 
   unsigned char swap;
@@ -583,7 +583,7 @@ bool M5Screen2bmp(){
   // Therefore, the image must be read from bottom to top.
   for(uint16_t y = image_height; y > 0; y--){
     // get one line of the screen content
-    M5.Lcd.readRectRGB(0, y - 1, image_width, 1, line_data);
+    display.readRectRGB(0, y - 1, image_width, 1, line_data);
     // BMP color order is: Blue, Green, Red
     // return values from readRectRGB is: Red, Green, Blue
     // therefore: R und B need to be swapped
@@ -755,23 +755,23 @@ void binLoader()
   {
     Serial.println("SPIFFS Mount Failed");
 
-    M5.Lcd.setTextFont(1);
-    M5.Lcd.setTextSize(2);
+    display.setTextFont(1);
+    display.setTextSize(2);
 
-    M5.Lcd.setTextColor(TFT_WHITE, TFT_BLACK);
-    M5.Lcd.setTextDatum(CC_DATUM);
-    M5.Lcd.drawString("Flash File System", 160, 20);
-    M5.Lcd.drawString("needs to be formated.", 160, 50);
-    M5.Lcd.drawString("It takes around 4 minutes.", 160, 100);
-    M5.Lcd.drawString("Please, wait until ", 160, 150);
-    M5.Lcd.drawString("the application starts !", 160, 180);
+    display.setTextColor(TFT_WHITE, TFT_BLACK);
+    display.setTextDatum(CC_DATUM);
+    display.drawString("Flash File System", 160, 20);
+    display.drawString("needs to be formated.", 160, 50);
+    display.drawString("It takes around 4 minutes.", 160, 100);
+    display.drawString("Please, wait until ", 160, 150);
+    display.drawString("the application starts !", 160, 180);
 
     Serial.println("SPIFFS Formating...");
 
     SPIFFS.format(); // Format SPIFFS...
 
-    M5.Lcd.setTextFont(0);
-    M5.Lcd.setTextSize(0);
+    display.setTextFont(0);
+    display.setTextSize(0);
 
     return;
   }
@@ -788,13 +788,13 @@ void binLoader()
   if (binIndex != 0)
   {
     // QRCode
-    M5.Lcd.qrcode("https://github.com/armel/ICSMeter", 90, 80, 140, 6);
+    display.qrcode("https://github.com/armel/ICSMeter", 90, 80, 140, 6);
 
-    M5.Lcd.setTextFont(1);
-    M5.Lcd.setTextSize(1);
+    display.setTextFont(1);
+    display.setTextSize(1);
 
-    M5.Lcd.setTextColor(TFT_WHITE, TFT_BLACK);
-    M5.Lcd.setTextDatum(CC_DATUM);
+    display.setTextColor(TFT_WHITE, TFT_BLACK);
+    display.setTextDatum(CC_DATUM);
 
     for (uint8_t i = TIMEOUT_BIN_LOADER * 10; i > 0; i--)
     {
@@ -803,7 +803,7 @@ void binLoader()
       if (i % 10 == 0)
       {
         tmpName += ".";
-        M5.Lcd.drawString(tmpName, 160, 20);
+        display.drawString(tmpName, 160, 20);
       }
 
       if (btnA || btnC)
@@ -814,7 +814,7 @@ void binLoader()
       else if (btnB)
       {
         click = 1;
-        M5.Lcd.fillRect(0, 0, 320, 240, TFT_BLACK);
+        display.fillRect(0, 0, 320, 240, TFT_BLACK);
         break;
       }
 
@@ -830,12 +830,12 @@ void binLoader()
       vTaskDelay(100);
     }
 
-    M5.Lcd.setTextFont(1);
-    M5.Lcd.setTextSize(2);
+    display.setTextFont(1);
+    display.setTextSize(2);
 
-    M5.Lcd.setTextColor(TFT_WHITE, TFT_BLACK);
-    M5.Lcd.setTextDatum(CC_DATUM);
-    M5.Lcd.drawString("Bin Loader V0.2", 160, 20);
+    display.setTextColor(TFT_WHITE, TFT_BLACK);
+    display.setTextDatum(CC_DATUM);
+    display.drawString("Bin Loader V0.2", 160, 20);
 
     getButton();
 
@@ -877,7 +877,7 @@ void binLoader()
     if (change != cursor)
     {
       change = cursor;
-      M5.Lcd.setTextPadding(320);
+      display.setTextPadding(320);
 
       uint8_t i = 0;
       for (uint8_t j = (start * limit); j < stop; j++)
@@ -889,17 +889,17 @@ void binLoader()
           tmpName = ">> " + tmpName + " <<";
 
           if(binFilename[cursor].substring(0, 4) == "SP_/") {
-            M5.Lcd.setTextSize(1);
-            M5.Lcd.drawString("SPI Flash File Storage", 160, 50);
+            display.setTextSize(1);
+            display.drawString("SPI Flash File Storage", 160, 50);
           }
           else {
-            M5.Lcd.setTextSize(1);
-            M5.Lcd.drawString("SD Card Storage", 160, 50);
+            display.setTextSize(1);
+            display.drawString("SD Card Storage", 160, 50);
           }
         }
 
-        M5.Lcd.setTextSize(2);
-        M5.Lcd.drawString(tmpName, 160, 80 + i * 20);
+        display.setTextSize(2);
+        display.drawString(tmpName, 160, 80 + i * 20);
         i++;
       }
     }

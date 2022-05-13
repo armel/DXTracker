@@ -310,7 +310,7 @@ void button(void *pvParameters)
     }
     */
 
-    if (M5.Lcd.getRotation() == 1) {
+    if (display.getRotation() == 1) {
       right = 1;
       left = -1;
     } else {
