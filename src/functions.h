@@ -346,7 +346,7 @@ void clusterAndSatMessage()
 {
   boolean exclude = 0;
   uint8_t counter = 0;
-  uint32_t tmp = 0;
+  int64_t tmp = 0;
 
   if(binarise().charAt(0) == '0')
   {
