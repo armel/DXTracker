@@ -172,29 +172,6 @@ void setup()
       display.drawString("Current map", 240, 90);
   }
 
-  //Serial.println(greylineSelect);
-  //Serial.println(endpointGreyline[greylineSelect]);
-
-  // Multitasking task for retreive propag data
-  xTaskCreatePinnedToCore(
-      hamdata,        // Function to implement the task
-      "hamdata",      // Name of the task
-      16384,          // Stack size in words
-      NULL,           // Task input parameter
-      1,              // Priority of the task
-      &hamdataHandle, // Task handle
-      0);             // Core where the task should run
-
-  // Multitasking task for retreive button
-  xTaskCreatePinnedToCore(
-      button,         // Function to implement the task
-      "button",       // Name of the task
-      8192,           // Stack size in words
-      NULL,           // Task input parameter
-      1,              // Priority of the task
-      &buttonHandle,  // Task handle
-      1);             // Core where the task should run
-
   // Let's go after temporisation
   delay(250);
 
@@ -205,33 +182,36 @@ void setup()
   display.setTextDatum(CC_DATUM);
   display.setTextPadding(320);
 
-  while(greylineData == "" || hamQSLData == "" || hamQTHData == "" || satData == "") 
+  while(hamQSLData == "" || hamQTHData == "" || satData == "") 
   {
     display.drawString("Loading datas", 160, 110);
-    delay(250);
-    display.drawString(" ", 160, 110);
-    delay(250);
-    display.drawString("It takes a while, so please wait !", 160, 130);
+    display.drawString("It takes a while, so please wait !", 160, 150);
 
-    if(greylineData != "")
+    if(hamQTHData == "")
     {
-      display.drawString("Greyline Ok", 160, 170);
+      getHamQTH();
+      if(hamQTHData != "")
+      {
+        display.drawString("Cluster Ok", 160, 190);
+      }
     }
-    if(hamQSLData != "")
+    if(satData == "")
     {
-      display.drawString("Solar Ok", 160, 190);
+      getHamSat();
+      if(hamQTHData != "")
+      {
+        display.drawString("Sat Ok", 160, 210);
+      }
     }
-    if(hamQTHData != "")
+    if(hamQSLData == "")
     {
-      display.drawString("Cluster Ok", 160, 210);
-    }
-    if(satData != "")
-    {
-      display.drawString("Sat Ok", 160, 230);
+      getHamQSL();
+      if(hamQSLData != "")
+      {
+        display.drawString("Solar Ok", 160, 230);
+      }
     }
   }
-
-  startup = 1;
   
   delay(500);
 
@@ -241,6 +221,26 @@ void setup()
     display.drawFastHLine(0, 240 - i, 320, TFT_BLACK);
     delay(5);
   }
+
+  // Multitasking task for retreive propag data
+  xTaskCreatePinnedToCore(
+      hamdata,        // Function to implement the task
+      "hamdata",      // Name of the task
+      16384,          // Stack size in words
+      NULL,           // Task input parameter
+      2,              // Priority of the task
+      &hamdataHandle, // Task handle
+      1);             // Core where the task should run
+
+  // Multitasking task for retreive button
+  xTaskCreatePinnedToCore(
+      button,         // Function to implement the task
+      "button",       // Name of the task
+      8192,           // Stack size in words
+      NULL,           // Task input parameter
+      4,              // Priority of the task
+      &buttonHandle,  // Task handle
+      1);             // Core where the task should run
 
   // And clear
   screenRefresh = 1;
@@ -261,9 +261,6 @@ void loop()
   // Prepare propag scroll message
   propagMessage();
 
-  // View greyline
-  greyline();
-
   // Manage scroll
   scroll();
 
@@ -276,7 +273,12 @@ void loop()
   // Manage alternance
   if(screenRefresh == 0 && millis() - temporisation > TIMEOUT_TEMPORISATION) {
     temporisation = millis();
-    alternance++;
-    alternance = (alternance > 11) ? 0 : alternance;
+    alternance = (alternance++ > 10) ? 0 : alternance;
+    if(alternance == 0) {
+      messageCurrent = (messageCurrent++ < 3) ? messageCurrent : 0;
+      reload = 0;
+      updateLocalTime(); // Update local time
+      Serial.println(String(ESP.getFreeHeap() / 1024) + " kb" + " / " + String(esp_get_minimum_free_heap_size() / 1024) + " kb");
+    }
   }
 }

@@ -1,30 +1,32 @@
 // Copyright (c) F4HWN Armel. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#define VERSION "1.1.1"
+#define VERSION "1.2.0"
 #define AUTHOR "F4HWN"
 #define NAME "DXTracker"
+
+#define DEBUG 1
 
 #define TIMEOUT_BIN_LOADER    3               // 3 sec
 #define TIMEOUT_SCREENSAVER   5 * 60 * 1000   // 5 min
 #define TIMEOUT_MAP           5 * 1000        // 5 sec
-#define TIMEOUT_TEMPORISATION 10 * 1000       // 10 sec
+#define TIMEOUT_TEMPORISATION 5 * 1000        // 5 sec
 
 #undef min
 
 #include <WiFiClientSecure.h>
 #include <HTTPClient.h>
 #include <Preferences.h>
-#include <JPEGDecoder.h>
 #include <FS.h>
 #include <SPIFFS.h>
 #include <M5Unified.h>
 #include <M5StackUpdater.h>
 
 // Wifi
-WiFiClient clientHamQSL, clientSat, clientGreyline, clientHamQTH;
+WiFiClient client;
 WiFiClient httpClient;
 WiFiServer httpServer(80);
+HTTPClient http;
 
 // Web site Screen Capture stuff
 #define GET_unknown 0
@@ -127,7 +129,7 @@ String propagKey[] = {
   "12m-10m\" time=\"night\">"    
 };
 
-String cluster[50], call[50], frequency[50], band[50], country[50];
+String cluster, call, frequency, band, country;
 
 // Task Handle
 TaskHandle_t hamdataHandle;
@@ -140,8 +142,7 @@ String greylineData = "", hamQSLData = "", hamQTHData = "", satData = "";
 String greylineUrl = "";
 String reloadState = "";
 
-boolean decoded = 0;
-boolean startup = 0;
+boolean reload = 0;
 boolean screensaverMode = 0;
 boolean greylineRefresh = 0;
 boolean greylineSelect = 0;
@@ -150,7 +151,7 @@ uint8_t screenRefresh = 1;
 uint8_t htmlGetRequest;
 uint8_t alternance = 0;
 uint8_t configCurrent = 0;
-uint8_t brightnessCurrent = 64;
+uint8_t brightnessCurrent = 128;
 uint8_t messageCurrent = 0;
 
 int16_t parenthesisBegin = 0;
