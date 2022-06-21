@@ -7,15 +7,14 @@
 #include "font.h"
 #include "tools.h"
 #include "webIndex.h"
+#include "data.h"
 #include "functions.h"
+#include "menu.h"
 #include "tasks.h"
 
 // Setup
 void setup()
 {
-  // Init screensaver timer
-  screensaver = millis();
-
   // Init M5
   auto cfg = M5.config();
   M5.begin(cfg);
@@ -28,6 +27,13 @@ void setup()
 
   // Preferences
   preferences.begin("DXTracker");
+  maps = preferences.getUInt("maps", 0);
+  gmt = preferences.getInt("gmt", 0);
+  daylight = preferences.getUInt("daylight", 0);
+  watch = preferences.getUInt("watch", 0);
+  brightness = preferences.getUInt("brightness", 64);
+  beep = preferences.getUInt("beep", 0);
+  screensaver = preferences.getUInt("screensaver", 10);
 
   size_t n = sizeof(config) / sizeof(config[0]);
   n = (n / 4) - 1;
@@ -42,9 +48,8 @@ void setup()
   }
 
   // LCD
-  display.setBrightness(brightnessCurrent);
-  display.fillScreen(display.color565(TFT_BACK.r, TFT_BACK.g, TFT_BACK.b));
-  screensaver = millis(); // Screensaver update !!!
+  display.setBrightness(map(brightness, 1, 100, 1, 254));
+  display.fillScreen(TFT_BACK);
 
   // SPIFFS
   if(!SPIFFS.begin())
@@ -55,7 +60,7 @@ void setup()
 
   // Title
   display.setFont(&rounded_led_board10pt7b);
-  display.setTextColor(TFT_WHITE, display.color565(TFT_BACK.r, TFT_BACK.g, TFT_BACK.b));
+  display.setTextColor(TFT_WHITE, TFT_BACK);
   display.setTextDatum(CC_DATUM);
   display.drawString(String(NAME), 160, 20);
   display.setFont(0);
@@ -104,7 +109,7 @@ void setup()
   display.drawString(String(WiFi.localIP().toString().c_str()), 160, 70);
 
   // Init and get time
-  configTzTime(ntpTimeZone, ntpServer);
+  configTime(gmt * 60 * 60, daylight * 60 * 60, ntpServer);
   updateLocalTime();
 
   // Scroll
@@ -117,82 +122,20 @@ void setup()
   // Start server (for Web site Screen Capture)
   httpServer.begin();     
 
-  // Clear screen
-  for (uint8_t i = 0; i <= 120; i++)
-  {
-    display.drawFastHLine(0, i, 320, TFT_BLACK);
-    display.drawFastHLine(0, 240 - i, 320, TFT_BLACK);
-    delay(5);
-  }
-
-  // Select map
-  greylineSelect = preferences.getUInt("map", 0);
-
-  display.setTextColor(TFT_WHITE, TFT_BLACK);
-  display.setTextSize(1);  // Font size scaling is x1
-  display.setTextFont(2);  // Font 2 selected
-  display.setTextDatum(CC_DATUM);
-  display.setTextPadding(160);
-
-  display.drawString("Select Left", 80, 10);
-  display.drawString("Select Right", 240, 10);
-
-  if(greylineSelect == 0) {
-      display.drawString("Current map", 80, 90);
-      display.drawString("", 240, 90);
-  } else {
-      display.drawString("", 80, 90);
-      display.drawString("Current map", 240, 90);
-  }
-
-  display.drawJpg(map_greyline, sizeof(map_greyline), 20, 20, 120, 60);
-  display.drawJpg(map_sunmap, sizeof(map_sunmap), 180, 20, 120, 60);
-
-  temporisation = millis();
-  while(millis() - temporisation < TIMEOUT_MAP) {
-    getButton();
-    if(btnA == 1) {
-      greylineSelect = 0;
-      preferences.putUInt("map", greylineSelect);
-      break;
-    }
-    if(btnC == 1) {
-      greylineSelect = 1;
-      preferences.putUInt("map", greylineSelect);
-      break;
-    }
-    delay(100);   
-  }
-
- if(greylineSelect == 0) {
-      display.drawString("Current map", 80, 90);
-      display.drawString("", 240, 90);
-  } else {
-      display.drawString("", 80, 90);
-      display.drawString("Current map", 240, 90);
-  }
-
   // Let's go after temporisation
   delay(250);
 
   // Waiting for data
-  display.setTextColor(TFT_WHITE, TFT_BLACK);
-  display.setTextSize(1);  // Font size scaling is x1
-  display.setTextFont(2);  // Font 2 selected
-  display.setTextDatum(CC_DATUM);
-  display.setTextPadding(320);
-
   while(hamQSLData == "" || hamQTHData == "" || satData == "") 
   {
-    display.drawString("Loading datas", 160, 110);
-    display.drawString("It takes a while, so please wait !", 160, 150);
+    display.drawString("Loading datas", 160, 70);
 
     if(hamQTHData == "")
     {
       getHamQTH();
       if(hamQTHData != "")
       {
-        display.drawString("Cluster Ok", 160, 190);
+        display.drawString("Cluster Ok", 160, 70);
       }
     }
     if(satData == "")
@@ -200,7 +143,7 @@ void setup()
       getHamSat();
       if(hamQTHData != "")
       {
-        display.drawString("Sat Ok", 160, 210);
+        display.drawString("Sat Ok", 160, 70);
       }
     }
     if(hamQSLData == "")
@@ -208,7 +151,7 @@ void setup()
       getHamQSL();
       if(hamQSLData != "")
       {
-        display.drawString("Solar Ok", 160, 230);
+        display.drawString("Solar Ok", 160, 70);
       }
     }
   }
@@ -244,41 +187,51 @@ void setup()
 
   // And clear
   screenRefresh = 1;
+
+  // Init screensaver timer
+  screensaverTimer = millis();
 }
 
 // Main loop
 void loop()
 {
-  // Let's clean if necessary
-  clear();
+  if(settingsMode == true) {
+    settingLock = false;
+  }
+  else {
+    settingLock = true;
 
-  // View propag datas
-  propagData();
+    // Let's clean if necessary
+    clear();
 
-  // Prepare cluster and sat scroll message
-  clusterAndSatMessage();
+    // View propag datas
+    propagData();
 
-  // Prepare propag scroll message
-  propagMessage();
+    // Prepare cluster and sat scroll message
+    clusterAndSatMessage();
 
-  // Manage scroll
-  scroll();
+    // Prepare propag scroll message
+    propagMessage();
 
-  // Manage Web site Screen Capture
-  getScreenshot();
+    // Manage scroll
+    scroll();
 
-  // Manage screensaver
-  wakeAndSleep();
+    // Manage screensaver
+    wakeAndSleep();
 
-  // Manage alternance
-  if(screenRefresh == 0 && millis() - temporisation > TIMEOUT_TEMPORISATION) {
-    temporisation = millis();
-    alternance = (alternance++ > 10) ? 0 : alternance;
-    if(alternance == 0) {
-      messageCurrent = (messageCurrent++ < 3) ? messageCurrent : 0;
-      reload = 0;
-      updateLocalTime(); // Update local time
-      Serial.println(String(ESP.getFreeHeap() / 1024) + " kb" + " / " + String(esp_get_minimum_free_heap_size() / 1024) + " kb");
+    // View clock
+    viewClock();
+
+    // Manage alternance
+    if(screenRefresh == 0 && millis() - temporisation > TIMEOUT_TEMPORISATION) {
+      temporisation = millis();
+      alternance = (alternance++ > 10) ? 0 : alternance;
+      if(alternance == 0) {
+        messageCurrent = (messageCurrent++ < 3) ? messageCurrent : 0;
+        reload = 0;
+        updateLocalTime(); // Update local time
+        Serial.println(String(ESP.getFreeHeap() / 1024) + " kb" + " / " + String(esp_get_minimum_free_heap_size() / 1024) + " kb");
+      }
     }
   }
 }

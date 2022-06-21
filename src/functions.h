@@ -21,32 +21,6 @@ String getValue(String data, char separator, uint16_t index)
   return found > index ? data.substring(strIndex[0], strIndex[1]) : "";
 }
 
-// Clear screen
-void clear()
-{
-  if(screenRefresh == 1) {
-    display.clear();
-    display.fillRect(0, 0, 320, 44, display.color565(TFT_BACK.r, TFT_BACK.g, TFT_BACK.b));
-    display.drawFastHLine(  0, 0, 320, TFT_WHITE);
-    display.drawFastHLine(  0, 44, 320, TFT_WHITE);
-    display.drawFastHLine(  0, 100, 320, TFT_WHITE);
-  }
-}
-
-// Manage message cycle
-String binarise()
-{
-  switch(messageCurrent)
-  {
-    case 0: return "00"; break;
-    case 1: return "01"; break;
-    case 2: return "10"; break;
-    case 3: return "11"; break;
-  }
-
-  return "00";
-}
-
 // Get local time
 void updateLocalTime()
 {
@@ -69,6 +43,39 @@ void updateLocalTime()
   //Serial.println(utc);
 
   dateString = String(timeStringBuff);
+}
+
+// Clear screen
+void clear()
+{
+  if(screenRefresh >= 1) {
+    display.clear();
+    display.fillRect(0, 0, 320, 44, TFT_BACK);
+    display.drawFastHLine(  0, 0, 320, TFT_WHITE);
+    display.drawFastHLine(  0, 44, 320, TFT_WHITE);
+    display.drawFastHLine(  0, 100, 320, TFT_WHITE);
+  }
+  if(screenRefresh == 2)
+  {
+    screenRefresh = 0;
+    getGreyline();
+    configTime(gmt * 60 * 60, daylight * 60 * 60, ntpServer);
+    updateLocalTime();
+  }
+}
+
+// Manage message cycle
+String binarise()
+{
+  switch(messageCurrent)
+  {
+    case 0: return "00"; break;
+    case 1: return "01"; break;
+    case 2: return "10"; break;
+    case 3: return "11"; break;
+  }
+
+  return "00";
 }
 
 // Build scroll A
@@ -124,7 +131,7 @@ void buildScrollB()
     imgB.drawFastHLine(0, h, w, TFT_BLACK);
 
   // Now print text on top of the graphics
-  imgB.setTextColor(display.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b)); // Gray text, no background colour
+  imgB.setTextColor(TFT_GRAY); // Gray text, no background colour
   imgB.setTextWrap(false);      // Turn of wrap so we can print past end of sprite
 
   // Need to print twice so text appears to wrap around at left and right edges
@@ -170,7 +177,7 @@ void title(String title)
     titleOld = title;
     reloadStateOld = " ";
 
-    display.setTextColor(TFT_WHITE, display.color565(TFT_BACK.r, TFT_BACK.g, TFT_BACK.b));
+    display.setTextColor(TFT_WHITE, TFT_BACK);
     display.setFont(&dot15pt7b);
     display.setTextDatum(CC_DATUM);
     display.setTextPadding(320);
@@ -193,7 +200,7 @@ void title(String title)
   if(tmpString != baselineOld) { // Refresh
     baselineOld = tmpString;
 
-    display.setTextColor(TFT_WHITE, display.color565(TFT_BACK.r, TFT_BACK.g, TFT_BACK.b));
+    display.setTextColor(TFT_WHITE, TFT_BACK);
     display.setFont(0);
     display.setTextDatum(CC_DATUM);
     display.setTextPadding(320);
@@ -207,17 +214,17 @@ void title(String title)
     reloadStateOld = tmpString;
 
     if(tmpString != "") {
-      display.drawFastHLine(2, 35, 10, display.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b));
-      display.drawLine(12, 35, 8, 31, display.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b));
-      display.drawLine(12, 35, 8, 39, display.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b));
+      display.drawFastHLine(2, 35, 10, TFT_GRAY);
+      display.drawLine(12, 35, 8, 31, TFT_GRAY);
+      display.drawLine(12, 35, 8, 39, TFT_GRAY);
     }
     else {
-      display.drawFastHLine(2, 35, 10, display.color565(TFT_BACK.r, TFT_BACK.g, TFT_BACK.b));
-      display.drawLine(12, 35, 8, 31, display.color565(TFT_BACK.r, TFT_BACK.g, TFT_BACK.b));
-      display.drawLine(12, 35, 8, 39, display.color565(TFT_BACK.r, TFT_BACK.g, TFT_BACK.b));
+      display.drawFastHLine(2, 35, 10, TFT_BACK);
+      display.drawLine(12, 35, 8, 31, TFT_BACK);
+      display.drawLine(12, 35, 8, 39, TFT_BACK);
     }
 
-    display.setTextColor(display.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b), display.color565(TFT_BACK.r, TFT_BACK.g, TFT_BACK.b));
+    display.setTextColor(TFT_GRAY, TFT_BACK);
     display.setFont(0);
     display.setTextDatum(ML_DATUM);
     display.setTextPadding(60);
@@ -227,19 +234,19 @@ void title(String title)
   // On left, view battery level
   uint8_t val = map(getBatteryLevel(1), 0, 100, 0, 16);
 
-  display.drawRect(294, 30, 20, 12, display.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b));
-  display.drawRect(313, 33, 4, 6, display.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b));
-  display.fillRect(296, 32, val, 8, display.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b));
+  display.drawRect(294, 30, 20, 12,  TFT_GRAY);
+  display.drawRect(313, 33, 4, 6,  TFT_GRAY);
+  display.fillRect(296, 32, val, 8,  TFT_GRAY);
     
   if(isCharging()) {
-    display.setTextColor(display.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b), display.color565(TFT_BACK.r, TFT_BACK.g, TFT_BACK.b));
+    display.setTextColor(TFT_GRAY, TFT_BACK);
     display.setFont(0);
     display.setTextDatum(CC_DATUM);
     display.setTextPadding(0);
     display.drawString("+", 288, 37);
   }
   else {
-    display.setTextColor(display.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b), display.color565(TFT_BACK.r, TFT_BACK.g, TFT_BACK.b));
+    display.setTextColor(TFT_GRAY, TFT_BACK);
     display.setFont(0);
     display.setTextDatum(CC_DATUM);
     display.setTextPadding(0);
@@ -440,9 +447,17 @@ void scroll()
 // Manage screensaver
 void wakeAndSleep()
 {
-  if (screensaverMode == 0 && millis() - screensaver > TIMEOUT_SCREENSAVER)
+  /*
+  Serial.println(screensaverMode);
+  Serial.println(screensaverTimer);
+  Serial.println(screensaver);
+  Serial.println(millis() - screensaverTimer);
+  Serial.println("-----");
+  */
+
+  if (screensaverMode == 0 && millis() - screensaverTimer > screensaver * 60 * 1000)
   {
-    for (uint8_t i = brightnessCurrent; i >= 1; i -= 4)
+    for (int16_t i = map(brightness, 1, 100, 1, 254); i >= 1; i -= 4)
     {
       setBrightness(i);
       scrollA(0);
@@ -452,15 +467,15 @@ void wakeAndSleep()
 
     screensaverMode = 1;
     display.sleep();
-    screensaver = millis();
+    screensaverTimer = millis();
   }
-  else if (screensaverMode == 1 && millis() - screensaver > TIMEOUT_SCREENSAVER)
+  else if (screensaverMode == 1 && millis() - screensaverTimer > screensaver * 60 * 1000)
   {
-    screensaver = millis();
+    screensaverTimer = millis();
     display.wakeup();
     screensaverMode = 0;
 
-    for (uint8_t i = 1; i <= brightnessCurrent; i += 4)
+    for (int16_t i = 1; i <= map(brightness, 1, 100, 1, 254); i += 4)
     {
       setBrightness(i);
       scrollA(0);
@@ -630,7 +645,7 @@ void getScreenshot()
               // and a content-type so the client knows what's coming, then a blank line,
               // followed by the content:
 
-              screensaver = millis(); // Screensaver update !!!
+              screensaverTimer = millis(); // Screensaver update !!!
 
               switch (htmlGetRequest)
               {
@@ -905,105 +920,26 @@ void binLoader()
   SD.end(); // If not Bluetooth doesn't work !!!
 }
 
-// get Greyline data
-void getGreyline()
+// View Clock
+void viewClock()
 {
-  reloadState = "Greyline";
-  if (DEBUG) Serial.println(reloadState);
-  
-  display.drawJpgUrl(endpointGreyline[greylineSelect],  0, 101, 320, 139, 0, 11);
-  
-  vTaskDelay(pdMS_TO_TICKS(20));
-  reloadState = "";
-}
-
-// get Solar data
-void getHamQSL()
-{
-  uint16_t httpCode;
-
-  reloadState = "Solar";
-  if (DEBUG) Serial.println(reloadState);
-
-  http.begin(client, endpointHamQSL);       // Specify the URL
-  http.addHeader("Content-Type", "text/plain");   // Specify content-type header
-  http.setTimeout(1000);                           // Set Time Out
-  httpCode = http.GET();                          // Make the request
-  if (httpCode == 200)                            // Check for the returning code
+  if(watch == 1)
   {
-    String tmpString = http.getString(); // Get data
-    tmpString.trim();
-
-    if(tmpString != "")
+    updateLocalTime();
+    
+    if(maps == 0)
     {
-      hamQSLData = tmpString;
+      display.setTextColor(TFT_WHITE, TFT_BACK);
     }
-  }
-  http.end(); // Free the resources
-  client.flush();
-  client.stop();
-
-  vTaskDelay(pdMS_TO_TICKS(20));
-  reloadState = "";
-}
-
-// get Cluster data
-void getHamQTH()
-{
-  uint16_t httpCode;
-
-  reloadState = "Cluster";
-  if (DEBUG) Serial.println(reloadState);
-
-  http.begin(client, endpointHamQTH);       // Specify the URL
-  http.addHeader("Content-Type", "text/plain");   // Specify content-type header
-  http.setTimeout(1000);                           // Set Time Out
-  httpCode = http.GET();                          // Make the request
-  if (httpCode == 200)                            // Check for the returning code
-  {
-    String tmpString = http.getString(); // Get data
-    tmpString.trim();
-    tmpString.replace("\n", "|");
-
-    if(tmpString != "" && tmpString != hamQTHData)
+    else
     {
-      hamQTHData = tmpString;
+      display.setTextColor(TFT_WHITE, display.color565(24, 57, 92));
     }
+    display.setFont(&YELLOWCRE8pt7b);
+    display.setTextPadding(100);
+    display.setTextDatum(CL_DATUM);
+    display.drawString(dateString.substring(0, 8), 60, 220);
+    display.setTextDatum(CR_DATUM);
+    display.drawString(dateString.substring(9, 17), 260, 220);
   }
-  http.end(); // Free the resources
-  client.flush();
-  client.stop();
-
-  vTaskDelay(pdMS_TO_TICKS(20));
-  reloadState = "";
-}
-
-// get Sat data
-void getHamSat()
-{
-  uint16_t httpCode;
-
-  reloadState = "Sat";
-  if (DEBUG) Serial.println(reloadState);
-
-  http.begin(client, endpointSat + "?lat=" + config[(configCurrent * 4) + 2] + "&lng=" + config[(configCurrent * 4) + 3] + "&format=text");       // Specify the URL
-  http.addHeader("Content-Type", "text/plain");   // Specify content-type header
-  http.setTimeout(1000);                          // Set Time Out
-  httpCode = http.GET();                          // Make the request
-  if (httpCode == 200)                            // Check for the returning code
-  {
-    String tmpString = http.getString(); // Get data
-    tmpString.trim();
-
-    if(tmpString != "" && tmpString != satData)
-    {
-      satData = tmpString;
-    }
-  }
-  http.end(); // Free the resources
-  client.flush();
-  client.stop();
-
-  vTaskDelay(pdMS_TO_TICKS(20));
-  reloadState = "";
 }
