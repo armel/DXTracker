@@ -219,6 +219,9 @@ void loop()
     // Manage screensaver
     wakeAndSleep();
 
+    // Get screenshot
+    getScreenshot();
+
     // Manage alternance
     if(screenRefresh == 0 && millis() - temporisation > TIMEOUT_TEMPORISATION) {
       temporisation = millis();
