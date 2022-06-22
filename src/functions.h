@@ -21,32 +21,6 @@ String getValue(String data, char separator, uint16_t index)
   return found > index ? data.substring(strIndex[0], strIndex[1]) : "";
 }
 
-// Clear screen
-void clear()
-{
-  if(screenRefresh == 1) {
-    display.clear();
-    display.fillRect(0, 0, 320, 44, display.color565(TFT_BACK.r, TFT_BACK.g, TFT_BACK.b));
-    display.drawFastHLine(  0, 0, 320, TFT_WHITE);
-    display.drawFastHLine(  0, 44, 320, TFT_WHITE);
-    display.drawFastHLine(  0, 100, 320, TFT_WHITE);
-  }
-}
-
-// Manage message cycle
-String binarise()
-{
-  switch(messageCurrent)
-  {
-    case 0: return "00"; break;
-    case 1: return "01"; break;
-    case 2: return "10"; break;
-    case 3: return "11"; break;
-  }
-
-  return "00";
-}
-
 // Get local time
 void updateLocalTime()
 {
@@ -69,6 +43,39 @@ void updateLocalTime()
   //Serial.println(utc);
 
   dateString = String(timeStringBuff);
+}
+
+// Clear screen
+void clear()
+{
+  if(screenRefresh >= 1) {
+    display.clear();
+    display.fillRect(0, 0, 320, 44, TFT_BACK);
+    display.drawFastHLine(  0, 0, 320, TFT_WHITE);
+    display.drawFastHLine(  0, 44, 320, TFT_WHITE);
+    display.drawFastHLine(  0, 100, 320, TFT_WHITE);
+  }
+  if(screenRefresh == 2)
+  {
+    screenRefresh = 0;
+    getGreyline();
+    configTime(gmt * 60 * 60, daylight * 60 * 60, ntpServer);
+    updateLocalTime();
+  }
+}
+
+// Manage message cycle
+String binarise()
+{
+  switch(messageCurrent)
+  {
+    case 0: return "00"; break;
+    case 1: return "01"; break;
+    case 2: return "10"; break;
+    case 3: return "11"; break;
+  }
+
+  return "00";
 }
 
 // Build scroll A
@@ -99,7 +106,7 @@ void scrollA(uint8_t pause)
   buildScrollA();
   imgA.pushSprite(0, 52);
 
-  posA -= 1;
+  posA -= 2;
   if (posA < 0)
   {
     //posA = display.width();
@@ -124,7 +131,7 @@ void buildScrollB()
     imgB.drawFastHLine(0, h, w, TFT_BLACK);
 
   // Now print text on top of the graphics
-  imgB.setTextColor(display.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b)); // Gray text, no background colour
+  imgB.setTextColor(TFT_GRAY); // Gray text, no background colour
   imgB.setTextWrap(false);      // Turn of wrap so we can print past end of sprite
 
   // Need to print twice so text appears to wrap around at left and right edges
@@ -151,6 +158,45 @@ void scrollB(uint8_t pause)
   vTaskDelay(pdMS_TO_TICKS(pause));
 }
 
+// Manage scroll
+void scroll()
+{
+  if(screenRefresh == 1)
+  {
+    return;
+  }
+
+  for(uint16_t i = 0; i < 10; i += 1)
+  {
+    scrollA(5);
+    scrollB(5);
+  }
+}
+
+// Get Propag Data
+String propagData(uint8_t index)
+{
+  // Title
+  solarData[index].toUpperCase();
+
+  // Current value
+  tmpString = hamQSLData;
+  
+  tmpString.replace("<" + solarKey[index] + ">", "(");
+  tmpString.replace("</" + solarKey[index] + ">", ")");
+
+  parenthesisBegin = tmpString.indexOf("(");
+  parenthesisLast = tmpString.indexOf(")");
+  if (parenthesisBegin > 0)
+  {
+    tmpString = tmpString.substring(parenthesisBegin + 1, parenthesisLast);
+  }
+
+  tmpString.trim();
+
+  return(solarData[index] + " " + tmpString);
+}
+
 // Draw title
 void title(String title)
 {
@@ -170,7 +216,7 @@ void title(String title)
     titleOld = title;
     reloadStateOld = " ";
 
-    display.setTextColor(TFT_WHITE, display.color565(TFT_BACK.r, TFT_BACK.g, TFT_BACK.b));
+    display.setTextColor(TFT_WHITE, TFT_BACK);
     display.setFont(&dot15pt7b);
     display.setTextDatum(CC_DATUM);
     display.setTextPadding(320);
@@ -179,7 +225,8 @@ void title(String title)
 
   if(alternance % 2 == 0)
   {
-    tmpString = "Update at " + dateString;
+    tmpString = propagData(12);
+    tmpString = "Updated" + tmpString.substring(0, 7) + " " + tmpString.substring(10, 15) + ":" + tmpString.substring(15, 21);
   }
   else if(alternance == 5)
   {
@@ -193,7 +240,7 @@ void title(String title)
   if(tmpString != baselineOld) { // Refresh
     baselineOld = tmpString;
 
-    display.setTextColor(TFT_WHITE, display.color565(TFT_BACK.r, TFT_BACK.g, TFT_BACK.b));
+    display.setTextColor(TFT_WHITE, TFT_BACK);
     display.setFont(0);
     display.setTextDatum(CC_DATUM);
     display.setTextPadding(320);
@@ -207,17 +254,17 @@ void title(String title)
     reloadStateOld = tmpString;
 
     if(tmpString != "") {
-      display.drawFastHLine(2, 35, 10, display.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b));
-      display.drawLine(12, 35, 8, 31, display.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b));
-      display.drawLine(12, 35, 8, 39, display.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b));
+      display.drawFastHLine(2, 35, 10, TFT_GRAY);
+      display.drawLine(12, 35, 8, 31, TFT_GRAY);
+      display.drawLine(12, 35, 8, 39, TFT_GRAY);
     }
     else {
-      display.drawFastHLine(2, 35, 10, display.color565(TFT_BACK.r, TFT_BACK.g, TFT_BACK.b));
-      display.drawLine(12, 35, 8, 31, display.color565(TFT_BACK.r, TFT_BACK.g, TFT_BACK.b));
-      display.drawLine(12, 35, 8, 39, display.color565(TFT_BACK.r, TFT_BACK.g, TFT_BACK.b));
+      display.drawFastHLine(2, 35, 10, TFT_BACK);
+      display.drawLine(12, 35, 8, 31, TFT_BACK);
+      display.drawLine(12, 35, 8, 39, TFT_BACK);
     }
 
-    display.setTextColor(display.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b), display.color565(TFT_BACK.r, TFT_BACK.g, TFT_BACK.b));
+    display.setTextColor(TFT_GRAY, TFT_BACK);
     display.setFont(0);
     display.setTextDatum(ML_DATUM);
     display.setTextPadding(60);
@@ -227,19 +274,19 @@ void title(String title)
   // On left, view battery level
   uint8_t val = map(getBatteryLevel(1), 0, 100, 0, 16);
 
-  display.drawRect(294, 30, 20, 12, display.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b));
-  display.drawRect(313, 33, 4, 6, display.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b));
-  display.fillRect(296, 32, val, 8, display.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b));
+  display.drawRect(294, 30, 20, 12,  TFT_GRAY);
+  display.drawRect(313, 33, 4, 6,  TFT_GRAY);
+  display.fillRect(296, 32, val, 8,  TFT_GRAY);
     
   if(isCharging()) {
-    display.setTextColor(display.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b), display.color565(TFT_BACK.r, TFT_BACK.g, TFT_BACK.b));
+    display.setTextColor(TFT_GRAY, TFT_BACK);
     display.setFont(0);
     display.setTextDatum(CC_DATUM);
     display.setTextPadding(0);
     display.drawString("+", 288, 37);
   }
   else {
-    display.setTextColor(display.color565(TFT_GRAY.r, TFT_GRAY.g, TFT_GRAY.b), display.color565(TFT_BACK.r, TFT_BACK.g, TFT_BACK.b));
+    display.setTextColor(TFT_GRAY, TFT_BACK);
     display.setFont(0);
     display.setTextDatum(CC_DATUM);
     display.setTextPadding(0);
@@ -247,30 +294,7 @@ void title(String title)
   }
 }
 
-// Draw Propag Data
-void propagData()
-{
-  // Title
-  solarData[alternance].toUpperCase();
-
-  // Current value
-  tmpString = hamQSLData;
-  tmpString.replace("<" + solarKey[alternance] + ">", "(");
-  tmpString.replace("</" + solarKey[alternance] + ">", ")");
-
-  parenthesisBegin = tmpString.indexOf("(");
-  parenthesisLast = tmpString.indexOf(")");
-  if (parenthesisBegin > 0)
-  {
-    tmpString = tmpString.substring(parenthesisBegin + 1, parenthesisLast);
-  }
-
-  tmpString.trim();
-
-  title(solarData[alternance] + " " + tmpString);
-}
-
-// Draw Propag Message
+// Format Propag Message
 void propagMessage()
 {
   if(binarise().charAt(1) == '0')
@@ -341,129 +365,111 @@ void propagMessage()
   }
 }
 
-// Draw Cluster Message
+// Format Cluster Message
 void clusterAndSatMessage()
 {
   boolean exclude = 0;
+  uint8_t next = 0;
   uint8_t counter = 0;
-  int64_t tmp = 0;
+  static uint8_t messageOld = 64;
+  long tmp = 0;
 
-  if(binarise().charAt(0) == '0')
-  {
-    size_t n = sizeof(frequencyExclude)/sizeof(frequencyExclude[0]);
+  if(messageOld != messageCurrent && reloadState == "") {
+    messageOld = messageCurrent;
 
-    messageA = "";
-    hamQTHData.replace("\n", "|");
-
-    for (uint8_t i = 0; i < 50; i++)
+    if(binarise().charAt(0) == '0')
     {
-      cluster[i] = getValue(hamQTHData, '|', i);
-      frequency[i] = getValue(cluster[i], '^', 1);
-      tmp = frequency[i].toInt();
-      
-      exclude = 0;
+      posA = 80;
+      messageA = "";
 
-      for (uint8_t j = 0; j < n; j++)
+      size_t n = sizeof(frequencyExclude)/sizeof(frequencyExclude[0]);
+
+      cluster = getValue(hamQTHData, '|', next);
+      while(cluster != "")
       {
-        if(abs(tmp - frequencyExclude[j]) <= 2 || tmp > 470000)
+        frequency = getValue(cluster, '^', 1);
+        tmp = frequency.toInt();
+
+        exclude = 0;
+
+        for (uint8_t j = 0; j < n; j++)
         {
-          exclude = 1;
+          if(abs(tmp - frequencyExclude[j]) <= 2 || tmp > 470000)
+          {
+            exclude = 1;
+            break;
+          }
+        }
+
+        if(exclude == 0)
+        {    
+          messageA += getValue(cluster, '^', 0) + " " + getValue(cluster, '^', 8) + " " + frequency + " " + getValue(cluster, '^', 9) + " -- ";
+          counter += 1;
+        }
+
+        if(counter == 20) 
+        {
           break;
         }
+
+        next++;
+        cluster = getValue(hamQTHData, '|', next);
       }
-
-      if(exclude == 0)
-      {    
-        call[i] = getValue(cluster[i], '^', 0);
-        band[i] = getValue(cluster[i], '^', 8);
-        country[i] = getValue(cluster[i], '^', 9);
-
-        messageA += call[i] + " " + band[i] + " " + frequency[i] + " " + country[i] + " -- ";
-        counter += 1;
-      }
-
-      if(counter == 10) 
+      if(messageA != "")
       {
-        break;
+        messageA = "DX Cluster -- " + messageA;
+        messageA = messageA.substring(0, messageA.length() - 4);
+      }
+      else
+      {
+        messageA = "DX Cluster -- Data acquisition on the way, please wait...";
       }
     }
-    if(messageA != "")
+    else if(binarise().charAt(0) == '1' && reloadState == "")
     {
-      messageA = "DX Cluster -- " + messageA;
-      messageA = messageA.substring(0, messageA.length() - 4);
-    }
-    else
-    {
-      messageA = "DX Cluster -- Data acquisition on the way, please wait...";
-    }
-  }
-  else if(binarise().charAt(0) == '1')
-  {
-    messageA = "";
-    if(satData.length() > 32)
-    {
-      messageA = satData.substring(15, satData.length() - 3);
-    }
-    if(messageA != "")
-    {
-      messageA = "Satellites Passes -- " + messageA;
-    }
-    else
-    {
-      messageA = "Satellites Passes -- Data acquisition on the way, please wait...";
-    }
-  }
-}
+      posA = 80;
+      messageA = "";
 
-// Draw Greyline
-void greyline()
-{  
-  if(greylineRefresh == 1)
-  {
-    // Draw greyline
-    decoded = JpegDec.decodeFsFile("/greyline.jpg");
-    if (decoded) {
-      display.drawJpgFile(SPIFFS, "/greyline.jpg", 0, 101, 320, 139, 0, 11);
-      greylineRefresh = 0;
+      if(satData.length() > 32)
+      {
+        messageA = satData.substring(15, satData.length() - 3);
+      }
+      if(messageA != "")
+      {
+        messageA = "Satellites Passes -- " + messageA;
+      }
+      else
+      {
+        messageA = "Satellites Passes -- Data acquisition on the way, please wait...";
+      }
     }
-  }
-}
-
-// Manage scroll
-void scroll()
-{
-  if(screenRefresh == 1)
-  {
-    return;
-  }
-
-  for(uint16_t i = 0; i < 10; i += 1)
-  {
-    scrollA(5);
-    scrollB(5);
   }
 }
 
 // Manage screensaver
 void wakeAndSleep()
 {
-  if (screensaverMode == 0 && millis() - screensaver > TIMEOUT_SCREENSAVER)
+  if (screensaverMode == 0 && millis() - screensaverTimer > screensaver * 60 * 1000)
   {
-    for (uint8_t i = brightnessCurrent; i >= 1; i--)
+    for (int16_t i = map(brightness, 1, 100, 1, 254); i >= 1; i -= 4)
     {
       setBrightness(i);
       scrollA(0);
       scrollB(0);
       delay(10);
     }
+
     screensaverMode = 1;
     display.sleep();
+    screensaverTimer = millis();
   }
-  else if (screensaverMode == 1 && millis() - screensaver < TIMEOUT_SCREENSAVER)
+  else if (screensaverMode == 1 && millis() - screensaverTimer > screensaver * 60 * 1000)
   {
+    screensaverTimer = millis();
     display.wakeup();
     screensaverMode = 0;
-    for (uint8_t i = 1; i <= brightnessCurrent; i++)
+
+    for (int16_t i = 1; i <= map(brightness, 1, 100, 1, 254); i += 4)
     {
       setBrightness(i);
       scrollA(0);
@@ -633,7 +639,7 @@ void getScreenshot()
               // and a content-type so the client knows what's coming, then a blank line,
               // followed by the content:
 
-              screensaver = millis(); // Screensaver update !!!
+              screensaverTimer = millis(); // Screensaver update !!!
 
               switch (htmlGetRequest)
               {
@@ -906,4 +912,28 @@ void binLoader()
     vTaskDelay(100);
   }
   SD.end(); // If not Bluetooth doesn't work !!!
+}
+
+// View Clock
+void viewClock()
+{
+  if(watch == 1)
+  {
+    updateLocalTime();
+    
+    if(maps == 0)
+    {
+      display.setTextColor(TFT_WHITE, TFT_BACK);
+    }
+    else
+    {
+      display.setTextColor(TFT_WHITE, display.color565(24, 57, 92));
+    }
+    display.setFont(&YELLOWCRE8pt7b);
+    display.setTextPadding(100);
+    display.setTextDatum(CL_DATUM);
+    display.drawString(dateString.substring(0, 8), 60, 220);
+    display.setTextDatum(CR_DATUM);
+    display.drawString(dateString.substring(9, 17), 260, 220);
+  }
 }

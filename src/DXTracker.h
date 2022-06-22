@@ -1,30 +1,30 @@
 // Copyright (c) F4HWN Armel. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#define VERSION "1.1.1"
+#define VERSION "1.2.0"
 #define AUTHOR "F4HWN"
 #define NAME "DXTracker"
 
+#define DEBUG 0
+
 #define TIMEOUT_BIN_LOADER    3               // 3 sec
-#define TIMEOUT_SCREENSAVER   5 * 60 * 1000   // 5 min
-#define TIMEOUT_MAP           5 * 1000        // 5 sec
-#define TIMEOUT_TEMPORISATION 10 * 1000       // 10 sec
+#define TIMEOUT_TEMPORISATION 5 * 1000        // 5 sec
 
 #undef min
 
 #include <WiFiClientSecure.h>
 #include <HTTPClient.h>
 #include <Preferences.h>
-#include <JPEGDecoder.h>
 #include <FS.h>
 #include <SPIFFS.h>
 #include <M5Unified.h>
 #include <M5StackUpdater.h>
 
 // Wifi
-WiFiClient clientHamQSL, clientSat, clientGreyline, clientHamQTH;
+WiFiClient client;
 WiFiClient httpClient;
 WiFiServer httpServer(80);
+HTTPClient http;
 
 // Web site Screen Capture stuff
 #define GET_unknown 0
@@ -50,18 +50,25 @@ typedef struct __attribute__((__packed__))
   uint8_t b;
 } colorType;
 
-colorType TFT_BACK = {48, 48, 48};
-colorType TFT_GRAY = {128, 128, 128};
+#define TFT_BACK display.color565(48, 48, 48)
+#define TFT_GRAY display.color565(128, 128, 128)
+#define TFT_MENU_BORDER display.color565(115, 135, 159)
+#define TFT_MENU_BACK display.color565(24, 57, 92)
+#define TFT_MENU_SELECT display.color565(255, 255, 255)
 
 // Timezone
 const char* ntpServer = "pool.ntp.org";
-const char* ntpTimeZone = "CET-1CEST-2,M3.5.0/02:00:00,M10.5.0/03:00:00"; // For Europe/Paris
+int8_t gmt = 0;
+int16_t daylight = 0;
+
+//const char* ntpTimeZone = "CET-1CEST-2,M3.5.0/02:00:00,M10.5.0/03:00:00"; // For Europe/Paris
 //const char* ntpTimeZone = "CET-1CEST,M3.5.0,M10.5.0/3"; // For Europe/Brussels
 //const char* ntpTimeZone = "EET-2EEST,M3.5.0/3,M10.5.0/4"; // For Europe/Sofia 
 //const char* ntpTimeZone = "EST5EDT,M3.2.0,M11.1.0"; // For America/Montreal
 //const char* ntpTimeZone = "AST4"; // For America/Martinique
 //const char* ntpTimeZone = "AST4"; // For America/Guadeloupe
 //const char* ntpTimeZone = "NCT-11"; // For Pacific/Noumea
+//const char* ntpTimeZone = "AEST-10AEDT-11,M10.5.0/02:00:00,M4.1.0/03:00:00"; // For Asutralia/Melbourne
 
 int utc = 1;
 
@@ -70,9 +77,10 @@ String endpointHamQSL = "http://www.hamqsl.com/solarxml.php";
 String endpointSat = "http://rrf2.f5nlg.ovh:8080/cgi-bin/DXSat.py";
 String endpointHamQTH = "http://rrf2.f5nlg.ovh:8080/cgi-bin/DXCluster.py";
 
-String endpointGreyline[2] = {
+String endpointGreyline[3] = {
   "http://rrf2.f5nlg.ovh:8080/greyline.jpg",
-  "http://rrf2.f5nlg.ovh:8080/sunmap.jpg"
+  "http://rrf2.f5nlg.ovh:8080/sunmap.jpg",
+  "http://rrf2.f5nlg.ovh:8080/nightmap.jpg"
 };
 
 // Scroll
@@ -93,13 +101,15 @@ uint8_t binIndex = 0;
 String solarData[] = {
   "SFI", "Sunspots", "A-Index", "K-Index", 
   "X-Ray", "Helium Line", "Proton Flux", "Electron Flux", 
-  "Aurora", "Solar Wind", "Magnetic Field", "Signal Noise"
+  "Aurora", "Solar Wind", "Magnetic Field", "Signal Noise",
+  ""
 };
 
 String solarKey[] = {
   "solarflux", "sunspots", "aindex", "kindex", 
   "xray", "heliumline", "protonflux", "electonflux", 
-  "aurora", "solarwind", "magneticfield", "signalnoise"
+  "aurora", "solarwind", "magneticfield", "signalnoise",
+  "updated"
 };
 
 String skipData[] = {
@@ -127,7 +137,7 @@ String propagKey[] = {
   "12m-10m\" time=\"night\">"    
 };
 
-String cluster[50], call[50], frequency[50], band[50], country[50];
+String cluster, call, frequency, band, country;
 
 // Task Handle
 TaskHandle_t hamdataHandle;
@@ -140,24 +150,29 @@ String greylineData = "", hamQSLData = "", hamQTHData = "", satData = "";
 String greylineUrl = "";
 String reloadState = "";
 
-boolean decoded = 0;
-boolean startup = 0;
+boolean reload = 0;
 boolean screensaverMode = 0;
 boolean greylineRefresh = 0;
-boolean greylineSelect = 0;
+boolean settingsMode = false;
+boolean settingLock = true;
 
 uint8_t screenRefresh = 1;
 uint8_t htmlGetRequest;
 uint8_t alternance = 0;
 uint8_t configCurrent = 0;
-uint8_t brightnessCurrent = 64;
+uint8_t brightness = 64;
 uint8_t messageCurrent = 0;
+
+int8_t beep = 0;
+int8_t maps = 0;
+int8_t watch = 0;
+int8_t screensaver = 0;
 
 int16_t parenthesisBegin = 0;
 int16_t parenthesisLast = 0;
 
 uint32_t temporisation;
-uint32_t screensaver;
+uint32_t screensaverTimer;
 uint32_t frequencyExclude[] = {
   1840, 1842, 3573, 5357,	
   7056, 7071, 7074, 7078,
@@ -169,5 +184,12 @@ uint32_t frequencyExclude[] = {
   70100, 144174, 222065, 432065
 };
 
-#undef SPI_READ_FREQUENCY
-#define SPI_READ_FREQUENCY 40000000
+// Menu
+const char *settings[] = {"Maps", "GMT Offset", "Daylight Offset", "Clock", "Brightness", "Beep", "Screensaver", "IP Address", "Shutdown", "Exit"};
+const char *choiceMaps[] = {"CLASSIC", "SUNMAP", "NIGHTMAP"};
+const char *choiceGMT[] = {"GMT OFFSET"};
+const char *choiceDaylight[] = {"DAYLIGHT OFFSET"};
+const char *choiceBrightness[] = {"BRIGHTNESS"};
+const char *choiceClock[] = {"OFF", "ON"};
+const char *choiceBeep[] = {"BEEP LEVEL"};
+const char *choiceScreensaver[] = {"TIMEOUT"};

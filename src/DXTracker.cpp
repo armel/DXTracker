@@ -7,15 +7,14 @@
 #include "font.h"
 #include "tools.h"
 #include "webIndex.h"
+#include "data.h"
 #include "functions.h"
+#include "menu.h"
 #include "tasks.h"
 
 // Setup
 void setup()
 {
-  // Init screensaver timer
-  screensaver = millis();
-
   // Init M5
   auto cfg = M5.config();
   M5.begin(cfg);
@@ -28,6 +27,13 @@ void setup()
 
   // Preferences
   preferences.begin("DXTracker");
+  maps = preferences.getUInt("maps", 0);
+  gmt = preferences.getInt("gmt", 0);
+  daylight = preferences.getUInt("daylight", 0);
+  watch = preferences.getUInt("watch", 0);
+  brightness = preferences.getUInt("brightness", 64);
+  beep = preferences.getUInt("beep", 0);
+  screensaver = preferences.getUInt("screensaver", 10);
 
   size_t n = sizeof(config) / sizeof(config[0]);
   n = (n / 4) - 1;
@@ -42,9 +48,8 @@ void setup()
   }
 
   // LCD
-  display.setBrightness(brightnessCurrent);
-  display.fillScreen(display.color565(TFT_BACK.r, TFT_BACK.g, TFT_BACK.b));
-  screensaver = millis(); // Screensaver update !!!
+  display.setBrightness(map(brightness, 1, 100, 1, 254));
+  display.fillScreen(TFT_BACK);
 
   // SPIFFS
   if(!SPIFFS.begin())
@@ -55,7 +60,7 @@ void setup()
 
   // Title
   display.setFont(&rounded_led_board10pt7b);
-  display.setTextColor(TFT_WHITE, display.color565(TFT_BACK.r, TFT_BACK.g, TFT_BACK.b));
+  display.setTextColor(TFT_WHITE, TFT_BACK);
   display.setTextDatum(CC_DATUM);
   display.drawString(String(NAME), 160, 20);
   display.setFont(0);
@@ -104,7 +109,7 @@ void setup()
   display.drawString(String(WiFi.localIP().toString().c_str()), 160, 70);
 
   // Init and get time
-  configTzTime(ntpTimeZone, ntpServer);
+  configTime(gmt * 60 * 60, daylight * 60 * 60, ntpServer);
   updateLocalTime();
 
   // Scroll
@@ -117,121 +122,39 @@ void setup()
   // Start server (for Web site Screen Capture)
   httpServer.begin();     
 
-  // Clear screen
-  for (uint8_t i = 0; i <= 120; i++)
-  {
-    display.drawFastHLine(0, i, 320, TFT_BLACK);
-    display.drawFastHLine(0, 240 - i, 320, TFT_BLACK);
-    delay(5);
-  }
-
-  // Select map
-  greylineSelect = preferences.getUInt("map", 0);
-
-  display.setTextColor(TFT_WHITE, TFT_BLACK);
-  display.setTextSize(1);  // Font size scaling is x1
-  display.setTextFont(2);  // Font 2 selected
-  display.setTextDatum(CC_DATUM);
-  display.setTextPadding(160);
-
-  display.drawString("Select Left", 80, 10);
-  display.drawString("Select Right", 240, 10);
-
-  if(greylineSelect == 0) {
-      display.drawString("Current map", 80, 90);
-      display.drawString("", 240, 90);
-  } else {
-      display.drawString("", 80, 90);
-      display.drawString("Current map", 240, 90);
-  }
-
-  display.drawJpg(map_greyline, sizeof(map_greyline), 20, 20, 120, 60);
-  display.drawJpg(map_sunmap, sizeof(map_sunmap), 180, 20, 120, 60);
-
-  temporisation = millis();
-  while(millis() - temporisation < TIMEOUT_MAP) {
-    getButton();
-    if(btnA == 1) {
-      greylineSelect = 0;
-      preferences.putUInt("map", greylineSelect);
-      break;
-    }
-    if(btnC == 1) {
-      greylineSelect = 1;
-      preferences.putUInt("map", greylineSelect);
-      break;
-    }
-    delay(100);   
-  }
-
- if(greylineSelect == 0) {
-      display.drawString("Current map", 80, 90);
-      display.drawString("", 240, 90);
-  } else {
-      display.drawString("", 80, 90);
-      display.drawString("Current map", 240, 90);
-  }
-
-  //Serial.println(greylineSelect);
-  //Serial.println(endpointGreyline[greylineSelect]);
-
-  // Multitasking task for retreive propag data
-  xTaskCreatePinnedToCore(
-      hamdata,        // Function to implement the task
-      "hamdata",      // Name of the task
-      16384,          // Stack size in words
-      NULL,           // Task input parameter
-      1,              // Priority of the task
-      &hamdataHandle, // Task handle
-      0);             // Core where the task should run
-
-  // Multitasking task for retreive button
-  xTaskCreatePinnedToCore(
-      button,         // Function to implement the task
-      "button",       // Name of the task
-      8192,           // Stack size in words
-      NULL,           // Task input parameter
-      1,              // Priority of the task
-      &buttonHandle,  // Task handle
-      1);             // Core where the task should run
-
   // Let's go after temporisation
   delay(250);
 
   // Waiting for data
-  display.setTextColor(TFT_WHITE, TFT_BLACK);
-  display.setTextSize(1);  // Font size scaling is x1
-  display.setTextFont(2);  // Font 2 selected
-  display.setTextDatum(CC_DATUM);
-  display.setTextPadding(320);
-
-  while(greylineData == "" || hamQSLData == "" || hamQTHData == "" || satData == "") 
+  while(hamQSLData == "" || hamQTHData == "" || satData == "") 
   {
-    display.drawString("Loading datas", 160, 110);
-    delay(250);
-    display.drawString(" ", 160, 110);
-    delay(250);
-    display.drawString("It takes a while, so please wait !", 160, 130);
+    display.drawString("Loading datas", 160, 70);
 
-    if(greylineData != "")
+    if(hamQTHData == "")
     {
-      display.drawString("Greyline Ok", 160, 170);
+      getHamQTH();
+      if(hamQTHData != "")
+      {
+        display.drawString("Cluster Ok", 160, 70);
+      }
     }
-    if(hamQSLData != "")
+    if(satData == "")
     {
-      display.drawString("Solar Ok", 160, 190);
+      getHamSat();
+      if(hamQTHData != "")
+      {
+        display.drawString("Sat Ok", 160, 70);
+      }
     }
-    if(hamQTHData != "")
+    if(hamQSLData == "")
     {
-      display.drawString("Cluster Ok", 160, 210);
-    }
-    if(satData != "")
-    {
-      display.drawString("Sat Ok", 160, 230);
+      getHamQSL();
+      if(hamQSLData != "")
+      {
+        display.drawString("Solar Ok", 160, 70);
+      }
     }
   }
-
-  startup = 1;
   
   delay(500);
 
@@ -242,41 +165,75 @@ void setup()
     delay(5);
   }
 
+  // Multitasking task for retreive propag data
+  xTaskCreatePinnedToCore(
+      hamdata,        // Function to implement the task
+      "hamdata",      // Name of the task
+      16384,          // Stack size in words
+      NULL,           // Task input parameter
+      2,              // Priority of the task
+      &hamdataHandle, // Task handle
+      1);             // Core where the task should run
+
+  // Multitasking task for retreive button
+  xTaskCreatePinnedToCore(
+      button,         // Function to implement the task
+      "button",       // Name of the task
+      8192,           // Stack size in words
+      NULL,           // Task input parameter
+      4,              // Priority of the task
+      &buttonHandle,  // Task handle
+      1);             // Core where the task should run
+
   // And clear
   screenRefresh = 1;
+
+  // Init screensaver timer
+  screensaverTimer = millis();
 }
 
 // Main loop
 void loop()
 {
-  // Let's clean if necessary
-  clear();
+  if(settingsMode == true) {
+    settingLock = false;
 
-  // View propag datas
-  propagData();
+    // Get screenshot
+    getScreenshot();
+  }
+  else {
+    settingLock = true;
 
-  // Prepare cluster and sat scroll message
-  clusterAndSatMessage();
+    // Let's clean if necessary
+    clear();
 
-  // Prepare propag scroll message
-  propagMessage();
+    // View propag datas
+    title(propagData(alternance));
 
-  // View greyline
-  greyline();
+    // Prepare cluster and sat scroll message
+    clusterAndSatMessage();
 
-  // Manage scroll
-  scroll();
+    // Prepare propag scroll message
+    propagMessage();
 
-  // Manage Web site Screen Capture
-  getScreenshot();
+    // Manage scroll
+    scroll();
 
-  // Manage screensaver
-  wakeAndSleep();
+    // Manage screensaver
+    wakeAndSleep();
 
-  // Manage alternance
-  if(screenRefresh == 0 && millis() - temporisation > TIMEOUT_TEMPORISATION) {
-    temporisation = millis();
-    alternance++;
-    alternance = (alternance > 11) ? 0 : alternance;
+    // Get screenshot
+    getScreenshot();
+
+    // Manage alternance
+    if(screenRefresh == 0 && millis() - temporisation > TIMEOUT_TEMPORISATION) {
+      temporisation = millis();
+      alternance = (alternance++ > 10) ? 0 : alternance;
+      if(alternance == 0) {
+        messageCurrent = (messageCurrent++ < 3) ? messageCurrent : 0;
+        reload = 0;
+        Serial.println(String(ESP.getFreeHeap() / 1024) + " kb" + " / " + String(esp_get_minimum_free_heap_size() / 1024) + " kb");
+      }
+    }
   }
 }
