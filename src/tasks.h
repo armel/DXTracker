@@ -177,12 +177,12 @@ void button(void *pvParameters)
             if(btnA == 1) {
               maps -= 1;
               if(maps < 0) {
-                maps = 1;
+                maps = 2;
               }
             }
             else if(btnC == 1) {
               maps += 1;
-              if(maps > 1) {
+              if(maps > 2) {
                 maps = 0;
               }
             }

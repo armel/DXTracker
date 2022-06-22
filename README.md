@@ -15,11 +15,11 @@
 
 **Many thanks to them and all my [donors](#donations)🙏🏻** 
 
-Le projet DXTracker propose plusieurs fonctionnalités permettant de suivre l'activité du Soleil, les conditions d'ouverture et l'activité du trafic sur les bandes Radio Amateurs, ainsi que les prévisions de passages des satellites Radio Amateurs.
+The DXTracker project offers several functionalities to monitor the Sun's activity, the opening conditions and the traffic activity on the Amateur Radio bands, as well as the transit forecasts of the Amateur Radio satellites.
 
-À ce titre, le DXTracker affiche en temps réel, les informations suivantes :
+For example, the DXTracker displays the following informations in real time:
 
-- Données solaires,
+- Solar datas,
 	- SFI,
 	- Sunspots,
 	- A-Index,
@@ -32,33 +32,82 @@ Le projet DXTracker propose plusieurs fonctionnalités permettant de suivre l'ac
 	- Solard Wind,
 	- Magnetic Field,
 	- Signal Noise.
-- Conditions d'ouverture de la bande VHF,
-- Conditions d'ouverture des bandes HF, de jour et de nuit,
-- Etat de la Greyline,
-- Prévisions de passages des satellites Radio Amateurs,
+- Propagation conditions on VHF band,
+- Propagation conditions on HF band (dayly, nightly),
+- Greyline,
+- Satellite transit forecasts,
 - Cluster DX.
 
 ![Map1](https://github.com/armel/DXTracker/blob/main/img/Map_1.png)
 ![Map2](https://github.com/armel/DXTracker/blob/main/img/Map_2.png)
+![Map3](https://github.com/armel/DXTracker/blob/main/img/Map_3.png)
+![Menu](https://github.com/armel/DXTracker/blob/main/img/Menu.png)
+
+# Technical architecture
+
+## Quick overview
+
+[M5Stack](https://m5stack.com/) is based on an ESP-32, dual core, which can be clocked up to 240 MHz. M5Stack has 16 MB of flash memory. Like all ESPs, Wi-Fi is of course integrated. The 2 inch IPS color display, based on the ILI9342C chipset, has a comfortable resolution of 320 x 240 pixels. It is very bright. The integrated battery is 110 mAh. It is possible to add an additional battery (700 or 800mAh) if needed.
+
+In terms of size and weight, it is very compact: 54 x 54 x 18mm for 47.2g. Can be carried in the pocket without any problem ;)
+
+## Detailed technical specs
+
+Here are the detailed technical specs, for the curious:
+
+| Resources |	Description |
+| --------- | ------------ |
+|ESP32| 240MHz dual core, 600 DMIPS, 520KB SRAM, Wi-Fi, dual mode Bluetooth
+Flash| Memory	16MB|
+|Power| Input	5V @ 500mA|
+|Port|	TypeC x 1, GROVE(I2C+I/0+UART) x 1|
+|Core|Bottom Port	PIN (G1，G2，G3，G16, G17, G18, G19, G21, G22, G23, G25, G26, G35, G36)|
+|IPS Screen|	2 inch, 320x240 Colorful TFT LCD, ILI9342C, max brightness 853nit|
+|Button|	Custom button x 3|
+|Speaker|	1W-0928|
+|Battery|	110mAh @ 3.7V|
+|Antenna|	2.4G 3D Antenna|
+|Operating Temperature|	32°F to 104°F ( 0°C to 40°C )|
+|Net weight|	47.2g|
+|Gross weight|	93g|
+|Product Size|	54 x 54 x 18mm|
+|Package Size	|95 x 65 x 25mm|
+|Case Material|	Plastic ( PC )|
+
+## In addition
+
+About the QSJ, count around 45€. You then have a complete development platform, totally autonomous, programmable in C and C++, MicroPython and UIFlow, from Linux, Windows or MacOS, all in a compact and ultra ergonomic box.
 
 # Installation
 
-## Pré-ambule
+## Prepare the stack
 
-Le plus simple est d'installer [PlateformIO for VSCode](https://platformio.org/install/ide?install=vscode) sur votre PC (Linux ou Windows) ou sur votre Mac (Intel ou M1). C'est un environnement de développement multiplateforme et multilangage performant, en plus d'être agréable à utiliser.
+The easiest way is to install [PlateformIO for VSCode](https://platformio.org/install/ide?install=vscode) on your PC (Linux or Windows) or on your Mac (Intel or M1). It is a cross-platform and multilanguage development environment that is powerful and pleasant to use.
 
-## Fichier `src/settings.h`
+Then, still on your PC or Mac, clone the DXTracker project via the command :
 
-Editer le fichier `src/settings.h` afin de renseigner vos paramétrages, à savoir :
+`git clone https://github.com/armel/DXTracker.git`
 
-* votre SSID Wifi,
-* votre mot de passe Wifi,
-* votre latitude (format décimale, par exemple 48.8482855),
-* votre longitude (format décimale, par exemple 2.2708201).
+You can also download a [zip archive](https://github.com/armel/DXTracker/releases) of the project, if you prefer, and unzip it.
 
-> __Remarque__
+As I said, an excellent [video](https://www.youtube.com/watch?v=SCPEO7Eiy1E&ab_channel=HAMRADIODUDE) was released by @HamRadioDude about the installation of the IC705SMeter project. It can help you !
+
+## Configuration
+
+Open the DXTracker project with PlateformIO for VSCode.
+
+### File `src/settings.h`
+
+Edit the `src/settings.h` file to set :
+
+* your Wifi SSID,
+* your Wifi password,
+* your latitude (decimal format, for example 48.8482855),
+* your longitude (decimal format, for example 2.2708201).
+
+> __Note__
 > 
-> Il est possible de gérer autant de configurations que vous le souhaitez ! Cela vous permet, par exemple, de préconfigurer vos paramétrages pour une utilisation locale sur le Wifi de votre QRA et une configuration mobile sur le Wifi de votre Smartphone. Une telle configuration pourrait ressembler à ceci :
+> It is possible to manage as many configurations as you wish! This allows you, for example, to pre-configure your settings for local use on the Wifi of your QRA and mobile configuration on the Wifi of your Smartphone. Such a configuration could look like this:
 > 
 
 ```
@@ -68,38 +117,128 @@ const char *config[] = {
 };
 ```
 
-## Fichier `src/DXTracker.h`
+### File `src/DXTracker.h`
 
-### Exclusion de fréquences
+#### Frequency Exclusion
 
-Par défaut, les fréquences FT8 sont filtrées et ne seront pas affichées par le Cluster DX. Libre à vous de modifier cette liste de filtrage et d'ajouter ou de supprimer les fréquences que vous souhaitez. Pour se faire, éditer le tableau `frequencyExclude[]`, ligne 159. 
+By default, FT8 frequencies are filtered out and will not be displayed by the DX Cluster. You are free to change this filter list and add or remove frequencies you wish. To do that, edit the table `frequencyExclude[]`, line 176. 
 
-# Pour finir
-Compiler et uploader le projet sur votre M5Stack. C'est terminé.
+# Compiling and flashing the M5Stack
 
-# Utilisation
+Compile and upload the project to your M5Stack. You are done !
 
-## Mise en veille
+# Usage
 
-Par défaut, le DXTracker se met automatiquement en veille au bout de 30 minutes et se reveille toutes les 30 minutes. Il reste évidemment possible de le faire sortir de veille en appuyant sur une touche du M5Stack. Cette mise en veille à pour but d'éviter une alteration prématurée de l'écran. 
+Once launched, after wifi and initial data initialization, if you click on left button, if you click on the middle button, you enter the settings menu. Use the right and left buttons to select a menu option and confirm with the middle button. If necessary, use the right and left buttons again to select the sub-options and the middle button to confirm. 
 
-## Boutons
+The following options are available :
 
-Les boutons gauche et droit permettent de passer plus rapidement d'une donnée solaire à une autre. Le bouton central permet d'agir sur l'affichage des informations défilantes.
+| Settings             | Value                                        | 
+| -------------------- |:--------------------------------------------:| 
+| Maps.                | Set Map (Classic, Sunmap or Nightmap) | 
+| GMT Offset           | Set GMT Offset (-14 ~ +14)                   | 
+| Daylight Offset      | Set Daylight Offset (0 ~ 1)                  | 
+| Clock                | Display Clock (OFF ~ ON)                     |
+| Brightness           | Set Brightness (0 ~ 100%)                    | 
+| Beep                 | Set Beep (0 ~ 100%)                          |
+| Screensaver          | Set Screensaver TimeOut (1 ~ 60 min)         |
+| IP Address           | Display your IP                              |
+| Shutdown             | Shutdown your M5Stack (even if in charge)    |
+| Exit                 | Menu Exit                                    |
+ 
+> Maps, GMT Offset, Daylight Offset, Clock, Brightness, Beep and Screensaver are preserved at the next restart.
 
-## Serveur Web intégré 
+# Using the Bin Loader (power user only...)
 
-Cette fonctionnalité permet de visualiser votre DXTracker depuis un simple navigateur. Il est même possible de le piloter par ce biais, dans la mesure ou les boutons sont cliquables. Afin d'afficher votre DXTracker dans votre navigateur, il suffit d'aller sur `http://adresse_ip_de_votre_dxtracker/`. Pour rappel, l'adresse IP que récupère votre DXTracker s'affiche sur l'écran d'accueil, à l'allumage.
+It's possible to store several applications on the SPI Flash File Storage of your M5Stack or on SD Card Storage. At startup, a procedure is provided to load a particular application.
 
-> Attention : c'est lent ! Et il n'y a pas de rafraîchissement automatique. Il faut cliquer sur le fond de l'image de l'écran pour faire une nouvelle > capture. Et sinon, comme dit, les boutons sont fonctionnels.
+## Preparation
 
-Mais pourquoi avoir développé une telle fonctionnalité ? Pour 2 raisons : 
+I will detail here the procedure to deploy ICSMeter and ICMultiMeter applications on the same M5Stack.
 
-- premièrement, c'était amusant à développer,
-- deuxièmement, ca permet de prendre de belle capture d'écran du DXTracker ;)
+### Step 1 - Compile
+
+Start by compiling your applications, as you used to do. Nothing changes here. For example, start by compiling the ICSMeter application. Then do the same with the ICMultiMeter application. 
+
+### Step 2 - Collecting the binary files
+
+That's it, you have compiled the ICSMeter and ICMultiMeter application? It's perfect.
+
+Each compilation has produced a binary. It is this binary that is sent / flashed to your M5Stack, via the USB connection.
+
+Go to the root of the ICSMeter folder, which contains the whole project. And go to the directory `.pio/build/m5stack`.
+
+You will find a `firmware.bin` file there. Now, there are 2 solutions...
+
+### Step 2.1 - SD Card Storage (simple)
+
+Format an SD Card as FAT32.
+
+Copy the `firmware.bin` at the root of the SD Card. And take the opportunity to rename it, for example, `ICSMeter.bin`.
+
+Do the same with the ICMultiMeter application. Of course rename it with a different name, for example, `ICMultiMeter.bin`.
+
+At this point, you should have 2 clearly identified binaries in the root of your SD Card : `ICSMeter.bin` and `ICMultiMeter.bin`.
+
+### Step 2.2 - SPI Flash File Storage (more difficult)
+
+Copy `firmware.bin` in the `data` directory at the root of the ICSMeter folder. And take the opportunity to rename it, for example, `ICSMeter.bin`.
+
+> If the `data` folder does not exist, create it.
+
+Do the same with the ICMultiMeter application. Go to the root of the ICMultiMeter folder, which contains the whole project. And go to the directory `.pio/build/m5stack`.
+
+You will also find a `firmware.bin` file. Copy it, too, in the `data` directory at the __root of the ICSMeter folder__. And take the opportunity to rename it to, for example, `ICMultiMeter.bin`.
+
+> Important, the idea is to copy these 2 binaries in the same directory `data`** (located at the root of the ICSMeter folder).
+
+At this point, you should have 2 clearly identified binaries: `ICSMeter.bin` and `ICMultiMeter.bin` in the `data` directory at the root of the ICSMeter folder.
+
+So let's move on to what is probably the most complicated step. Open the ICSMeter project from Visual Studio Code, as you would compile it. 
+
+![Capture](https://github.com/armel/ICMultiMeter/blob/main/img/flash_1.png)
+
+Step 1, click on the Platformio icon (the icon with an ant's head...). Step 2, unroll the section `m5stack`.
+
+![Capture](https://github.com/armel/ICMultiMeter/blob/main/img/flash_2.png)
+
+Finally, step 3, go to the `Platform` sub-section. And click on `Upload Filesystem Image`.
+
+Wait ! It's coffee time (or beer) :) The contents of the `data` directory will be written to the SPI Flash File Storage of your M5Stack. Are you done? You're there !!!!
+
+## Usage
+
+Start your M5Stack. You should see a black screen with a QR code, followed by 1, 2 and 3 small dots at the top of the screen. This is the famous Bin Loader ;)
+
+As soon as the first little dot appears, you can :
+
+- either press the left or right button, to launch the default application.
+- or press the central button. In this case, the Bin Loader menu appears and offers you the list of available binaries in SPI Flash File Storage or SD Card. 
+
+If you have followed the procedure perfectly, you should have a choice between `ICSMeter.bin` and `ICMultiMeter.bin`.
+
+The left and right buttons allow you to switch from one binary to another. And the middle button validates the selected binary. In this case, the selected application will be loaded ;)
+
+> The loading takes about 20 seconds...
+
+## Limitation
+
+I think it is possible to have 3 or 4 applications cohabit in SPI Flash File Storage. If need more, use SD Card Storage.
+
+# Credits
+ 
+Many thanks to...
+
+| Project             | Author                                                |  Link                                        |
+|:------------------- | :---------------------------------------------------- | :------------------------------------------- |
+| M5Stack             | [M5Stack](https://twitter.com/M5Stack)                | https://github.com/m5stack/M5Stack           |
+| M5Stack-SD-Updater  | [Tobozo](https://twitter.com/TobozoTagada)            | https://github.com/tobozo/M5Stack-SD-Updater |
+
 
 # Donations
-Si vous trouvez cette application fun et utile alors [offrez moi une bière](https://www.paypal.me/F4HWN) :)
 
-# That's all
-Bon trafic à tous, 88 & 73 de Armel F4HWN ! 
+Special thanks to Rolf Schroeder DL8BAG, Brian Garber WB8AM, Matt B-Wilkinson M6VWM, Robert Agnew KD0TVP, Meinhard Frank Günther DL0CN, Johan Hansson SM0TSC, Tadeusz Pater VA7CPM, Frederic Ulmer F4ESO, Joshua Murray M0JMO, Mark Hammond N8MH, Angel Mateu Muzzio EA4GIG, Hiroshi Sasaki JL7KGW, Robert John Williams VK3IE, Mark Bumstead M0IAX, Félix Symann F1VEO, Patrick Ruhl DG2YRP, Michael Beck DH5DAX, Philippe Nicolas F4IQP, Timothy Nustad KD9KHZ and Martin Blanz DL9SAD for their donations. That’s so kind of them. Thanks so much 🙏🏻
+
+If you find this project fun and useful then [offer me a beer](https://www.paypal.me/F4HWN) :) 
+
+By the way, you can follow me on [Twitter](https://twitter.com/F4HWN) and post pictures of your installation with your M5Stack. It always makes me happy ;) 

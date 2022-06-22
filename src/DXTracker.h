@@ -77,9 +77,10 @@ String endpointHamQSL = "http://www.hamqsl.com/solarxml.php";
 String endpointSat = "http://rrf2.f5nlg.ovh:8080/cgi-bin/DXSat.py";
 String endpointHamQTH = "http://rrf2.f5nlg.ovh:8080/cgi-bin/DXCluster.py";
 
-String endpointGreyline[2] = {
+String endpointGreyline[3] = {
   "http://rrf2.f5nlg.ovh:8080/greyline.jpg",
-  "http://rrf2.f5nlg.ovh:8080/sunmap.jpg"
+  "http://rrf2.f5nlg.ovh:8080/sunmap.jpg",
+  "http://rrf2.f5nlg.ovh:8080/nightmap.jpg"
 };
 
 // Scroll
@@ -185,7 +186,7 @@ uint32_t frequencyExclude[] = {
 
 // Menu
 const char *settings[] = {"Maps", "GMT Offset", "Daylight Offset", "Clock", "Brightness", "Beep", "Screensaver", "IP Address", "Shutdown", "Exit"};
-const char *choiceMaps[] = {"CLASSIC", "BLUE"};
+const char *choiceMaps[] = {"CLASSIC", "SUNMAP", "NIGHTMAP"};
 const char *choiceGMT[] = {"GMT OFFSET"};
 const char *choiceDaylight[] = {"DAYLIGHT OFFSET"};
 const char *choiceBrightness[] = {"BRIGHTNESS"};
