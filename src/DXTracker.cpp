@@ -197,6 +197,9 @@ void loop()
 {
   if(settingsMode == true) {
     settingLock = false;
+
+    // Get screenshot
+    getScreenshot();
   }
   else {
     settingLock = true;
