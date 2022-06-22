@@ -104,11 +104,8 @@ Edit the `src/settings.h` file to set :
 * your Wifi password,
 * your latitude (decimal format, for example 48.8482855),
 * your longitude (decimal format, for example 2.2708201).
-
-> __Note__
-> 
-> It is possible to manage as many configurations as you wish! This allows you, for example, to pre-configure your settings for local use on the Wifi of your QRA and mobile configuration on the Wifi of your Smartphone. Such a configuration could look like this:
-> 
+ 
+> It is possible to manage as many configurations as you wish! This allows you, for example, to pre-configure your settings for local use on the Wifi of your QRA and mobile configuration on the Wifi of your Smartphone. Such a configuration could look like this: 
 
 ```
 const char *config[] = {
