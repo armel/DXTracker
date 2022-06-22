@@ -44,6 +44,9 @@ void button(void *pvParameters)
 
   for (;;)
   {
+    // View clock
+    viewClock();
+
     // Get screenshot
     getScreenshot();
 

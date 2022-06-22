@@ -205,7 +205,7 @@ void loop()
     clear();
 
     // View propag datas
-    propagData();
+    title(propagData(alternance));
 
     // Prepare cluster and sat scroll message
     clusterAndSatMessage();
@@ -219,9 +219,6 @@ void loop()
     // Manage screensaver
     wakeAndSleep();
 
-    // View clock
-    viewClock();
-
     // Manage alternance
     if(screenRefresh == 0 && millis() - temporisation > TIMEOUT_TEMPORISATION) {
       temporisation = millis();
@@ -229,7 +226,6 @@ void loop()
       if(alternance == 0) {
         messageCurrent = (messageCurrent++ < 3) ? messageCurrent : 0;
         reload = 0;
-        updateLocalTime(); // Update local time
         Serial.println(String(ESP.getFreeHeap() / 1024) + " kb" + " / " + String(esp_get_minimum_free_heap_size() / 1024) + " kb");
       }
     }

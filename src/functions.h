@@ -158,6 +158,45 @@ void scrollB(uint8_t pause)
   vTaskDelay(pdMS_TO_TICKS(pause));
 }
 
+// Manage scroll
+void scroll()
+{
+  if(screenRefresh == 1)
+  {
+    return;
+  }
+
+  for(uint16_t i = 0; i < 10; i += 1)
+  {
+    scrollA(5);
+    scrollB(5);
+  }
+}
+
+// Get Propag Data
+String propagData(uint8_t index)
+{
+  // Title
+  solarData[index].toUpperCase();
+
+  // Current value
+  tmpString = hamQSLData;
+  
+  tmpString.replace("<" + solarKey[index] + ">", "(");
+  tmpString.replace("</" + solarKey[index] + ">", ")");
+
+  parenthesisBegin = tmpString.indexOf("(");
+  parenthesisLast = tmpString.indexOf(")");
+  if (parenthesisBegin > 0)
+  {
+    tmpString = tmpString.substring(parenthesisBegin + 1, parenthesisLast);
+  }
+
+  tmpString.trim();
+
+  return(solarData[index] + " " + tmpString);
+}
+
 // Draw title
 void title(String title)
 {
@@ -186,7 +225,8 @@ void title(String title)
 
   if(alternance % 2 == 0)
   {
-    tmpString = "Update at " + dateString;
+    tmpString = propagData(12);
+    tmpString = "Updated" + tmpString.substring(0, 7) + " " + tmpString.substring(10, 15) + ":" + tmpString.substring(15, 21);
   }
   else if(alternance == 5)
   {
@@ -254,30 +294,7 @@ void title(String title)
   }
 }
 
-// Draw Propag Data
-void propagData()
-{
-  // Title
-  solarData[alternance].toUpperCase();
-
-  // Current value
-  tmpString = hamQSLData;
-  tmpString.replace("<" + solarKey[alternance] + ">", "(");
-  tmpString.replace("</" + solarKey[alternance] + ">", ")");
-
-  parenthesisBegin = tmpString.indexOf("(");
-  parenthesisLast = tmpString.indexOf(")");
-  if (parenthesisBegin > 0)
-  {
-    tmpString = tmpString.substring(parenthesisBegin + 1, parenthesisLast);
-  }
-
-  tmpString.trim();
-
-  title(solarData[alternance] + " " + tmpString);
-}
-
-// Draw Propag Message
+// Format Propag Message
 void propagMessage()
 {
   if(binarise().charAt(1) == '0')
@@ -348,7 +365,7 @@ void propagMessage()
   }
 }
 
-// Draw Cluster Message
+// Format Cluster Message
 void clusterAndSatMessage()
 {
   boolean exclude = 0;
@@ -429,32 +446,9 @@ void clusterAndSatMessage()
   }
 }
 
-// Manage scroll
-void scroll()
-{
-  if(screenRefresh == 1)
-  {
-    return;
-  }
-
-  for(uint16_t i = 0; i < 10; i += 1)
-  {
-    scrollA(5);
-    scrollB(5);
-  }
-}
-
 // Manage screensaver
 void wakeAndSleep()
 {
-  /*
-  Serial.println(screensaverMode);
-  Serial.println(screensaverTimer);
-  Serial.println(screensaver);
-  Serial.println(millis() - screensaverTimer);
-  Serial.println("-----");
-  */
-
   if (screensaverMode == 0 && millis() - screensaverTimer > screensaver * 60 * 1000)
   {
     for (int16_t i = map(brightness, 1, 100, 1, 254); i >= 1; i -= 4)

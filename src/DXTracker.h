@@ -5,7 +5,7 @@
 #define AUTHOR "F4HWN"
 #define NAME "DXTracker"
 
-#define DEBUG 1
+#define DEBUG 0
 
 #define TIMEOUT_BIN_LOADER    3               // 3 sec
 #define TIMEOUT_TEMPORISATION 5 * 1000        // 5 sec
@@ -58,8 +58,8 @@ typedef struct __attribute__((__packed__))
 
 // Timezone
 const char* ntpServer = "pool.ntp.org";
-int8_t  gmt = 0;
-int16_t  daylight = 0;
+int8_t gmt = 0;
+int16_t daylight = 0;
 
 //const char* ntpTimeZone = "CET-1CEST-2,M3.5.0/02:00:00,M10.5.0/03:00:00"; // For Europe/Paris
 //const char* ntpTimeZone = "CET-1CEST,M3.5.0,M10.5.0/3"; // For Europe/Brussels
@@ -100,13 +100,15 @@ uint8_t binIndex = 0;
 String solarData[] = {
   "SFI", "Sunspots", "A-Index", "K-Index", 
   "X-Ray", "Helium Line", "Proton Flux", "Electron Flux", 
-  "Aurora", "Solar Wind", "Magnetic Field", "Signal Noise"
+  "Aurora", "Solar Wind", "Magnetic Field", "Signal Noise",
+  ""
 };
 
 String solarKey[] = {
   "solarflux", "sunspots", "aindex", "kindex", 
   "xray", "heliumline", "protonflux", "electonflux", 
-  "aurora", "solarwind", "magneticfield", "signalnoise"
+  "aurora", "solarwind", "magneticfield", "signalnoise",
+  "updated"
 };
 
 String skipData[] = {
