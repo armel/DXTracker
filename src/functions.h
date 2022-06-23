@@ -24,25 +24,13 @@ String getValue(String data, char separator, uint16_t index)
 // Get local time
 void updateLocalTime()
 {
-  char timeStringBuff[20];  //20 chars should be enough
-  char utcStringBuff[20];   //20 chars should be enough
-
-  struct tm timeinfo;
-
   if(!getLocalTime(&timeinfo)){
     Serial.println("Failed to obtain time");
     return;
   }
   
-  strftime(timeStringBuff, sizeof(timeStringBuff), "%H:%M:%S %d-%m-%y", &timeinfo);
-  strftime(utcStringBuff, sizeof(utcStringBuff), "%z", &timeinfo);
-
-  sscanf(utcStringBuff, "%d", &utc);
-  utc = utc / 100;
-
-  //Serial.println(utc);
-
-  dateString = String(timeStringBuff);
+  strftime(timeLocalBuff, sizeof(timeLocalBuff), "%H:%M:%S", &timeinfo);
+  strftime(dateLocalBuff, sizeof(dateLocalBuff), "%d-%m-%y", &timeinfo);
 }
 
 // Clear screen
@@ -59,8 +47,6 @@ void clear()
   {
     screenRefresh = 0;
     getGreyline();
-    configTime(gmt * 60 * 60, daylight * 60 * 60, ntpServer);
-    updateLocalTime();
   }
 }
 
@@ -932,8 +918,8 @@ void viewClock()
     display.setFont(&YELLOWCRE8pt7b);
     display.setTextPadding(100);
     display.setTextDatum(CL_DATUM);
-    display.drawString(dateString.substring(0, 8), 60, 220);
+    display.drawString(timeLocalBuff, 60, 220);
     display.setTextDatum(CR_DATUM);
-    display.drawString(dateString.substring(9, 17), 260, 220);
+    display.drawString(dateLocalBuff, 260, 220);
   }
 }
