@@ -13,7 +13,7 @@ void hamdata(void *pvParameters)
         case 0: getGreyline(); break;
         case 1: getHamSat(); getHamQTH(); break;
         case 2: getGreyline(); break;
-        //case 3: getHamQSL(); break;
+        case 3: getHamQSL(); break;
       }
       reload = 1;
     }
@@ -44,9 +44,6 @@ void button(void *pvParameters)
 
   for (;;)
   {
-    // View clock
-    viewClock();
-
     // Get button
     getButton();
 
@@ -226,7 +223,10 @@ void button(void *pvParameters)
           }
           else if(btnB == 1) {
             if(gmtOld != gmt)
+            {
+              configTime(gmt * 60 * 60, daylight * 60 * 60, ntpServer);
               preferences.putInt("gmt", gmt);
+            }
             screenRefresh = 2;
             settingsSelect = false;
             settingsMode = false;
@@ -256,7 +256,10 @@ void button(void *pvParameters)
           }
           else if(btnB == 1) {
             if(daylightOld != daylight)
+            {
+              configTime(gmt * 60 * 60, daylight * 60 * 60, ntpServer);
               preferences.putUInt("daylight", daylight);
+            }
             screenRefresh = 2;
             settingsSelect = false;
             settingsMode = false;

@@ -195,17 +195,20 @@ void setup()
 // Main loop
 void loop()
 {
+ // Get screenshot
+  getScreenshot();
+
   if(settingsMode == true) {
     settingLock = false;
-
-    // Get screenshot
-    getScreenshot();
   }
   else {
     settingLock = true;
 
     // Let's clean if necessary
     clear();
+
+    // View clock
+    viewClock();
 
     // View propag datas
     title(propagData(alternance));

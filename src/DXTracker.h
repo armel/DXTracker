@@ -1,7 +1,7 @@
 // Copyright (c) F4HWN Armel. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#define VERSION "1.2.0"
+#define VERSION "1.2.1"
 #define AUTHOR "F4HWN"
 #define NAME "DXTracker"
 
@@ -56,21 +56,12 @@ typedef struct __attribute__((__packed__))
 #define TFT_MENU_BACK display.color565(24, 57, 92)
 #define TFT_MENU_SELECT display.color565(255, 255, 255)
 
-// Timezone
+// Time
 const char* ntpServer = "pool.ntp.org";
-int8_t gmt = 0;
-int16_t daylight = 0;
+char timeLocalBuff[9];
+char dateLocalBuff[9];
 
-//const char* ntpTimeZone = "CET-1CEST-2,M3.5.0/02:00:00,M10.5.0/03:00:00"; // For Europe/Paris
-//const char* ntpTimeZone = "CET-1CEST,M3.5.0,M10.5.0/3"; // For Europe/Brussels
-//const char* ntpTimeZone = "EET-2EEST,M3.5.0/3,M10.5.0/4"; // For Europe/Sofia 
-//const char* ntpTimeZone = "EST5EDT,M3.2.0,M11.1.0"; // For America/Montreal
-//const char* ntpTimeZone = "AST4"; // For America/Martinique
-//const char* ntpTimeZone = "AST4"; // For America/Guadeloupe
-//const char* ntpTimeZone = "NCT-11"; // For Pacific/Noumea
-//const char* ntpTimeZone = "AEST-10AEDT-11,M10.5.0/02:00:00,M4.1.0/03:00:00"; // For Asutralia/Melbourne
-
-int utc = 1;
+struct tm timeinfo;
 
 // HTTP endpoint
 String endpointHamQSL = "http://www.hamqsl.com/solarxml.php";
@@ -167,6 +158,8 @@ int8_t beep = 0;
 int8_t maps = 0;
 int8_t watch = 0;
 int8_t screensaver = 0;
+int8_t gmt = 0;
+int16_t daylight = 0;
 
 int16_t parenthesisBegin = 0;
 int16_t parenthesisLast = 0;
