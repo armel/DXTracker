@@ -11,6 +11,8 @@
 ![version](https://img.shields.io/github/v/release/armel/DXTracker)
 ![activity](https://img.shields.io/github/commit-activity/y/armel/DXTracker)
 
+**You could use the code F4HWN in order to get 5% discount on the [M5Stack shop](https://shop.m5stack.com/?ref=LUxetaH4) 🎁**
+
 **For Germans, take a look at this other excellent [video](https://www.youtube.com/watch?v=UR8D_PGrvio&ab_channel=ManuelLausmann) released by [@ManuelLausmann](https://twitter.com/ManuelLausmann).**
 
 **Many thanks to them and all my [donors](#donations)🙏🏻** 
@@ -237,5 +239,7 @@ Many thanks to...
 Special thanks to Rolf Schroeder DL8BAG, Brian Garber WB8AM, Matt B-Wilkinson M6VWM, Robert Agnew KD0TVP, Meinhard Frank Günther DL0CN, Johan Hansson SM0TSC, Tadeusz Pater VA7CPM, Frederic Ulmer F4ESO, Joshua Murray M0JMO, Mark Hammond N8MH, Angel Mateu Muzzio EA4GIG, Hiroshi Sasaki JL7KGW, Robert John Williams VK3IE, Mark Bumstead M0IAX, Félix Symann F1VEO, Patrick Ruhl DG2YRP, Michael Beck DH5DAX, Philippe Nicolas F4IQP, Timothy Nustad KD9KHZ and Martin Blanz DL9SAD for their donations. That’s so kind of them. Thanks so much 🙏🏻
 
 If you find this project fun and useful then [offer me a beer](https://www.paypal.me/F4HWN) :) 
+
+You could use the code F4HWN in order to get 5% discount on the [M5Stack shop](https://shop.m5stack.com/?ref=LUxetaH4) 🎁
 
 By the way, you can follow me on [Twitter](https://twitter.com/F4HWN) and post pictures of your installation with your M5Stack. It always makes me happy ;) 
