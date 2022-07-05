@@ -7,7 +7,7 @@ void getGreyline()
   reloadState = "Greyline";
   if (DEBUG) Serial.println(reloadState);
   
-  display.drawJpgUrl(endpointGreyline[maps],  0, 101, 320, 139, 0, 11);
+  display.drawJpgUrl(endpointGreyline[maps],  0 + offsetX, 101 + offsetY, 320, 139, 0, 11);
   
   vTaskDelay(pdMS_TO_TICKS(20));
   reloadState = "";

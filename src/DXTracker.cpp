@@ -19,14 +19,20 @@ void setup()
   auto cfg = M5.config();
   M5.begin(cfg);
 
+  pinMode(32, INPUT_PULLUP);
+  pinMode(26, INPUT_PULLUP);
+
   // Init Display
   display.begin();
+
+  offsetX = (display.width() - 320) / 2; 
+  offsetY = (display.height() - 240) / 2;
 
   // Bin Loader
   binLoader();
 
   // Preferences
-  preferences.begin("DXTracker");
+  preferences.begin(NAME);
   maps = preferences.getUInt("maps", 0);
   gmt = preferences.getInt("gmt", 0);
   daylight = preferences.getUInt("daylight", 0);
@@ -62,12 +68,12 @@ void setup()
   display.setFont(&rounded_led_board10pt7b);
   display.setTextColor(TFT_WHITE, TFT_BACK);
   display.setTextDatum(CC_DATUM);
-  display.drawString(String(NAME), 160, 20);
+  display.drawString(String(NAME), 160 + offsetX, 20 + offsetY);
   display.setFont(0);
-  display.drawString("Version " + String(VERSION) + " by F4HWN", 160, 50);
+  display.drawString("Version " + String(VERSION) + " by F4HWN", 160 + offsetX, 50 + offsetY);
 
   // QRCode
-  display.qrcode("https://github.com/armel/DXTracker", 90, 80, 140, 6);
+  display.qrcode("https://github.com/armel/DXTracker", 90 + offsetX, 80 + offsetY, 140, 6);
 
   // We start by connecting to the WiFi network
   display.setTextPadding(320);
@@ -75,18 +81,18 @@ void setup()
   while(true)
   {
     uint8_t attempt = 1;
-    display.drawString(String(config[(configCurrent * 4)]), 160, 60);
+    display.drawString(String(config[(configCurrent * 4)]), 160 + offsetX, 60 + offsetY);
     WiFi.begin(config[(configCurrent * 4)], config[(configCurrent * 4) + 1]);
     while (WiFi.status() != WL_CONNECTED)
     {
       delay(500);
       if(attempt % 2 == 0)
       {
-        display.drawString("Connecting in progress", 160, 70);
+        display.drawString("Connecting in progress", 160 + offsetX, 70 + offsetY);
       }
       else 
       {
-        display.drawString(" ", 160, 70);
+        display.drawString(" ", 160 + offsetX, 70 + offsetY);
       }
       attempt++;
       if(attempt > 10) {
@@ -106,18 +112,18 @@ void setup()
     }
   }
 
-  display.drawString(String(WiFi.localIP().toString().c_str()), 160, 70);
+  display.drawString(String(WiFi.localIP().toString().c_str()), 160 + offsetX, 70 + offsetY);
 
   // Init and get time
   configTime(gmt * 60 * 60, daylight * 60 * 60, ntpServer);
   updateLocalTime();
 
   // Scroll
-  posA = display.width();
-  imgA.createSprite(display.width(), 20);
+  posA = 320;
+  imgA.createSprite(posA, 20);
 
-  posB = display.width();
-  imgB.createSprite(display.width(), 20);
+  posB = 320;
+  imgB.createSprite(posB, 20);
 
   // Start server (for Web site Screen Capture)
   httpServer.begin();     
@@ -128,14 +134,14 @@ void setup()
   // Waiting for data
   while(hamQSLData == "" || hamQTHData == "" || satData == "") 
   {
-    display.drawString("Loading datas", 160, 70);
+    display.drawString("Loading datas", 160 + offsetX, 70 + offsetY);
 
     if(hamQTHData == "")
     {
       getHamQTH();
       if(hamQTHData != "")
       {
-        display.drawString("Cluster Ok", 160, 70);
+        display.drawString("Cluster Ok", 160 + offsetX, 70 + offsetY);
       }
     }
     if(satData == "")
@@ -143,7 +149,7 @@ void setup()
       getHamSat();
       if(hamQTHData != "")
       {
-        display.drawString("Sat Ok", 160, 70);
+        display.drawString("Sat Ok", 160 + offsetX, 70 + offsetY);
       }
     }
     if(hamQSLData == "")
@@ -151,7 +157,7 @@ void setup()
       getHamQSL();
       if(hamQSLData != "")
       {
-        display.drawString("Solar Ok", 160, 70);
+        display.drawString("Solar Ok", 160 + offsetX, 70 + offsetY);
       }
     }
   }
@@ -160,8 +166,8 @@ void setup()
 
   for (uint8_t i = 0; i <= 120; i++)
   {
-    display.drawFastHLine(0, i, 320, TFT_BLACK);
-    display.drawFastHLine(0, 240 - i, 320, TFT_BLACK);
+    display.drawFastHLine(0 + offsetX, i + offsetY, 320, TFT_BLACK);
+    display.drawFastHLine(0 + offsetX, 240 - i + offsetY, 320, TFT_BLACK);
     delay(5);
   }
 
