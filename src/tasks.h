@@ -37,10 +37,10 @@ void button(void *pvParameters)
   static int8_t settingsChoice = 0;
   static boolean settingsSelect = false;
 
-  uint8_t x = 44;
-  uint8_t y = 4;
-  uint16_t w = 320 - (x * 2);
-  uint8_t h = 185;
+  uint16_t x = 44 + offsetX;
+  uint16_t y = 4 + offsetY;
+  uint16_t w = display.width() - (x * 2);
+  uint16_t h = 185;
 
   for (;;)
   {
@@ -168,7 +168,7 @@ void button(void *pvParameters)
         // Maps
         if(settingsString == "Maps")
         {
-          display.drawString(String(choiceMaps[maps]), 160, h - 6);
+          display.drawString(String(choiceMaps[maps]), 160 + offsetX, h - 6 + offsetY);
 
           if(btnA || btnC) {
             if(btnA == 1) {
@@ -200,11 +200,11 @@ void button(void *pvParameters)
         {
           if(gmt > 0)
           {
-            display.drawString(String(choiceGMT[0]) + " +" + String(gmt), 160, h - 6);
+            display.drawString(String(choiceGMT[0]) + " +" + String(gmt), 160 + offsetX, h - 6 + offsetY);
           }
           else
           {
-            display.drawString(String(choiceGMT[0]) + " " + String(gmt), 160, h - 6);
+            display.drawString(String(choiceGMT[0]) + " " + String(gmt), 160 + offsetX, h - 6 + offsetY);
           }
 
           if(btnA || btnC) {
@@ -238,7 +238,7 @@ void button(void *pvParameters)
         // Daylight Offset
         else if(settingsString == "Daylight Offset")
         {
-          display.drawString(String(choiceDaylight[0]) + " " + String(daylight), 160, h - 6);
+          display.drawString(String(choiceDaylight[0]) + " " + String(daylight), 160 + offsetX, h - 6 + offsetY);
 
           if(btnA || btnC) {
             if(btnA == 1) {
@@ -271,7 +271,7 @@ void button(void *pvParameters)
         // watch
         if(settingsString == "Clock")
         {
-          display.drawString(String(choiceClock[watch]), 160, h - 6);
+          display.drawString(String(choiceClock[watch]), 160 + offsetX, h - 6 + offsetY);
 
           if(btnA || btnC) {
             if(btnA == 1) {
@@ -301,7 +301,7 @@ void button(void *pvParameters)
         // Brightness
         if(settingsString == "Brightness")
         {
-          display.drawString(String(choiceBrightness[0]) + " " + String(brightness) + "%", 160, h - 6);
+          display.drawString(String(choiceBrightness[0]) + " " + String(brightness) + "%", 160 + offsetX, h - 6 + offsetY);
 
           if(btnA || btnC) {
             if(btnA == 1) {
@@ -325,13 +325,13 @@ void button(void *pvParameters)
             settingsMode = false;
             vTaskDelay(pdMS_TO_TICKS(150));
           }
-          setBrightness(map(brightness, 1, 100, 1, 254));
+          display.setBrightness(map(brightness, 1, 100, 1, 254));
           vTaskDelay(pdMS_TO_TICKS(25));
         }
         // Beep
         else if(settingsString == "Beep")
         {
-          display.drawString(String(choiceBeep[0]) + " " + String(beep) + "%", 160, h - 6);
+          display.drawString(String(choiceBeep[0]) + " " + String(beep) + "%", 160 + offsetX, h - 6 + offsetY);
 
           if(btnA || btnC) {
             if(btnA == 1) {
@@ -361,7 +361,7 @@ void button(void *pvParameters)
         // Screensaver
         else if(settingsString == "Screensaver")
         {
-          display.drawString(String(choiceScreensaver[0]) + " " + String(screensaver) + " MIN", 160, h - 6);
+          display.drawString(String(choiceScreensaver[0]) + " " + String(screensaver) + " MIN", 160 + offsetX, h - 6 + offsetY);
 
           if(btnA || btnC) {
             if(btnA == 1) {
@@ -391,7 +391,7 @@ void button(void *pvParameters)
         // IP Address
         else if(settingsString == "IP Address")
         {
-          display.drawString(String(WiFi.localIP().toString().c_str()), 160, h - 6);
+          display.drawString(String(WiFi.localIP().toString().c_str()), 160 + offsetX, h - 6 + offsetY);
 
           if(btnB == 1) {
             screenRefresh = 2;

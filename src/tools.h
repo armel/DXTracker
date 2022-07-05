@@ -39,12 +39,6 @@ void getButton()
   //Serial.printf("%d %d %d\n", btnA, btnB, btnC);
 }
 
-// Manage brightness
-void setBrightness(uint8_t value)
-{
-  display.setBrightness(value);
-}
-
 // Shutdown
 void shutdown()
 {

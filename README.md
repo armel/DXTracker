@@ -5,6 +5,10 @@
 ![core2](https://img.shields.io/badge/M5Stack-CORE2-green)
 ![aws](https://img.shields.io/badge/M5Stack-AWS-orange)
 
+![ATOM Lite](https://img.shields.io/badge/M5Stack-ATOM%20Lite-darkgrey)
+![ATOM Echo Smart](https://img.shields.io/badge/M5Stack-ATOM%20Echo%20Smart-white)
+![ATOM Matrix](https://img.shields.io/badge/M5Stack-ATOM%20Matrix-blue)
+
 ![licence](https://img.shields.io/github/license/armel/DXTracker)
 ![language](https://img.shields.io/github/languages/top/armel/DXTracker)
 ![size](https://img.shields.io/github/repo-size/armel/DXTracker)
@@ -120,7 +124,37 @@ const char *config[] = {
 
 #### Frequency Exclusion
 
-By default, FT8 frequencies are filtered out and will not be displayed by the DX Cluster. You are free to change this filter list and add or remove frequencies you wish. To do that, edit the table `frequencyExclude[]`, line 176. 
+By default, FT8 frequencies are filtered out and will not be displayed by the DX Cluster. You are free to change this filter list and add or remove frequencies you wish. To do that, edit the table `frequencyExclude[]`, line 176.
+
+### File `platformio.ini` (for ATOM Display only)
+
+If and only if __you are using the ATOM Display__, edit the `platformio.ini` file and change line 12,
+
+```
+default_envs = m5stack
+```
+
+By,
+
+```
+default_envs = atom
+```
+
+This is the same as changing the target platform.
+
+In addition, you can specify the resolution of your screen. Note that the DXTracker will still be displayed at 320 x 240, but will be centered on the screen. By default, the screen resolution is set to 320 x 240. But if you want to change it to 480 x 320, change line 41,
+
+```
+build_flags = ${env.build_flags} -D atom=1 -D displayWidth=320 -D displayHeight=240
+```
+
+By,
+
+```
+build_flags = ${env.build_flags} -D atom=1 -D displayWidth=480 -D displayHeight=320
+```
+
+Translated with www.DeepL.com/Translator (free version)
 
 # Compiling and flashing the M5Stack
 
@@ -150,6 +184,8 @@ The following options are available :
 # Using the Bin Loader (power user only...)
 
 It's possible to store several applications on the SPI Flash File Storage of your M5Stack or on SD Card Storage. At startup, a procedure is provided to load a particular application.
+
+> The Bin Loader does not work with the ATOM Display.
 
 ## Preparation
 

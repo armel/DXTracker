@@ -38,10 +38,10 @@ void clear()
 {
   if(screenRefresh >= 1) {
     display.clear();
-    display.fillRect(0, 0, 320, 44, TFT_BACK);
-    display.drawFastHLine(  0, 0, 320, TFT_WHITE);
-    display.drawFastHLine(  0, 44, 320, TFT_WHITE);
-    display.drawFastHLine(  0, 100, 320, TFT_WHITE);
+    display.fillRect(0 + offsetX, 0 + offsetY, 320, 44, TFT_BACK);
+    display.drawFastHLine(  0 + offsetX, 0 + offsetY, 320, TFT_WHITE);
+    display.drawFastHLine(  0 + offsetX, 44 + offsetY, 320, TFT_WHITE);
+    display.drawFastHLine(  0 + offsetX, 100 + offsetY, 320, TFT_WHITE);
   }
   if(screenRefresh == 2)
   {
@@ -90,7 +90,7 @@ void scrollA(uint8_t pause)
 {
   // Sprite for scroll
   buildScrollA();
-  imgA.pushSprite(0, 52);
+  imgA.pushSprite(0 + offsetX, 52 + offsetY);
 
   posA -= 2;
   if (posA < 0)
@@ -130,7 +130,7 @@ void scrollB(uint8_t pause)
 {
   // Sprite for scroll
   buildScrollB();
-  imgB.pushSprite(0, 74);
+  imgB.pushSprite(0 + offsetX, 74 + offsetY);
 
   posB -= 1;
   if (posB < 0)
@@ -206,7 +206,7 @@ void title(String title)
     display.setFont(&dot15pt7b);
     display.setTextDatum(CC_DATUM);
     display.setTextPadding(320);
-    display.drawString(title, 160, 16);
+    display.drawString(title, 160 + offsetX, 16 + offsetY);
   }
 
   if(alternance % 2 == 0)
@@ -230,7 +230,7 @@ void title(String title)
     display.setFont(0);
     display.setTextDatum(CC_DATUM);
     display.setTextPadding(320);
-    display.drawString(tmpString, 160, 36);
+    display.drawString(tmpString, 160 + offsetX, 36 + offsetY);
   }
 
   // On right, view reload data
@@ -240,43 +240,46 @@ void title(String title)
     reloadStateOld = tmpString;
 
     if(tmpString != "") {
-      display.drawFastHLine(2, 35, 10, TFT_GRAY);
-      display.drawLine(12, 35, 8, 31, TFT_GRAY);
-      display.drawLine(12, 35, 8, 39, TFT_GRAY);
+      display.drawFastHLine(2 + offsetX, 35 + offsetY, 10, TFT_GRAY);
+      display.drawLine(12 + offsetX, 35 + offsetY, 8 + offsetX, 31 + offsetY, TFT_GRAY);
+      display.drawLine(12 + offsetX, 35 + offsetY, 8 + offsetX, 39 + offsetY, TFT_GRAY);
     }
     else {
-      display.drawFastHLine(2, 35, 10, TFT_BACK);
-      display.drawLine(12, 35, 8, 31, TFT_BACK);
-      display.drawLine(12, 35, 8, 39, TFT_BACK);
+      display.drawFastHLine(2 + offsetX, 35 + offsetY, 10, TFT_BACK);
+      display.drawLine(12 + offsetX, 35 + offsetY, 8 + offsetX, 31 + offsetY, TFT_BACK);
+      display.drawLine(12 + offsetX, 35 + offsetY, 8 + offsetX, 39 + offsetY, TFT_BACK);
     }
 
     display.setTextColor(TFT_GRAY, TFT_BACK);
     display.setFont(0);
     display.setTextDatum(ML_DATUM);
     display.setTextPadding(60);
-    display.drawString(tmpString, 18, 36);
+    display.drawString(tmpString, 18 + offsetX, 36 + offsetY);
   }
 
   // On left, view battery level
-  uint8_t val = map(getBatteryLevel(1), 0, 100, 0, 16);
+  if (M5.getBoard() != m5::board_t::board_M5ATOM)
+  {
+    uint8_t val = map(getBatteryLevel(1), 0, 100, 0, 16);
 
-  display.drawRect(294, 30, 20, 12,  TFT_GRAY);
-  display.drawRect(313, 33, 4, 6,  TFT_GRAY);
-  display.fillRect(296, 32, val, 8,  TFT_GRAY);
-    
-  if(isCharging()) {
-    display.setTextColor(TFT_GRAY, TFT_BACK);
-    display.setFont(0);
-    display.setTextDatum(CC_DATUM);
-    display.setTextPadding(0);
-    display.drawString("+", 288, 37);
-  }
-  else {
-    display.setTextColor(TFT_GRAY, TFT_BACK);
-    display.setFont(0);
-    display.setTextDatum(CC_DATUM);
-    display.setTextPadding(0);
-    display.drawString(" ", 288, 37);
+    display.drawRect(294 + offsetX, 30 + offsetY, 20, 12,  TFT_GRAY);
+    display.drawRect(313 + offsetX, 33 + offsetY, 4, 6,  TFT_GRAY);
+    display.fillRect(296 + offsetX, 32 + offsetY, val, 8,  TFT_GRAY);
+      
+    if(isCharging()) {
+      display.setTextColor(TFT_GRAY, TFT_BACK);
+      display.setFont(0);
+      display.setTextDatum(CC_DATUM);
+      display.setTextPadding(0);
+      display.drawString("+", 288 + offsetX, 37 + offsetY);
+    }
+    else {
+      display.setTextColor(TFT_GRAY, TFT_BACK);
+      display.setFont(0);
+      display.setTextDatum(CC_DATUM);
+      display.setTextPadding(0);
+      display.drawString(" ", 288 + offsetX, 37 + offsetY);
+    }
   }
 }
 
@@ -439,7 +442,7 @@ void wakeAndSleep()
   {
     for (int16_t i = map(brightness, 1, 100, 1, 254); i >= 1; i -= 4)
     {
-      setBrightness(i);
+      display.setBrightness(i);
       scrollA(0);
       scrollB(0);
       delay(10);
@@ -457,7 +460,7 @@ void wakeAndSleep()
 
     for (int16_t i = 1; i <= map(brightness, 1, 100, 1, 254); i += 4)
     {
-      setBrightness(i);
+      display.setBrightness(i);
       scrollA(0);
       scrollB(0);
       delay(10);
@@ -780,7 +783,7 @@ void binLoader()
   if (binIndex != 0)
   {
     // QRCode
-    display.qrcode("https://github.com/armel/ICSMeter", 90, 80, 140, 6);
+    display.qrcode("https://github.com/armel/DXTracker", 90 + offsetX, 80 + offsetY, 140, 6);
 
     display.setTextFont(1);
     display.setTextSize(1);
@@ -918,8 +921,8 @@ void viewClock()
     display.setFont(&YELLOWCRE8pt7b);
     display.setTextPadding(100);
     display.setTextDatum(CL_DATUM);
-    display.drawString(timeLocalBuff, 60, 220);
+    display.drawString(timeLocalBuff, 60 + offsetX, 220 + offsetY);
     display.setTextDatum(CR_DATUM);
-    display.drawString(dateLocalBuff, 260, 220);
+    display.drawString(dateLocalBuff, 260 + offsetX, 220 + offsetY);
   }
 }
