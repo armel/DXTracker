@@ -142,7 +142,7 @@ default_envs = atom
 
 This is the same as changing the target platform.
 
-In addition, you can specify the resolution of your screen. Note that the DXTracker will still be displayed at 320 x 240, but will be centered on the screen. By default, the screen resolution is set to 320 x 240. But if you want to change it to 480 x 320, change line 41,
+In addition, you can specify the resolution of your screen. Note that the DXTracker will still be displayed at 320 x 240, but will be centered on the screen. By default, the screen resolution is set to 320 x 240. But, for example, if you want to change it to 480 x 320, change line 41,
 
 ```
 build_flags = ${env.build_flags} -D atom=1 -D displayWidth=320 -D displayHeight=240
@@ -153,8 +153,6 @@ By,
 ```
 build_flags = ${env.build_flags} -D atom=1 -D displayWidth=480 -D displayHeight=320
 ```
-
-Translated with www.DeepL.com/Translator (free version)
 
 # Compiling and flashing the M5Stack
 
