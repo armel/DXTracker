@@ -19,6 +19,9 @@ void setup()
   auto cfg = M5.config();
   M5.begin(cfg);
 
+  pinMode(32, INPUT_PULLUP);
+  pinMode(26, INPUT_PULLUP);
+
   // Init Display
   display.begin();
 
@@ -26,7 +29,7 @@ void setup()
   binLoader();
 
   // Preferences
-  preferences.begin("DXTracker");
+  preferences.begin(NAME);
   maps = preferences.getUInt("maps", 0);
   gmt = preferences.getInt("gmt", 0);
   daylight = preferences.getUInt("daylight", 0);
