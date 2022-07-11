@@ -1,7 +1,7 @@
 // Copyright (c) F4HWN Armel. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#define VERSION "1.2.3"
+#define VERSION "1.2.4"
 #define AUTHOR "F4HWN"
 #define NAME "DXTracker"
 
@@ -94,11 +94,11 @@ String endpointGreyline[3] = {
 };
 
 // Scroll
-LGFX_Sprite imgA(&M5.Lcd); // Create Sprite object "img" with pointer to "tft" object
+LGFX_Sprite imgA(&display); // Create Sprite object "img" with pointer to "tft" object
 String messageA = "";
 int16_t posA;
 
-LGFX_Sprite imgB(&M5.Lcd); // Create Sprite object "img" with pointer to "tft" object
+LGFX_Sprite imgB(&display); // Create Sprite object "img" with pointer to "tft" object
 String messageB = "";
 int16_t posB;
 
