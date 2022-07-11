@@ -258,7 +258,7 @@ void title(String title)
   }
 
   // On left, view battery level
-  if (M5.getBoard() != m5::board_t::board_M5ATOM)
+  if (M5.getBoard() != m5::board_t::board_M5ATOM && M5.getBoard() != m5::board_t::board_M5AtomPsram && M5.getBoard() != m5::board_t::board_M5AtomU)
   {
     uint8_t val = map(getBatteryLevel(1), 0, 100, 0, 16);
 
